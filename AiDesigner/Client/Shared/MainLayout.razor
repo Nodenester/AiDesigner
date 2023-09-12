@@ -1,0 +1,362 @@
+﻿@using AiDesigner.Shared;
+@inherits LayoutComponentBase
+@inject IJSRuntime JSRuntime;
+@inject NavigationManager NavigationManagers
+@using AiDesigner.Shared.Data;
+@using Newtonsoft.Json.Linq;
+@using Newtonsoft.Json.Serialization;
+@using NodeBaseApi.Version2;
+@using System.Security.Claims;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject HttpClient Http;
+@using Microsoft.AspNetCore.Components.Authorization;
+@using Newtonsoft.Json;
+@using AiDesigner.Client.Pages.Documents;
+
+<CascadingValue Value="@AuthState" Name="CascAuth">
+<CascadingValue Value="@EAPs" Name="EAPs">
+    <CascadingValue Value="@APs" Name="APs">
+        <CascadingValue Value="@AP" Name="AP">
+                <div class="page h-screen flex">
+                    @if (Title == "home" || Title == "library")
+                    {
+                        <div class="flex-none w-48">
+                            <NavMenu />
+                        </div>
+                    }
+                    else if (Title == "documentation")
+                    {
+                        <div class="flex-none w-48">
+                            <DocNavMenu />
+                        </div>
+                    }
+                    <main class="flex-1 flex flex-col">
+
+                        <div class="flex">
+                            @if(Title == "editor")
+                            {
+                                <div class="text-lg top-row px-3 py-2 bg-white dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; ">
+                                    <div class="container mx-auto sm:px-4">
+                                        <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">AiDesigner</a>
+                                    </div>
+                                </div>
+                            }
+
+                            @* Should documentation seen top nav menu? *@
+                            @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation")
+                            {
+                                <div class="text-lg top-row px-3 py-2 bg-white dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; ">
+                                    <div class="container mx-auto sm:px-4">
+                                        <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">AiDesigner</a>
+                                    </div>
+                                </div>
+
+                                <TopNavMenu/>
+                            }
+                            @if (Title == "documentation")
+                            {
+                                <TopNavMenu />
+                            }
+
+                            <div style="border-width:0" class="top-row auth bg-white dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow flex items-center">
+
+                                <div style="border-width:0" class="top-row auth bg-white dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow flex items-center">
+                                    <label class="relative inline-flex items-center cursor-pointer border-0">
+                                        <input type="checkbox" @bind="isDarkMode" @bind:event="onchange" @onclick="ToggleDarkMode" class="sr-only peer">
+                                        <div class="w-11 h-6 bg-gray-200 rounded-full dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-gray-600"></div>
+                                    </label>
+                                </div>
+
+                                <LoginDisplay />
+                            </div>
+                        </div>
+
+                        @if (Title == "library" || Title == "editor")
+                        {
+                            <div class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white">
+                                <div id="menu">
+                                    <ul>
+                                        <li class="@(AP == null ? "selected" : "") group" @onclick="ResetAP">
+                                            Library
+                                        </li>
+                                       @foreach (var CAP in APs)
+                                        {
+                                            <li class="@(AP == CAP ? "selected" : "") group" @onclick="() => SetAP(CAP)">
+                                                @CAP.Name
+                                                <span class="project-remove float-right px-1 py-0.5 ml-2 text-sm font-semibold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full hidden" @onclick="(() => RemoveProject(CAP))" @onclick:stopPropagation @onmouseover:stopPropagation>X</span>
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            </div>
+                        }
+                        <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
+                        <CascadingValue Value=@NewAps Name="NewAps">
+                            @Body
+                        </CascadingValue>
+
+                            @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation")
+                            {
+                                <Footer></Footer>
+                            }
+                        </article>
+                    </main>
+                </div>
+        </CascadingValue>
+    </CascadingValue>
+</CascadingValue>
+</CascadingValue>
+<style>
+    .footer {
+        background-color: #f1f1f1;
+        padding: 20px;
+        position: relative;
+        bottom: 0;
+        width: 100%;
+    }
+
+    .container .row .col-md-4 {
+        margin: 15px 0;
+    }
+
+        .container .row .col-md-4 h5 {
+            font-weight: bold;
+        }
+
+        .container .row .col-md-4 ul {
+            list-style: none;
+            padding: 0;
+        }
+
+
+/*     sdasdasdasd
+ */
+    .nav-container {
+        display: flex;
+        justify-content: space-between; /* Optional: to space the items out evenly */
+    }
+
+    .nav-container {
+        display: flex;
+        justify-content: space-between;
+        gap: 10px; /* Add some gap between items */
+    }
+
+    .top-row[b-83yhc3crg9] .container a {
+        margin-left: 0rem !important;
+    }
+
+    #menu ul {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        height: 28px;
+    }
+
+    #menu li {
+        display: inline-block;
+        border-top-right-radius: 5px;
+        border-top-left-radius: 5px;
+        margin-right: 5px;
+        padding-left: 5px;
+        margin: 4px;
+        border-color: darkslategray;
+        width: 100px;
+        max-width: 100px;
+        max-height: 25px;
+        overflow: hidden;
+    }
+
+        #menu li:hover {
+            background-color: #b3b3b3; /* Lighter Gray */
+            color: #000; /* Black Text */
+        }
+
+    #menu .selected {
+        background-color: #004080; /* Dark Blue */
+        color: #fff; /* White Text */
+    }
+
+    .dark #menu .selected {
+        background-color: #4d4d4d; /* Lighter Very Dark Gray */
+        color: #fff; /* White Text */
+    }
+
+    .dark #menu li:hover {
+        background-color: #555; /* Darker Gray */
+        color: #fff; /* White Text */
+    }
+
+
+/*     #menu li:hover {
+        background-color: lightgray;
+        color: white;
+    }
+
+    #menu .selected {
+        background-color: darkslategray;
+        color: white;
+    }
+
+    .dark #menu .selected {
+        background-color: #3B4252;
+        color: white;
+    }
+
+    .dark #menu li:hover {
+        background-color: #4A5568;
+        color: white;
+    } */
+
+    #menu li:hover .project-remove,
+    #menu .selected .project-remove {
+        display: block;
+    }
+</style>
+
+@code {
+    public string Title { get; set; } = "";
+    public List<ProgramObject> APs = new List<ProgramObject>();
+    public List<ProgramObject> EAPs = new List<ProgramObject>();
+    public ProgramObject AP = null;
+    private string _currentUri;
+
+    public AuthenticationState AuthState { get; set; }
+
+    private bool isDarkMode = true;
+
+    public EventCallback<ProgramObject> NewAps => EventCallback.Factory.Create<ProgramObject>(this, AddAps);
+
+    public void AddAps(ProgramObject ap)
+    {
+        if(!APs.Contains(ap))
+        {
+            APs.Add(ap);
+            SetAP(ap);
+        }
+        else
+        {
+            SetAP(ap);
+        }
+    }
+
+    //Make this update when loggin in and other stuff and make it api     this might work
+    protected override async Task OnInitializedAsync()
+    {
+        AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = AuthState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    var response = await Http.GetAsync($"Programs/user/{userId}");
+                    if (response.IsSuccessStatusCode)
+                    {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var settings = new JsonSerializerSettings
+                            {
+                                TypeNameHandling = TypeNameHandling.Auto,
+                                Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                                ContractResolver = new DefaultContractResolver
+                                {
+                                    NamingStrategy = new CamelCaseNamingStrategy()
+                                },
+                                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                                ObjectCreationHandling = ObjectCreationHandling.Replace
+                            };
+                        var userPrograms = JsonConvert.DeserializeObject<List<ProgramObject>>(responseContent, settings);
+                        EAPs = userPrograms.ToList();
+                        //varför??
+                        //if (EAPs.Any())
+                        //{
+                        //    AP = EAPs.First();
+                        //}
+                    }
+                    else
+                    {
+                        // Read the response content which should contain the error message
+                        var errorMessage = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine($"HTTP request failed with status code: {response.StatusCode}, message: {errorMessage}");
+                    }
+
+                }
+                catch (HttpRequestException ex)
+                {
+                    // Handle or log the HTTP request exception here...
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+                catch (JsonException ex)
+                {
+                    // Handle or log the deserialization exception here...
+                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    public async Task SetEAPs()
+    {
+        var user = AuthState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.FindFirst(ClaimTypes.NameIdentifier);
+            if (userIdClaim != null && Guid.TryParse(userIdClaim.Value, out Guid userId))
+            {
+                var userPrograms = await Http.GetFromJsonAsync<IEnumerable<ProgramObject>>($"Programs/user/{userId}");
+                EAPs = userPrograms.ToList();
+            }
+        }
+    }
+
+    public void RemoveProject(ProgramObject projectToRemove)
+    {
+        APs.Remove(projectToRemove);
+
+        if (AP == projectToRemove)
+        {
+            AP = null;
+            NavigationManagers.NavigateTo("library");
+        }
+    }
+
+    public void SetAP(ProgramObject ap)
+    {
+        AP = ap;
+        NavigationManagers.NavigateTo("editor");
+    }
+
+    public void ResetAP()
+    {
+        AP = null;
+
+        NavigationManagers.NavigateTo("library");
+    }
+
+    private async Task ToggleDarkMode()
+    {
+        isDarkMode = !isDarkMode;
+        await JSRuntime.InvokeVoidAsync("toggleDarkMode");
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        var newUri = NavigationManagers.Uri;
+
+        if (_currentUri != newUri)
+        {
+            _currentUri = newUri;
+            UpdateTitleFromUri();
+        }
+    }
+
+    private void UpdateTitleFromUri()
+    {
+        Title = NavigationManagers.ToBaseRelativePath(NavigationManagers.Uri).ToLower();
+        StateHasChanged();
+    }
+}
+
+

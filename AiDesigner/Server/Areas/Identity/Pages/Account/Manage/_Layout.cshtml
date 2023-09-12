@@ -1,0 +1,55 @@
+﻿@{
+    if (ViewData.TryGetValue("ParentLayout", out var parentLayout) && parentLayout != null)
+    {
+        Layout = parentLayout.ToString();
+    }
+    else
+    {
+        Layout = "/Areas/Identity/Pages/_Layout.cshtml";
+    }
+}
+
+<div class="row manageAccount">
+    <div class="col-md-3 manageNav">
+        <h1 class="" style="display: flex; align-items: center; justify-content: center; color: white;">Manage Account</h1>
+        <partial name="_ManageNav" />
+    </div>
+    <div class="col-md-9 manageBody">
+        <h2>Change your account settings</h2>
+
+        @RenderBody()
+    </div>
+</div>
+
+<style>
+    /* Styling for the manage account row */
+    .row.manageAccount {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 85vh; 
+        background-color: #2b2b2b; 
+    }
+
+    /* Adjust the styling of the manageNav */
+    .manageNav {
+        background-color: #353535; 
+        padding: 20px;
+        border-radius: 8px;
+        color: #eaeaea; 
+    }
+
+    /* Adjust the styling of the manageBody */
+    .manageBody {
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    h2 {
+        color: #eaeaea; 
+    }
+</style>
+
+@section Scripts {
+    @RenderSection("Scripts", required: false)
+}

@@ -1,0 +1,158 @@
+﻿@page "/"
+
+@* First image and text *@
+<div class="Start">
+    <div class="centered">
+        <div class="Start-Text">
+            <h1>Decentralizing AI Research</h1>
+            <div class="button-container">
+                <NavLink class="no-underline text-gray-800 dark:bg-green-600 dark:text-white dark:hover:bg-green-700 rounded-md text-xl p-2" href="aboutus" Match="NavLinkMatch.All">
+                    About us
+                </NavLink>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="ImageRow">
+    <a href="home" class="ImageBlock">
+        <img src="../images/starter/nodes.jpg" alt="Image 1">
+        <h2 class="rowText">Build Custom AI Models</h2>
+    </a>
+        <a href="chat" class="ImageBlock">
+        <img src="../images/starter/chat.jpg" alt="Image 3">
+        <h2 class="rowText">Chat with AI</h2>
+    </a>
+    <a href="marketplace" class="ImageBlock">
+        <img src="../images/starter/store.jpg" alt="Image 2">
+        <h2 class="rowText">Marketplace for AI</h2>
+    </a>
+</div>
+
+<!-- New Section: Image on the Right, Text on the Left -->
+
+<div class="Section ImageRightTextLeft">
+    <div class="Text">
+        <h2 style="font-size: 2.2rem">Unleash AI's Full Potential</h2>
+        <p>With our state-of-the-art, node-based programming environment, even the most complex AI models become effortlessly manageable. Say goodbye to the intricacies and dive into a world where complexity is now simplified.</p>
+    </div>
+    <div class="Image">
+        <img src="../images/starter/simpleai.jpg" alt="Image showing simplified AI">
+    </div>
+</div>
+
+
+<!-- New Section: Image on the Left, Text on the Right -->
+<div class="Section ImageLeftTextRight">
+    <div class="Image">
+        <img src="../images/starter/community.jpg" alt="Sample Image">
+    </div>
+    <div class="Text">
+        <h2 style="font-size: 2.2rem">A Community of Innovators</h2>
+        <p>Join a dynamic ecosystem of researchers, developers, and AI enthusiasts. Together, let's redefine the future of artificial intelligence.</p>
+    </div>
+</div>
+
+<style>
+/*     Start */
+    .Start {
+        background-image: url("../images/starter/earth.jpg");
+        background-size: cover;
+        background-position: center;
+        height: calc(100% + 3.5rem);
+        width: calc(100% + 3.5rem);
+        display: flex;
+        align-items: flex-end;
+        justify-content: center;
+        margin-top: -2rem; 
+        margin-left: -2rem; 
+        margin-right: -2rem; 
+        overflow: hidden;
+    }
+
+    .Start-Text {
+        font-size: 5rem;
+        text-align: center;
+        margin: 0;
+        padding-bottom: 6rem;
+        color: white;
+        display: flex;
+        flex-direction: column;
+        align-items: center; /* Centering items horizontally */
+    }
+
+    h1 {
+        margin-bottom: -3rem; /* Distance from the button */
+    }
+
+    .button-container {
+        align-self: flex-start; /* Align to the left */
+        margin-left: 2%; /* Distance from the left edge */
+    }
+
+    /*image row */
+    .ImageRow {
+        display: flex;
+        justify-content: space-around;
+        padding: 2rem;
+    }
+
+    .ImageBlock {
+        text-align: center;
+        flex: 1;
+        margin: 1.5rem;
+        transition: all 0.2s ease-in-out; /* This makes the resizing smooth */
+    }
+
+        .ImageBlock img {
+            max-width: 100%;
+            height: auto;
+            display: block; /* Makes the image block level */
+            margin: auto; /* Auto margins effectively center the image */
+        }
+
+        .ImageBlock:hover {
+            transform: scale(1.05);
+            transition: all 0.2s ease-in-out; /* This makes the resizing smooth */
+        }
+
+    .rowText {
+        color: #ffffff;
+    }
+
+    .rowText:hover {
+        color: #ffffff;  /* Corrected hex code */
+    }
+
+    /*Images + text */
+
+.Section {
+    display: flex;
+    justify-content: space-between;
+    padding: 2rem;
+    width: 90%;
+    margin: auto;  /* This will center the section horizontally */
+}
+
+    /* Styles for Text and Image Divs */
+    .ImageRightTextLeft .Text, .ImageLeftTextRight .Text {
+        flex: 1; /* Takes more space than Image */
+        padding: 2rem;
+        font-size: 2rem; /* Increase the font size */
+    }
+
+    .ImageRightTextLeft .Image, .ImageLeftTextRight .Image {
+        flex: 1; /* Takes less space than Text */
+        padding: 2rem;
+    }
+
+    /* Styles for Image */
+    .Image img {
+        width: 100%; /* Reduced to make the image a bit smaller */
+        height: auto;
+        margin: 0 auto; /* Centering the image */
+    }
+</style>
+@code {
+
+}

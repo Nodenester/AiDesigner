@@ -1,0 +1,215 @@
+﻿@page "/library"
+@using AiDesigner.Shared
+@inject NavigationManager NavigationManager
+@using AiDesigner.Shared.Data;
+@using Newtonsoft.Json;
+@using NodeBaseApi.Version2;
+@using AiDesigner.Client.Modals;
+@using AiDesigner.Client.Components;
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+@inject HttpClient Http
+@using System.Net.Http.Json
+@using System.Text;
+@using System.Text.Json;
+
+<PageTitle>Library</PageTitle>
+
+@*Här ska man testa programet eller blocket? och inställningar för project*@
+
+<ProgramSettings SelectedProgram="AP" SelectedProgramChanged="OnSelectedProgramChanged"></ProgramSettings>
+<br />
+
+<CascadingValue Value="NewProgram" Name="NP">
+<div style="display: flex; align-items: center; justify-content: space-between;">
+    <h1 style="margin-right: 10px;">My projects</h1>
+    <hr style="flex-grow: 1; margin: 0;">
+    <AiDesigner.Client.Modals.AddProgram CreateNew="CreateProgram"></AiDesigner.Client.Modals.AddProgram>
+</div>
+</CascadingValue>
+
+<div class="flex flex-wrap gap-4 mt-8">
+    @foreach (var eap in EAPs)
+    {
+        if (eap is CustomProgram customProgram)
+        {
+            <button class="w-64 h-32 p-4 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center"
+            @onmousedown="@(async () => await HandleButtonClick(eap))"
+            @ondblclick="@(async () => await HandleDButtonClick(eap))">
+                <h3 class="dark:text-white">@eap.Name</h3>
+                <p class="rounded dark:text-white">@eap.Description</p>
+            </button>
+        }
+    }
+</div>
+<br />
+
+<CascadingValue Value="NewBlockProgram" Name="NCB">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+        <h1 style="margin-right: 10px;">My custom blocks</h1>
+        <hr style="flex-grow: 1; margin: 0;">
+        <AiDesigner.Client.Modals.AddCustomBlock CreateNew="CreateBlockProgram"></AiDesigner.Client.Modals.AddCustomBlock>
+    </div>
+</CascadingValue>
+
+<div class="flex flex-wrap gap-4 mt-8">
+    @foreach (var eap in EAPs)
+    {
+        if (eap is CustomBlockProgram customBlockProgram)
+        {
+            <button class="w-64 h-32 p-4 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center"
+            @onmousedown="@(async () => await HandleButtonClick(eap))"
+            @ondblclick="@(async () => await HandleDButtonClick(eap))">
+                <h3 class="dark:text-white">@eap.Name</h3>
+                <p class="rounded dark:text-white">@eap.Description</p>
+            </button>
+        }
+    }
+</div>
+
+<div style="display: flex; align-items: center; justify-content: space-between;">
+    <h1 style="margin-right: 10px;">Vault</h1>
+    <hr style="flex-grow: 1; margin: 0;">
+</div>
+
+<div class="flex flex-wrap gap-4 mt-8">
+    @foreach (var eap in EAPs)
+    {
+        if (eap is CustomBlockProgram customBlockProgram)
+        {
+            <button class="w-64 h-32 p-4 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center">
+                <h3 class="dark:text-white">@eap.Name</h3>
+                <p class="rounded dark:text-white">@eap.Description</p>
+            </button>
+        }
+    }
+</div>
+
+@*Lägg till project som man fått från market och blocks*@
+
+@code {
+    [CascadingParameter(Name = "EAPs")]
+    public List<ProgramObject> EAPs { get; set; }
+
+    [CascadingParameter(Name = "AP")]
+    public ProgramObject AP { get; set; }
+
+    [CascadingParameter(Name = "NewAps")]
+    protected EventCallback<ProgramObject> NewAps { get; set; }
+
+    //Vars For modal
+    public CustomProgram NewProgram { get; set; } = new CustomProgram();
+    public CustomBlockProgram NewBlockProgram { get; set; } = new CustomBlockProgram();
+
+    bool isSingleClick = true;
+    private async Task HandleButtonClick(ProgramObject eap)
+    {
+        isSingleClick = true;
+        await Task.Delay(250);
+        if (isSingleClick)
+        {
+            if (AP == eap)
+            {
+                AP = null;
+            }
+            else
+            {
+                AP = eap;
+            }
+        }
+    }
+
+    private async Task HandleDButtonClick(ProgramObject eap)
+    {
+        isSingleClick = false;
+        await NewAps.InvokeAsync(eap);
+    }
+
+    private void CreateProgram()
+    {
+        EAPs.Add(NewProgram);
+        NewProgram = new CustomProgram();
+        StateHasChanged();
+    }
+
+    private void CreateBlockProgram()
+    {
+        EAPs.Add(NewBlockProgram);
+        NewBlockProgram = new CustomBlockProgram();
+        StateHasChanged();
+    }
+
+    private async Task OnSelectedProgramChanged(ProgramObject newProgram)
+    {
+        AP = newProgram;
+        // Find a matching ProgramObject in EAPs
+        var matchingProgram = EAPs.Find(program => program.Id == AP.Id);
+
+        HttpResponseMessage response = null;
+
+        if (matchingProgram != null)
+        {
+            // If a matching program is found, update its properties with those of newProgram
+            // You may need to adjust this code based on the exact properties of your ProgramObject class
+            matchingProgram.Id = newProgram.Id;
+            matchingProgram.Name = newProgram.Name;
+            matchingProgram.Description = newProgram.Description;
+            matchingProgram.Author = newProgram.Author;
+            matchingProgram.AuthorName = newProgram.AuthorName;
+            matchingProgram.IsPublic = newProgram.IsPublic;
+            matchingProgram.SupportsSessions = newProgram.SupportsSessions;
+
+            // If the ProgramObject is a CustomProgram
+            if (matchingProgram is CustomProgram customProgram && newProgram is CustomProgram newCustomProgram)
+            {
+                customProgram.ApiKey = newCustomProgram.ApiKey;
+                customProgram.ProgramStructure = newCustomProgram.ProgramStructure;
+            }
+            else if (matchingProgram is CustomBlockProgram customBlockProgram && newProgram is CustomBlockProgram newCustomBlockProgram)
+            {
+                customBlockProgram.ProgramStructure = newCustomBlockProgram.ProgramStructure;
+            }
+
+            var settings = new JsonSerializerSettings
+                {
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    TypeNameHandling = TypeNameHandling.Auto, // Preserve type information during serialization
+                    Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
+
+            try
+            {
+                if (newProgram is CustomProgram)
+                {
+                    var json = JsonConvert.SerializeObject(matchingProgram, settings);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    response = await Http.PutAsync($"programs/{matchingProgram.Id}", content);
+                }
+                else if (newProgram is CustomBlockProgram)
+                {
+                    var json = JsonConvert.SerializeObject(matchingProgram, settings);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    response = await Http.PutAsync($"customblocks/{matchingProgram.Id}", content);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while sending the request: " + ex.ToString());
+            }
+
+            if (response == null || !response.IsSuccessStatusCode)
+            {
+                string errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to update program with ID {matchingProgram.Id}. Response: {errorContent}. Code {response.StatusCode}");
+            }
+        }
+        else
+        {
+            throw new Exception($"No program found with ID matching {AP.Id}");
+        }
+    }
+
+}

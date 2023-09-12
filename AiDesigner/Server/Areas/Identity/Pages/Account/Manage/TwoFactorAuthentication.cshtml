@@ -1,0 +1,141 @@
+﻿@page
+@using Microsoft.AspNetCore.Http.Features
+@model TwoFactorAuthenticationModel
+
+@{
+    ViewData["Title"] = "Two-factor authentication (2FA)";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<div class="profileContainer">
+    <h3>@ViewData["Title"]</h3>
+    <partial name="_StatusMessage" for="StatusMessage" />
+
+    @{
+        var consentFeature = HttpContext.Features.Get<ITrackingConsentFeature>();
+        @if (consentFeature?.CanTrack ?? true)
+        {
+            @if (Model.Is2faEnabled)
+            {
+                // Alert messages based on remaining recovery codes
+                <div class="alert @(Model.RecoveryCodesLeft == 0 || Model.RecoveryCodesLeft == 1 ? "alert-danger" : Model.RecoveryCodesLeft <= 3 ? "alert-warning" : "")">
+                    <strong>You have @Model.RecoveryCodesLeft recovery code@(Model.RecoveryCodesLeft != 1 ? "s" : "") left.</strong>
+                    <p>
+                        @if (Model.RecoveryCodesLeft == 0)
+                        {
+                            @:You must <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a> before you can log in with a recovery code.
+                        }
+                        else
+                        {
+                            @:You should <a asp-page="./GenerateRecoveryCodes">generate a new set of recovery codes</a>.
+                        }
+                    </p>
+                </div>
+
+                <div class="btn-group mb-3">
+                    @if (Model.IsMachineRemembered)
+                    {
+                        <form method="post" style="display: inline-block">
+                            <button type="submit" class="profileBtn">Forget this browser</button>
+                        </form>
+                    }
+                    <a asp-page="./Disable2fa" class="profileBtn">Disable 2FA</a>
+                    <a asp-page="./GenerateRecoveryCodes" class="profileBtn">Reset recovery codes</a>
+                </div>
+            }
+
+            <h4>Authenticator app</h4>
+            <div class="btn-group mb-3">
+                <a id="enable-authenticator" asp-page="./EnableAuthenticator" class="profileBtn">@(!Model.HasAuthenticator ? "Add" : "Set up") authenticator app</a>
+                @if (Model.HasAuthenticator)
+                {
+                    <a id="reset-authenticator" asp-page="./ResetAuthenticator" class="profileBtn">Reset authenticator app</a>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-danger">
+                <strong>Privacy and cookie policy have not been accepted.</strong>
+                <p>You must accept the policy before you can enable two-factor authentication.</p>
+            </div>
+        }
+    }
+</div>
+
+<style>
+    .profileContainer {
+        background-color: #353535;
+        padding: 30px;
+        border-radius: 8px;
+        color: #eaeaea;
+        max-width: 600px;
+        /*         margin: auto; */
+    }
+
+    h3 {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-control {
+        background-color: #2b2b2b;
+        color: #eaeaea;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 15px;
+    }
+
+        .form-control:focus {
+            background-color: #2b2b2b;
+            box-shadow: none;
+            color: #eaeaea;
+            border: none;
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background-color: #2b2b2b;
+            opacity: 0.7;
+            border: none;
+            /*          Gives a slight faded effect to indicate it's disabled color: #eaeaea; */
+        }
+
+    .form-label {
+        color: #eaeaea;
+    }
+
+    .text-danger {
+        color: #ff6b6b;
+    }
+
+    .profileBtn {
+        background-color: #2ea44f;
+        border: none;
+        padding: 10px 15px;
+        font-size: 18px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        text-decoration: none; /* remove underline from the link */
+        display: inline-block; /* necessary to give padding and margins to inline elements like 'a' */
+        color: #fff;
+        text-align: center; /* centers text */
+        width: 100%;
+    }
+
+        .profileBtn:hover {
+            background-color: #249739;
+            text-decoration: none; /* ensure that there is no underline even on hover */
+            color: #fff;
+        }
+
+    .btn-group {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

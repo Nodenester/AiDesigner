@@ -1,0 +1,114 @@
+﻿@page "/aboutus"
+
+<!-- Add a container to hold your about us content -->
+<div style="display: flex;  justify-content: center; width: 100%;">
+    <div class="about-us-container">
+        <!-- Add a large title on the top-left -->
+        <div class="about-us-title">
+            <h1>About</h1>
+        </div>
+
+        <!-- Add a short text at the top-middle -->
+        <div class="about-us-text">
+            <p>We're democratizing AI, making it accessible to all. With our node-based environment, we simplify AI development. Join us and reshape the future of AI.</p>
+        </div>
+    </div>
+</div>
+
+<div class="BigImage">
+    <img src="../images/aboutus/team.jpg" alt="Image fake team">
+</div>
+
+<!-- New Section: Image on the Left, Text on the Right -->
+<div class="Section ImageLeftTextRight">
+    <div class="Image">
+        <img src="../images/starter/community.jpg" alt="Community Image">
+    </div>
+    <div class="Text">
+        <h2 style="font-size: 2.2rem">Meet Our Community</h2>
+        <p>Our platform is built on a vibrant community of AI enthusiasts—from researchers and developers to students and educators. Together, we're driving AI innovation and accessibility.</p>
+    </div>
+</div>
+
+<!-- New Section: Image on the Right, Text on the Left -->
+<div class="Section ImageRightTextLeft">
+    <div class="Text">
+        <h2 style="font-size: 2.2rem">Committed to Safety</h2>
+        <p>We take the security and safety of AI seriously. Our platform adheres to rigorous ethical standards and security protocols, ensuring that your AI projects are not just innovative but also secure and responsible.</p>
+    </div>
+    <div class="Image">
+        <img src="../images/aboutus/aisafety.jpg" alt="Image showcasing safety measures">
+    </div>
+</div>
+
+
+<style>
+    .about-us-container {
+        width: 83%;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        margin-top: 20px;
+        position: relative;
+        margin-bottom: 6rem;
+    }
+
+    .about-us-title h1 {
+        font-size: 55px;
+        margin: 0;
+       /*  margin-left: 3rem; */
+    }
+
+    .about-us-text {
+        position: absolute;
+        left: 50%;
+        top: calc(50% - 1.25rem); /* 0.625rem is half the font-size, this makes the first line vertically centered */
+    }
+
+        .about-us-text p {
+            font-size: 25px;
+            margin: 0;
+           /*  margin-right: 1rem; */
+        }
+
+    .BigImage img {
+        width: 83%;
+        max-height: 800px; /* Set the maximum height you want for the image */
+        object-fit: cover; /* This will ensure the aspect ratio is maintained and will crop any overflow */
+        display: block;
+        margin: 0 auto; /* Centers the image horizontally */
+    }
+
+    <!-- image and text -->
+    .Section {
+        display: flex;
+        justify-content: space-between;
+        padding: 2rem;
+        width: 90%;
+        margin: auto; /* This will center the section horizontally */
+    }
+
+    /* Styles for Text and Image Divs */
+    .ImageRightTextLeft .Text, .ImageLeftTextRight .Text {
+        flex: 1; /* Takes more space than Image */
+        padding: 2rem;
+        font-size: 2rem; /* Increase the font size */
+    }
+
+    .ImageRightTextLeft .Image, .ImageLeftTextRight .Image {
+        flex: 1; /* Takes less space than Text */
+        padding: 2rem;
+    }
+
+    /* Styles for Image */
+    .Image img {
+        width: 100%; /* Reduced to make the image a bit smaller */
+        height: auto;
+        margin: 0 auto; /* Centering the image */
+    }
+</style>
+
+
+@code {
+
+}

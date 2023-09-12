@@ -1,0 +1,92 @@
+﻿@page
+@model ResetAuthenticatorModel
+@{
+    ViewData["Title"] = "Reset authenticator key";
+    ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
+}
+
+<div class="profileContainer">
+    <h3>@ViewData["Title"]</h3>
+    <partial name="_StatusMessage" for="StatusMessage" />
+    
+    <div class="authenticatorWarning">
+        <div class="warningContent">
+            <span class="warningIcon">⚠️</span>
+            <div>
+                <strong>If you reset your authenticator key, your authenticator app will not work until you reconfigure it.</strong>
+                <p>This process disables 2FA until you verify your authenticator app. If you do not complete your authenticator app configuration, you may lose access to your account.</p>
+            </div>
+        </div>
+    </div>
+    
+    <div class="actionSection">
+        <form id="reset-authenticator-form" method="post">
+            <button id="reset-authenticator-button" class="profileBtn btn-danger">Reset authenticator key</button>
+        </form>
+    </div>
+</div>
+
+<style>
+    .profileContainer {
+        background-color: #353535;
+        padding: 30px;
+        border-radius: 8px;
+        color: #eaeaea;
+        max-width: 600px;
+        /*         margin: auto; */
+    }
+
+    .profileBtn {
+        background-color: #2ea44f;
+        border: none;
+        padding: 10px 15px;
+        font-size: 18px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        width: 100%;
+        color: #fff;
+    }
+
+        .profileBtn:hover {
+            background-color: #249739;
+        }
+
+    .authenticatorWarning {
+        background-color: #ffdeab;
+        padding: 20px;
+        border-radius: 4px;
+        color: #755c00;
+        margin-bottom: 20px;
+    }
+
+    .warningContent {
+        display: flex;
+        align-items: center;
+    }
+
+    .warningIcon {
+        font-size: 24px;
+        margin-right: 15px;
+    }
+
+    .authenticatorWarning strong {
+        display: block;
+        margin-bottom: 10px;
+    }
+
+    .actionSection {
+        text-align: center;
+    }
+
+    .btn-danger {
+        background-color: #e3342f;
+        border: none;
+        padding: 10px 15px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+    }
+
+        .btn-danger:hover {
+            background-color: #cc1f1a;
+        }
+</style>

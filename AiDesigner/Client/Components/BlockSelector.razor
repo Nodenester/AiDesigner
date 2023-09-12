@@ -1,0 +1,91 @@
+﻿@*@using System.Collections.Generic
+@using System.Linq
+@using Microsoft.AspNetCore.Components.Web
+@using Microsoft.JSInterop
+
+<div class="container" @oncontextmenu="HandleContextMenu">
+    Right-click here to show the popup
+    @if (isPopupVisible)
+    {
+        <div class="popup">
+            @foreach (var item in buttonItems)
+            {
+                <div class="item">
+                    <span class="item-text">@item.Text</span>
+                    @if (item.Buttons.Any())
+                    {
+                        <div class="sub-menu">
+                            @foreach (var button in item.Buttons)
+                            {
+                                <button @onclick="() => HandleButtonClick(button)">@button.Text</button>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        <div class="overlay" @onclick="HidePopup"></div>
+    }
+</div>
+
+@code {
+    private bool isPopupVisible = false;
+    private List<ButtonItem> buttonItems = new List<ButtonItem>
+    {
+        new ButtonItem("Folder 1", new List<ButtonItem>
+        {
+            new ButtonItem("Button 1.1"),
+            new ButtonItem("Button 1.2")
+        }),
+        new ButtonItem("Folder 2", new List<ButtonItem>
+        {
+            new ButtonItem("Button 2.1"),
+            new ButtonItem("Button 2.2")
+        }),
+        new ButtonItem("Button 3")
+    };
+
+    [Inject]
+    public IJSRuntime JSRuntime { get; set; }
+
+    private async Task HandleContextMenu(MouseEventArgs e)
+    {
+        e.PreventDefault(); // Prevent the default right-click behavior
+        await JSRuntime.InvokeVoidAsync("blockSelectorInterop.stopEventPropagation", e);
+        isPopupVisible = true;
+    }
+
+    private void HidePopup()
+    {
+        isPopupVisible = false;
+    }
+
+    private void HandleButtonClick(ButtonItem button)
+    {
+        // Handle button click action
+        Console.WriteLine($"Button '{button.Text}' clicked.");
+        SendBack(button);
+    }
+
+    [Parameter]
+    public Action<ButtonItem> SendBack { get; set; }
+
+    public class ButtonItem
+    {
+        public ButtonItem(string text)
+        {
+            Text = text;
+            Buttons = new List<ButtonItem>();
+        }
+
+        public ButtonItem(string text, List<ButtonItem> buttons)
+        {
+            Text = text;
+            Buttons = buttons;
+        }
+
+        public string Text { get; }
+        public List<ButtonItem> Buttons { get; }
+    }
+}
+*@

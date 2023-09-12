@@ -1,0 +1,29 @@
+﻿@page "/home"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<PageTitle>Index</PageTitle>
+
+
+<style>
+
+</style>
+
+@code {
+    Random rnd = new Random();
+
+    public string Name = "minecraft";
+
+    private void SetName()
+    {
+        Name = _names[rnd.Next(0, 3)];
+    }
+
+    private List<string> _names = new List<string> {
+        "minecraft", 
+        "calamari", 
+        "roblox" 
+    };
+}
+
+

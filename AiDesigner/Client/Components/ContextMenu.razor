@@ -1,0 +1,125 @@
+﻿@using AiDesigner.Shared.Blocks;
+@using Microsoft.JSInterop
+@using AiDesigner.Shared
+@inject IJSRuntime JSRuntime
+
+<div id="contextMenu" class="context-menu hidden bg-gray-700 w-48 h-48 overflow-auto absolute z-10" style="border-radius: 10px;">
+    <input id="searchInput" type="text" placeholder="Search..." @oninput="UpdateFilter" class="px-1 py-1 w-full border-b-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none" />
+    <ul class="px-1 py-0 dark:bg-gray-700">
+        @RenderItems(FilteredItems)
+    </ul>
+</div>
+
+<style>
+    /* The emerging W3C standard that is currently Firefox compatible only */
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: gray transparent;
+    }
+
+        /* Works on Chrome/Edge/Safari */
+        *::-webkit-scrollbar {
+            width: 5px;
+        }
+
+        *::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        *::-webkit-scrollbar-thumb {
+            background-color: gray;
+            border-radius: 20px;
+            transition: width 0.3s;
+        }
+
+            *::-webkit-scrollbar-thumb:hover {
+                width: 10px;
+            }
+
+</style>
+
+@code {
+    [Parameter]
+    public EventCallback<Item> OnMenuItemClick { get; set; }
+
+    private string filter = "";
+
+    private List<Item> Items { get; set; } = new List<Item>
+    {
+        new Item
+        {
+            Name = "Node Logic",
+            SubItems = new List<Item>
+            {
+                new Item { Name = "IndexLoop", block = new IndexLoop() },
+                new Item { Name = "For Loop", block = new ForLoop() },
+                new Item { Name = "While Loop", block = new WhileLoop() },
+                new Item { Name = "If", block = new IfBlock() },
+                new Item { Name = "Set Variable", block = new SetVariableBlock() },
+                new Item { Name = "Get Variable", block = new GetVariableBlock() },
+            }
+        },
+        new Item
+        {
+            Name = "Boolean logic",
+            SubItems = new List<Item>
+            {
+                new Item { Name = "And", block = new AndBlock() },
+                new Item { Name = "Or", block = new OrBlock() },
+                new Item { Name = "Not", block = new NotBlock() },
+                new Item { Name = "Xor", block = new XorBlock() },
+            }
+        },
+        new Item
+        {
+            Name = "Math operatons",
+            SubItems = new List<Item>
+            {
+               new Item { Name = "Add", block = new AddBlock() },
+               new Item { Name = "Subtract", block = new SubtractBlock() },
+               new Item { Name = "Multiply", block = new MultiplyBlock() },
+               new Item { Name = "Divide", block = new AndBlock() },
+
+            }
+        },
+        new Item
+        {
+            Name = "String handeling",
+            SubItems = new List<Item>
+            {
+               new Item { Name = "Concatenation", block = new StringConcatenationBlock() },
+               new Item { Name = "Length", block = new StringLengthBlock() },
+               new Item { Name = "Substring", block = new StringSubstringBlock() },
+               new Item { Name = "To Lowercase", block = new ToLowercaseBlock() },
+               new Item { Name = "To Uppercase", block = new ToUppercaseBlock() },
+               new Item { Name = "Contains", block = new Contains() },
+            }
+        },
+    };
+
+
+    private IEnumerable<Item> FilteredItems => Items.Where(i => IsMatch(i, filter));
+
+    private bool IsMatch(Item item, string filter)
+    {
+        return item.Name.ToLower().Contains(filter.ToLower())
+            || (item.SubItems?.Any(subItem => IsMatch(subItem, filter)) ?? false);
+    }
+
+    private void UpdateFilter(ChangeEventArgs e)
+    {
+        filter = e.Value.ToString();
+    }
+
+    private RenderFragment RenderItems(IEnumerable<Item> items) => builder =>
+       {
+       var seq = 0;
+       foreach (var item in items)
+       {
+           builder.OpenComponent<MenuItem>(seq++);
+           builder.AddAttribute(seq++, "Item", item);
+           builder.AddAttribute(seq++, "OnItemClick", OnMenuItemClick);
+           builder.CloseComponent();
+       }
+   };
+}

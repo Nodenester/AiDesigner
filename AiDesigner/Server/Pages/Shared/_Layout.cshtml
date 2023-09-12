@@ -1,0 +1,168 @@
+﻿@using Microsoft.AspNetCore.Hosting
+@using Microsoft.AspNetCore.Mvc.ViewEngines
+@inject IWebHostEnvironment Environment
+@inject ICompositeViewEngine Engine
+
+<style>
+    /* Overall Body Style */
+    body {
+        background-color: #2b2b2b;
+        color: #eaeaea;
+        width: 100%;
+        margin: 0 !important;
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+
+    /* Dark Navbar */
+    .navbar {
+        background-color: #353535 !important;
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+    }
+
+    .navbar-brand, .navbar-light .navbar-nav .nav-link, .navbar-light .navbar-toggler-icon {
+        color: #eaeaea !important;
+    }
+
+    /* Main Container Style */
+    .container {
+        background-color: #2b2b2b;
+        width: 100%;
+        max-width : 100% !important;
+        padding-top: 0rem !important;
+        padding-bottom: 0rem !important;
+        flex: 1 0 auto;
+    }
+
+    html, body {
+        height: 100%; /* This will ensure the footer sticks to the bottom if content is short  */
+    }
+
+    /* Footer */
+    .footers {
+        background-color: #353535;
+        padding: 0px 0; /* This will make it thinner */
+        overflow: hidden !important;
+        position: absolute;
+        bottom: 0;
+        width: 100%;
+        overflow: scroll;
+        white-space: nowrap;
+        line-height: 60px;
+    }
+
+        .footers a {
+            color: #63d2ff;
+        }
+
+            .footers a:hover {
+                color: #4098bf;
+                text-decoration: none;
+            }
+
+    /* Links */
+    a {
+        color: #63d2ff;
+    }
+
+        a:hover {
+            color: #4098bf;
+            text-decoration: none;
+        }
+</style>
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - AiDesigner.Server</title>
+
+    <environment include="Development">
+        <link rel="stylesheet" href="~/Identity/lib/bootstrap/dist/css/bootstrap.css" />
+        <link rel="stylesheet" href="~/Identity/css/site.css" />
+    </environment>
+    <environment exclude="Development">
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css"
+              integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"
+              asp-fallback-href="~/Identity/lib/bootstrap/dist/css/bootstrap.min.css"
+              asp-fallback-test-class="sr-only" asp-fallback-test-property="position" asp-fallback-test-value="absolute" />
+        <link rel="stylesheet" href="~/Identity/css/site.css" asp-append-version="true" />
+    </environment>
+</head>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white">
+            <div class="container">
+                <a class="navbar-brand" href="~/">AiDesigner.Server</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                        aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="navbar-collapse collapse d-sm-inline-flex flex-sm-row-reverse">
+                    @{
+                        var result = Engine.FindView(ViewContext, "_LoginPartial", isMainPage: false);
+                    }
+                    @if (result.Success)
+                    {
+                        await Html.RenderPartialAsync("_LoginPartial");
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("The default Identity UI layout requires a partial view '_LoginPartial' " +
+                            "usually located at '/Pages/_LoginPartial' or at '/Views/Shared/_LoginPartial' to work. Based on your configuration " +
+                            $"we have looked at it in the following locations: {System.Environment.NewLine}{string.Join(System.Environment.NewLine, result.SearchedLocations)}.");
+                    }
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <partial name="_CookieConsentPartial" optional />
+        <main role="main" class="">
+            @RenderBody()
+        </main>
+    </div>
+    <footer class="footers text-muted">
+        <!-- The 'mt-auto' is a Bootstrap class to push the footer to the bottom -->
+        <div class="container">
+            &copy; 2023 - AiDesigner.Server
+            @{
+                var foundPrivacy = Url.Page("/Privacy", new { area = "" });
+            }
+            @if (foundPrivacy != null)
+            {
+                <a asp-area="" asp-page="/Privacy">Privacy</a>
+            }
+        </div>
+    </footer>
+
+    <environment include="Development">
+        <script src="~/Identity/lib/jquery/dist/jquery.js"></script>
+        <script src="~/Identity/lib/bootstrap/dist/js/bootstrap.bundle.js"></script>
+        <script src="~/Identity/js/site.js" asp-append-version="true"></script>
+    </environment>
+    <environment exclude="Development">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"
+                asp-fallback-src="~/Identity/lib/jquery/dist/jquery.min.js"
+                asp-fallback-test="window.jQuery"
+                crossorigin="anonymous"
+                integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2">
+        </script>
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-src="~/Identity/lib/bootstrap/dist/js/bootstrap.bundle.min.js"
+                asp-fallback-test="window.jQuery && window.jQuery.fn && window.jQuery.fn.modal"
+                crossorigin="anonymous"
+                integrity="sha384-U1DAWAznBHeqEIlVSCgzq+c9gqGAJn5c/t99JyeKa9xxaYpSvHU5awsuZVVFIhvj">
+        </script>
+        <script src="~/Identity/js/site.js" asp-append-version="true"></script>
+    </environment>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>
+
+

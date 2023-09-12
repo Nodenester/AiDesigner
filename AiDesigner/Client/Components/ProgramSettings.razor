@@ -1,0 +1,183 @@
+﻿@using NodeBaseApi.Version2
+@using AiDesigner.Shared
+@using System.ComponentModel.DataAnnotations
+@using AiDesigner.Client.Modals
+
+<PageTitle>Program Settings and Code</PageTitle>
+
+@if (localProgram != null)
+{
+    <div class="flex justify-center">
+        <div class="@((localProgram is CustomProgram) ? "w-1/2" : "w-2/5") p-4 rounded-lg bg-gray-100 dark:bg-gray-700 mx-8">
+            <h2 class="text-xl font-semibold mb-2">@localProgram.Name Settings</h2>
+            <div class="mt-4">
+                <label for="name" class="block text-sm font-medium text-gray-700 dark:text-white">Name</label>
+                <input type="text" @bind="localProgram.Name" id="name" class="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-700 rounded-md focus:outline-none focus:border-gray-500 dark:focus:border-gray-400" />
+            </div>
+            <div class="mt-4">
+                <label for="description" class="block text-sm font-medium text-gray-700 dark:text-white">Description</label>
+                <textarea @bind="localProgram.Description" id="description" class="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-700 rounded-md focus:outline-none focus:border-gray-500 dark:focus:border-gray-400"></textarea>
+            </div>
+            <div class="mt-4">
+                <label for="IsPublic" class="block text-sm font-medium text-gray-700 dark:text-white">Is public</label>
+                <div class="mt-1">
+                    <input type="checkbox" @bind="localProgram.IsPublic" id="IsPublic" class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded" />
+                    <label for="IsPublic" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
+                </div>
+            </div>
+            @if (localProgram is CustomProgram)
+            {
+                <label for="SupportsSessions" class="block text-sm font-medium text-gray-700 dark:text-white">Supports sessions</label>
+                <div class="mt-1">
+                    <input type="checkbox" @bind="localProgram.SupportsSessions" id="IsPublic" class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded" />
+                    <label for="IsPublic" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
+                </div>
+                <div class="mt-4">
+                    <label for="apiKey" class="block text-sm font-medium text-gray-700 dark:text-white">API Key</label>
+                    <input type="text" @bind="((CustomProgram)localProgram).ApiKey" id="apiKey" class="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-md focus:outline-none focus:border-gray-500 dark:focus:border-gray-400" readonly />
+                </div>
+                <div class="mt-4 flex justify-center">
+                    <AiDesigner.Client.Modals.ExacuteProgram AP="localProgram"></AiDesigner.Client.Modals.ExacuteProgram>
+                    <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-500 hover:bg-green-700 rounded">Save</button>
+                </div>
+            }
+            else if (localProgram is CustomBlockProgram)
+            {
+                <div class="mt-4 flex justify-center">
+                    <AiDesigner.Client.Modals.ExacuteProgram AP="localProgram"></AiDesigner.Client.Modals.ExacuteProgram>
+                    <button @onclick="SaveSettingsBlock" class="ml-4 px-4 py-2 text-white bg-green-500 hover:bg-green-700 rounded">Save</button>
+                </div>
+            }
+        </div>
+        @if (localProgram is CustomProgram)
+        {
+            <div class="w-1/2 p-4 rounded-lg bg-gray-100 dark:bg-gray-700 mx-8">
+                <h2 class="text-xl font-semibold mb-2">Code</h2>
+            <div class="relative inline-block w-full mb-4">
+                <select @bind="SelectedLanguage" class="block appearance-none w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-600 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500 dark:focus:border-gray-400">
+                    <option value="csharp">C#</option>
+                    <option value="python">Python</option>
+                    <option value="javascript">JavaScript</option>
+                </select>
+                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-400">
+                    <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-5.082 4.892-0.387 0.389-1.039 0.389-1.427 0-0.387-0.39-4.675-4.474-5.082-4.892-0.409-0.418-0.436-1.17 0-1.615z" /></svg>
+                </div>
+            </div>
+            <textarea class="form-control mt-2 w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-2 focus:outline-none focus:border-gray-500 dark:focus:border-gray-400 text-lg leading-relaxed" rows="10" readonly>@CodeSnippet</textarea>
+        </div>
+        }
+    </div>
+
+    <ReleaseArticle programObject="SelectedProgram" />
+}
+
+@code {
+    [Parameter]
+    public ProgramObject SelectedProgram { get; set; }
+
+    [Parameter]
+    public EventCallback<ProgramObject> SelectedProgramChanged { get; set; }
+
+    public ProgramObject localProgram { get; set; }
+
+    private string CodeSnippet
+    {
+        get
+        {
+            string code;
+            switch (SelectedLanguage)
+            {
+                case "csharp":
+                    code = $"// C# Code for {(SelectedProgram?.Name ?? "Untitled")}\n// ...";
+                    break;
+                case "python":
+                    code = $"# Python Code for {(SelectedProgram?.Name ?? "Untitled")}\n# ...";
+                    break;
+                case "javascript":
+                    code = $"// JavaScript Code for {(SelectedProgram?.Name ?? "Untitled")}\n// ...";
+                    break;
+                default:
+                    code = "";
+                    break;
+            }
+            return code;
+        }
+    }
+
+    private string SelectedLanguage { get; set; } = "csharp";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedProgram != null)
+        {
+            localProgram = Clone(SelectedProgram);
+        }
+        else
+        {
+            // handle null SelectedProgram, e.g., initialize it to a default value or throw an exception
+        }
+
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task UpdateSelectedProgram(ProgramObject newProgram)
+    {
+        SelectedProgram = newProgram;
+        await SelectedProgramChanged.InvokeAsync(newProgram);
+    }
+
+    private async Task SaveSettingsProgram()
+    {
+        // Update SelectedProgram with localProgram and notify the parent component
+        await UpdateSelectedProgram(Clone(localProgram));
+    }
+
+    private async Task SaveSettingsBlock()
+    {
+        // Update SelectedProgram with localProgram and notify the parent component
+        await UpdateSelectedProgram(Clone(localProgram));
+    }
+
+   
+    // Clone method
+    private ProgramObject Clone(ProgramObject source)
+    {
+        // Check if source is an instance of CustomProgram
+        if (source is CustomProgram customProgramSource)
+        {
+            return new CustomProgram
+                {
+                    Id = customProgramSource.Id,
+                    Name = customProgramSource.Name,
+                    Description = customProgramSource.Description,
+                    Author = customProgramSource.Author,
+                    AuthorName = customProgramSource.AuthorName,
+                    IsPublic = customProgramSource.IsPublic,
+                    SupportsSessions = customProgramSource.SupportsSessions,
+                    ProgramStructure = customProgramSource.ProgramStructure, // Assuming ProgramStructure can be shallow copied
+                    ApiKey = customProgramSource.ApiKey
+                };
+        }
+        // Check if source is an instance of CustomBlockProgram
+        else if (source is CustomBlockProgram customBlockProgramSource)
+        {
+            return new CustomBlockProgram
+                {
+                    Id = customBlockProgramSource.Id,
+                    Name = customBlockProgramSource.Name,
+                    Description = customBlockProgramSource.Description,
+                    Author = customBlockProgramSource.Author,
+                    AuthorName = customBlockProgramSource.AuthorName,
+                    IsPublic = customBlockProgramSource.IsPublic,
+                    SupportsSessions = customBlockProgramSource.SupportsSessions,
+                    ProgramStructure = customBlockProgramSource.ProgramStructure  // Assuming ProgramStructure can be shallow copied
+                };
+        }
+        // If the source is neither a CustomProgram nor a CustomBlockProgram, throw an exception
+        else
+        {
+            throw new ArgumentException($"Cannot clone object of type {source.GetType()}");
+        }
+    }
+
+}

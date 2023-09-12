@@ -1,0 +1,50 @@
+﻿@using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@inject NavigationManager Navigation
+@using AiDesigner.Shared
+
+<AuthorizeView>
+    <Authorized>
+        <div class="relative inline-block text-left">
+            <!-- This is the round button with the person symbol -->
+            <button @onclick="ToggleDropdown" class="rounded-full p-2 bg-blue-500 dark:bg-gray-700 hover:bg-blue-600 dark:hover:bg-gray-600 text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-person-circle" viewBox="0 0 16 16">
+                    <path d="M11 6a3 3 0 1 1-6 0 3 3 0 0 1 6 0z" />
+                    <path fill-rule="evenodd" d="M0 8a8 8 0 1 1 16 0A8 8 0 0 1 0 8zm8-7a7 7 0 0 0-5.468 11.37C3.242 11.226 4.805 10 8 10s4.757 1.225 5.468 2.37A7 7 0 0 0 8 1z" />
+                </svg>
+            </button>
+
+            <!-- This is the dropdown that appears when the button is pressed -->
+            <div class="absolute right-0 mt-2 w-48 invisible" style="display: @(isDropdownOpen ? "block" : "none")">
+                <div class="py-1 dark:bg-gray-700 rounded-md visible" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
+                    <a href="authentication/profile" class="py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white" role="menuitem">
+                        Settings
+                    </a>
+                    <button @onclick="BeginLogOut" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white" role="menuitem">
+                        Log out
+                    </button>
+                    <!-- Add more buttons here as needed -->
+                </div>
+            </div>
+        </div>
+    </Authorized>
+    <NotAuthorized>
+        <a href="authentication/register">Register</a>
+        <a href="authentication/login">Log in</a>
+    </NotAuthorized>
+</AuthorizeView>
+
+@code {
+    private bool isDropdownOpen = false;
+
+    private void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+
+    private void BeginLogOut()
+    {
+        isDropdownOpen = false; // Close the dropdown when logging out
+        Navigation.NavigateToLogout("authentication/logout");
+    }
+}

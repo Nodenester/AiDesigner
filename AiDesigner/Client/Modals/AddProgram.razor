@@ -1,0 +1,117 @@
+﻿@using AiDesigner.Shared.Data;
+@using NodeBaseApi.Version2;
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject HttpClient Http;
+@using Newtonsoft.Json;
+@using System.Text;
+
+<button @onclick="Open" class="btn btn-secondary mr-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-white bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600" type="button">
+    Add Program
+</button>
+
+<div class="@($"fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full {(IsModalOpen ? "block" : "hidden")}")" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="relative w-full max-w-2xl max-h-full mx-auto">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+            <!-- Modal header -->
+            <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 dark:bg-gray-800">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Create Program
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" @onclick="Close">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-6 space-y-6 dark:text-gray-300 dark:bg-gray-600 dark:text-white">
+                <EditForm Model="NewProgram">
+                    <div class="space-y-4">
+                        <div>
+                            <input type="text" @bind="NewProgram.Name" placeholder="Name" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0" />
+                        </div>
+                        <div>
+                            <textarea @bind="NewProgram.Description" placeholder="Description" rows="4" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0"></textarea>
+                        </div>
+                        <div>
+                            <label for="isPublic" class="block text-sm font-medium">Is Public</label>
+                            <input id="isPublic" type="checkbox" class="form-checkbox mt-1 h-4 w-4 text-blue-600 dark:bg-gray-700 outline-none border-0" @bind="NewProgram.IsPublic" />
+                        </div>
+                        <div>
+                            <label for="supportsSessions" class="block text-sm font-medium">Supports Sessions</label>
+                            <input id="supportsSessions" type="checkbox" class="form-checkbox mt-1 h-4 w-4 text-blue-600 dark:bg-gray-700 outline-none border-0" @bind="NewProgram.SupportsSessions" />
+                        </div>
+                    </div>
+                </EditForm>
+            </div>
+            <!-- Modal footer -->
+            <div class="flex items-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600">
+                <button type="button" class="btn btn-secondary mr-2 px-4 py-2 text-sm font-semibold text-gray-700 dark:text-white bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 border-0" data-dismiss="modal" @onclick="() => Close()">Return</button>
+                <button type="button" class="btn btn-primary px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 border-0" @onclick="@HandleNextButtonClick">Finnish</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool IsModalOpen { get; set; }
+
+    [Parameter]
+    public EventCallback CreateNew { get; set; }
+
+    [CascadingParameter(Name = "NP")]
+    public CustomProgram NewProgram { get; set; }
+
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState AuthState { get; set; }
+
+    public void Open()
+    {
+        IsModalOpen = true;
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        IsModalOpen = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleNextButtonClick()
+    {
+        var user = AuthState.User;
+        NewProgram.Id = Guid.NewGuid();
+        NewProgram.ApiKey = Guid.NewGuid();
+        NewProgram.Author = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        NewProgram.AuthorName = user.Identity.Name;
+        NewProgram.ProgramStructure = new ProgramStructure();
+
+        var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                TypeNameHandling = TypeNameHandling.Auto,
+                Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+
+        var json = JsonConvert.SerializeObject(NewProgram, settings);
+        var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+        var response = await Http.PostAsync("Programs", content);
+
+        if (response.IsSuccessStatusCode)
+        {
+            var programId = NewProgram.Id;
+            var userId = Guid.Parse(user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value);
+            var connectUserResponse = await Http.PostAsync($"Programs/connect/{userId}/{programId}", null);
+        }
+        else
+        {
+            // Handle errors
+        }
+
+        await CreateNew.InvokeAsync();
+        Close();
+    }
+
+}
