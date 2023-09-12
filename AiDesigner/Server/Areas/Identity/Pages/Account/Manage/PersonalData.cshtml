@@ -1,0 +1,85 @@
+﻿@page
+@model PersonalDataModel
+
+@{
+    ViewData["Title"] = "Personal Data";
+    ViewData["ActivePage"] = ManageNavPages.PersonalData;
+}
+
+<div class="profileContainer">
+    <h3>@ViewData["Title"]</h3>
+    <div>
+        <p>Your account contains personal data that you have given us. This page allows you to download or delete that data.</p>
+        <p class="alert-danger">
+            <strong>Deleting this data will permanently remove your account, and this cannot be recovered.</strong>
+        </p>
+
+        <form id="download-data" asp-page="DownloadPersonalData" method="post" class="mb-3">
+            <button class="profileBtn" type="submit">Download</button>
+        </form>
+
+        <a id="delete" asp-page="DeletePersonalData" class="btnDelete w-100">Delete</a>
+    </div>
+</div>
+
+<style>
+    .profileContainer {
+        background-color: #353535;
+        padding: 30px;
+        border-radius: 8px;
+        color: #eaeaea;
+        max-width: 600px;
+        /*         margin: auto; */
+    }
+
+    h3 {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .alert-danger {
+        color: #ff6b6b;
+        border: 1px solid #ff6b6b;
+        padding: 8px 12px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+
+    .profileBtn {
+        background-color: #2ea44f;
+        border: none;
+        padding: 10px 15px;
+        font-size: 18px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        width: 100%;
+        color: #fff;
+    }
+
+        .profileBtn:hover {
+            background-color: #249739;
+        }
+
+    .btnDelete {
+        background-color: #ff6b6b;
+        border: none;
+        padding: 10px 15px;
+        font-size: 18px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        text-decoration: none; /* remove underline from the link */
+        display: inline-block; /* necessary to give padding and margins to inline elements like 'a' */
+        color: #fff;
+        text-align: center; /* centers text */
+        width: 100%;
+    }
+
+        .btnDelete:hover {
+            background-color: #e64f4f;
+            color: #fff;
+        }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

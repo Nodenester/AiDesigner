@@ -1,0 +1,56 @@
+﻿@inject SignInManager<ApplicationUser> SignInManager
+
+@{
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
+}
+
+<div class="navContainer">
+    <ul class="manageNavList">
+        <li><a class="@ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
+        <li><a class="@ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
+        <li><a class="@ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
+
+        @if (hasExternalLogins)
+        {
+            <li id="external-logins"><a id="external-login" class="@ManageNavPages.ExternalLoginsNavClass(ViewContext)" asp-page="./ExternalLogins">External logins</a></li>
+        }
+
+        <li><a class="@ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
+        <li><a class="@ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+    </ul>
+</div>
+
+<style>
+    .navContainer {
+        background-color: #353535;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .manageNavList {
+        list-style-type: none;
+        padding: 0;
+    }
+
+        .manageNavList li {
+            margin-bottom: 12px;
+        }
+
+            .manageNavList li a {
+                color: #eaeaea;
+                text-decoration: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                display: block;
+            }
+
+                .manageNavList li a:hover {
+                    background-color: #2ea44f;
+                    color: white;
+                }
+
+                .manageNavList li a.active {
+                    background-color: #249739;
+                    color: white;
+                }
+</style>

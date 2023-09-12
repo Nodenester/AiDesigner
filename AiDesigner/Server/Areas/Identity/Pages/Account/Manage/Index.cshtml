@@ -1,0 +1,95 @@
+﻿@page
+@model IndexModel
+
+@{
+    ViewData["Title"] = "Profile";
+    ViewData["ActivePage"] = ManageNavPages.Index;
+}
+
+<div class="profileContainer">
+    <h3>@ViewData["Title"]</h3>
+    <partial name="_StatusMessage" for="StatusMessage" />
+
+    <form id="profile-form" method="post">
+        <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Username" class="form-control" placeholder="Please choose your username." disabled />
+            <label asp-for="Username" class="form-label"></label>
+        </div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.PhoneNumber" class="form-control" placeholder="Please enter your phone number." />
+            <label asp-for="Input.PhoneNumber" class="form-label"></label>
+            <span asp-validation-for="Input.PhoneNumber" class="text-danger"></span>
+        </div>
+
+        <button id="update-profile-button" type="submit" class="profileBtn">Save</button>
+    </form>
+</div>
+
+<style>
+    .profileContainer {
+        background-color: #353535;
+        padding: 30px;
+        border-radius: 8px;
+        color: #eaeaea;
+        max-width: 600px;
+/*         margin: auto; */
+    }
+
+    h3 {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .form-control {
+        background-color: #2b2b2b;
+        color: #eaeaea;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 15px;
+    }
+
+        .form-control:focus {
+            background-color: #2b2b2b;
+            box-shadow: none;
+            color: #eaeaea;
+            border: none;
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background-color: #2b2b2b;
+            opacity: 0.7;
+            border: none;
+/*          Gives a slight faded effect to indicate it's disabled color: #eaeaea; */        
+        }
+
+    .form-label {
+        color: #eaeaea;
+    }
+
+    .text-danger {
+        color: #ff6b6b;
+    }
+
+    .profileBtn {
+        background-color: #2ea44f;
+        border: none;
+        padding: 10px 15px;
+        font-size: 18px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        width:100%;
+        color: #fff;
+    }
+
+        .profileBtn:hover {
+            background-color: #249739;
+        }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

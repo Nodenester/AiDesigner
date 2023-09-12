@@ -1,0 +1,90 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using NodeBaseApi.Version2;
+
+<div class="flex justify-center items-center">
+    <div style="width: 75%;">
+        <div class="flex flex-wrap gap-4 mt-8 ml-1">
+            @if (Articles != null)
+            {
+                @foreach (var article in Articles)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
+                        <!-- Add Image Here -->
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 260px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" />
+                        <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+                        <p class="w-full text-left dark:text-white ml-4">@article.AuthorName</p>
+                        <br />
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+                        <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                            <p class="text-left dark:text-white text-lg m-1 ml-3">@article.SearchClass</p>
+                            <button class="bg-green-500 text-white rounded p-1 m-1">Add to vault</button>
+                        </div>
+                        <br />
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+
+<div class="flex justify-center items-center">
+    <div style="width:83%;">
+        <div class="flex justify-center mt-8 space-x-4">
+            @if (CurrentPage > 1)
+            {
+                <button @onclick="() => SetCurrentPage(1)" class="px-4 py-2 text-white bg-gray-500 rounded">First</button>
+                <button @onclick="() => SetCurrentPage(CurrentPage - 1)" class="px-4 py-2 text-white bg-gray-500 rounded">Previous</button>
+            }
+
+            @for (var i = Math.Max(1, CurrentPage - PageRange); i <= Math.Min(TotalPages, CurrentPage + PageRange); i++)
+            {
+                var pageIndex = i;
+                <button @onclick="() => SetCurrentPage(pageIndex)" class="px-4 py-2 text-white @(CurrentPage == pageIndex ? "bg-gray-700" : "bg-gray-500") rounded">@pageIndex</button>
+            }
+
+            @if (CurrentPage < TotalPages)
+            {
+                <button @onclick="() => SetCurrentPage(CurrentPage + 1)" class="px-4 py-2 text-white bg-gray-500 rounded">Next</button>
+                <button @onclick="() => SetCurrentPage(TotalPages)" class="px-4 py-2 text-white bg-gray-500 rounded">Last</button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public List<WorkshopArticle> Articles { get; set; }
+
+    [Parameter]
+    public WorkshopArticle SelectedArticle { get; set; }
+
+    [Parameter]
+    public int CurrentPage { get; set; }
+
+    [Parameter]
+    public int TotalPages { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPageChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<WorkshopArticle> OnSelectedArticle { get; set; }
+
+    // Number of additional pages to show around the current page.
+    private int PageRange { get; set; } = 2; // Change this value based on your requirements
+
+    private async Task SetCurrentPage(int page)
+    {
+        CurrentPage = page;
+        await OnPageChanged.InvokeAsync(CurrentPage);
+        // If the parent component listens to this event, it can then call methods to refresh data.
+    }
+
+    private void SetSelectedArticle(WorkshopArticle article)
+    {
+        SelectedArticle = article;
+        OnSelectedArticle.InvokeAsync(SelectedArticle);
+    }
+}
+

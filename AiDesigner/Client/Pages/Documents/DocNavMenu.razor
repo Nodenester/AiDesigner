@@ -1,0 +1,182 @@
+﻿<div class="text-lg top-row px-3 py-2 bg-white dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
+    <div class="container mx-auto sm:px-4">
+        <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">AiDesigner</a>
+    </div>
+</div>
+
+<div class="ml-3 DocNavMenu p-6 bg-white dark:!bg-gray-800">
+    <ul class="space-y-4">
+        <!-- Introduction Menu -->
+        <li class="mb-2">
+            <div class="flex items-center justify-between">
+                <span class="text-lg text-gray-600 dark:text-white" @onclick='() => ToggleSubMenu("introduction")'>
+                    Introduction
+                    <span style="display:inline-block; transition: transform 0.2s ease-in-out;
+                    @(ShowSubMenu["introduction"] ? "transform: rotate(360deg);" : "transform: rotate(270deg);")">
+                        ▼
+                    </span>
+                </span>
+            </div>
+            @if (ShowSubMenu["introduction"])
+            {
+                <ul class="ml-2 space-y-0">
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/introduction/gettingstarted" Match="NavLinkMatch.All">
+                            Getting started
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/introduction/overview" Match="NavLinkMatch.All">
+                            Overview
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/introduction/features" Match="NavLinkMatch.All">
+                            Features
+                        </NavLink>
+                    </li>
+                </ul>
+            }
+        </li>
+
+        <!-- Block Menu -->
+        <li class="mb-2">
+            <div class="flex items-center justify-between">
+                <span class="text-lg text-gray-600 dark:text-white" @onclick='() => ToggleSubMenu("block")'>
+                    Blocks
+                    <span style="display:inline-block; transition: transform 0.2s ease-in-out;
+                    @(ShowSubMenu["block"] ? "transform: rotate(360deg);" : "transform: rotate(270deg);")">
+                        ▼
+                    </span>
+                </span>
+            </div>
+            @if (ShowSubMenu["block"])
+            {
+                <ul class="ml-2 space-y-0">
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/baseblocks" Match="NavLinkMatch.All">
+                            Base Blocks
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/booleanlogic" Match="NavLinkMatch.All">
+                            Boolean Logic
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/stringManipulation" Match="NavLinkMatch.All">
+                            String Manipulation
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/math" Match="NavLinkMatch.All">
+                            Math
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/omageprocessing" Match="NavLinkMatch.All">
+                            Image Processing
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/aimodels" Match="NavLinkMatch.All">
+                            Ai models
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/customblocks" Match="NavLinkMatch.All">
+                            Custom blocks
+                        </NavLink>
+                    </li>
+                </ul>
+            }
+        </li>
+
+        <!-- Api Menu -->
+        <li class="mb-2">
+            <div class="flex items-center justify-between">
+                <span class="text-lg text-gray-600 dark:text-white" @onclick='() => ToggleSubMenu("api")'>
+                    Api
+                    <span style="display:inline-block; transition: transform 0.2s ease-in-out;
+                    @(ShowSubMenu["api"] ? "transform: rotate(360deg);" : "transform: rotate(270deg);")">
+                        ▼
+                    </span>
+                </span>
+            </div>
+            @if (ShowSubMenu["api"])
+            {
+                <ul class="ml-2 space-y-0">
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/api/apiusage" Match="NavLinkMatch.All">
+                            Usage
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/api/codeexamples" Match="NavLinkMatch.All">
+                            Code examples
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/api/codegeneration" Match="NavLinkMatch.All">
+                            Code generation
+                        </NavLink>
+                    </li>
+                </ul>
+            }
+        </li>
+
+
+        <!-- More menu and subamenu items -->
+    </ul>
+</div>
+
+<style>
+.DocNavMenu {
+    width: 250px;
+    height: 100%;
+    background-color: #f5f5f5;
+    padding: 20px;
+}
+
+.DocNavMenu ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.DocNavMenu li {
+    margin-bottom: 0px;
+}
+
+.DocNavMenu li a {
+    text-decoration: none;
+    color: #333;
+}
+
+.DocNavMenu li a.active {
+    font-weight: bold;
+    color: #007bff;
+}
+</style>
+
+@code {
+    private Dictionary<string, bool> ShowSubMenu = new Dictionary<string, bool>
+    {
+        {"introduction", false},
+        {"block", false},
+        {"api", false},
+    };
+
+    private void ToggleSubMenu(string menuName)
+    {
+        if (ShowSubMenu.ContainsKey(menuName))
+        {
+            ShowSubMenu[menuName] = !ShowSubMenu[menuName];
+        }
+        else
+        {
+            ShowSubMenu.Add(menuName, true);
+        }
+    }
+}
+

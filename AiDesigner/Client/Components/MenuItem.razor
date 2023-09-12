@@ -1,0 +1,46 @@
+﻿@using AiDesigner.Shared
+@inject IJSRuntime JSRuntime
+
+<li class="my-0 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-white">
+    @if (Item.SubItems == null || !Item.SubItems.Any())
+    {
+        <button class="w-full text-left" @onclick="HandleClick">@Item.Name</button>
+    }
+    else
+    {
+        <details open="@Item.IsExpanded">
+            <summary @onclick="HandleClick">@Item.Name</summary>
+            <ul>
+                @foreach (var subItem in Item.SubItems)
+                {
+                    <MenuItem Item="subItem" OnItemClick="OnItemClick"></MenuItem>
+                }
+            </ul>
+        </details>
+    }
+</li>
+
+@code {
+    [Parameter] 
+    public Item Item { get; set; }
+
+    [Parameter] 
+    public EventCallback<Item> OnItemClick { get; set; }
+
+    private async Task HandleClick()
+    {
+        if (Item.SubItems != null && Item.SubItems.Any())
+        {
+            // Toggle the visibility of subitems
+            Item.IsExpanded = !Item.IsExpanded;
+        }
+        else
+        {
+            if (OnItemClick.HasDelegate)
+            {
+                await OnItemClick.InvokeAsync(Item);
+            }
+            await JSRuntime.InvokeVoidAsync("hideContextMenu");
+        }
+    }
+}

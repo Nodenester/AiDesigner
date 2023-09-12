@@ -1,0 +1,126 @@
+@using Microsoft.AspNetCore.Authorization
+@using NodeBaseApi.Version2
+@inject HttpClient Http;
+@attribute [Authorize]
+
+<div class="flex flex-row mt-8">
+    <!-- Left section: Single image display -->
+    <div class="w-2/3 flex flex-col items-center gap-4">
+        @if (SelectedArticle != null)
+        {
+            @if (SelectedArticle.ArticleImages != null && SelectedArticle.ArticleImages.Any() && SelectedImageIndex >= 0 && SelectedImageIndex < SelectedArticle.ArticleImages.Count)
+            {
+                var image = SelectedArticle.ArticleImages[SelectedImageIndex];
+                if (image != null)
+                {
+                    <div class="rounded overflow-hidden bg-white">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(image.ImageData)}")" alt="@image.Description" style="width: 800; height: 400px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" />
+                    </div>
+                    <!-- Thumbnail Selector -->
+                    <div class="flex gap-4 mt-2">
+                        @foreach (var thumbnail in SelectedArticle.ArticleImages)
+                        {
+                            var index = SelectedArticle.ArticleImages.IndexOf(thumbnail);
+                            <img src="@($"data:image/png;base64,{Convert.ToBase64String(thumbnail.ImageData)}")" alt="@thumbnail.Description"
+                                 style="width: 50px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer;"
+                            @onclick="() => SetSelectedImage(index)" />
+                        }
+                    </div>
+
+                    <!-- Navigation Buttons -->
+                    <div class="flex gap-4 mt-2">
+                        <button @onclick="() => PreviousImage()">Previous</button>
+                        <button @onclick="() => NextImage()">Next</button>
+                    </div>
+                }
+            }
+        }
+    </div>
+
+    <!-- Right section: Article details -->
+    <div class="w-1/3 flex flex-col ml-4">
+        @if (SelectedArticle != null)
+        {
+            <h1 class="text-4xl font-bold mb-4">@SelectedArticle.Name</h1>
+            <p class="text-lg mb-4">@SelectedArticle.Description</p>
+            <h2 class="text-2xl font-semibold mb-2">Additional Details</h2>
+            <ul>
+                <li><strong>Author:</strong> @SelectedArticle.AuthorName</li>
+                <li><strong>Type:</strong> @SelectedArticle.Type</li>
+                <li><strong>Created:</strong> @SelectedArticle.Created</li>
+                <li><strong>Downloads:</strong> @SelectedArticle.Downloads</li>
+                <li>
+                    <strong>Rating:</strong>
+                    <div class="rating">
+                        @for (var i = 1; i <= 5; i++)
+                        {
+                            var starClass = i <= SelectedArticle.Rating ? "fas fa-star text-yellow-400" : "far fa-star text-gray-300";
+                            <span class="@starClass cursor-pointer" @onclick="() => SetRating(i)"></span>
+                        }
+                    </div>
+                </li>
+            </ul>
+        }
+    </div>
+</div>
+
+<!-- Reviews -->
+<div class="mt-8">
+    <h2 class="text-2xl font-semibold mb-2">Reviews</h2>
+    @* Implement reviews section here. You might loop through a list of UserArticle related to this article *@
+</div>
+
+@code {
+    private int SelectedImageIndex { get; set; } = 0;
+
+    [Parameter]
+    public WorkshopArticle SelectedArticle { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        string requestUri = $"Workshop/article-images/{SelectedArticle.Id}";
+
+        // Make the HTTP GET request
+        HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
+
+        // Check if the request is successful
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            // Deserialize the response content to List<ArticleImages>
+            List<ArticleImages> articleImages = await httpResponse.Content.ReadFromJsonAsync<List<ArticleImages>>();
+            SelectedArticle.ArticleImages = articleImages;
+        }
+        else
+        {
+            Console.WriteLine($"Failed to fetch article images. Status code: {httpResponse.StatusCode}");
+        }
+    }
+
+    private void SetSelectedImage(int index)
+    {
+        SelectedImageIndex = index;
+    }
+
+    private void PreviousImage()
+    {
+        if (SelectedImageIndex > 0)
+        {
+            SelectedImageIndex--;
+        }
+    }
+
+    private void NextImage()
+    {
+        if (SelectedArticle?.ArticleImages != null && SelectedImageIndex < SelectedArticle.ArticleImages.Count - 1)
+        {
+            SelectedImageIndex++;
+        }
+    }
+
+    private void SetRating(int newRating)
+    {
+        // Here you could update the rating for SelectedArticle and perform any server updates if necessary
+        SelectedArticle.Rating = newRating;
+    }
+}
+

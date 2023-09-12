@@ -1,0 +1,296 @@
+﻿@page "/marketplace"
+@using AiDesigner.Client.Pages.Marketplace;
+@using AiDesigner.Client.Components;
+@using Microsoft.AspNetCore.Authorization;
+@using NodeBaseApi.Version2;
+@inject HttpClient Http
+@attribute [Authorize]
+
+
+<div class="flex justify-center items-center">
+    <div style="width:83%;">
+        <div class="flex items-center justify-between bg-gray-200 dark:bg-gray-600 p-1">
+            <div class="flex items-center space-x-1 pl-1">
+                @if (SelectedOption != "Home")
+                {
+                    <button @onclick="GoBack" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-700 mr-2">Back</button>
+                }
+
+                @if (SelectedOption == "Home")
+                {
+                    <span class="text-3xl font-bold">Workshop</span>
+                }
+                else
+                {
+                    <span class="text-3xl font-bold">@SelectedOption</span>
+                }
+            </div>
+
+            <div class="flex items-center space-x-1 ml-auto">
+
+                <div class="relative inline-block text-left pr-1"
+                     @onmouseenter="() => ShowTypeDropdown = true"
+                     @onmouseleave="() => ShowTypeDropdown = false">
+                    <button class="rounded-md px-4 py-2 bg-white dark:!bg-gray-700 text-black dark:!text-white border-0">
+                        Browse
+                    </button>
+                    @if (ShowTypeDropdown)
+                    {
+                        <div class="absolute left-0 mt-0 w-full py-1 bg-white dark:!bg-gray-700 border-0 rounded-md z-50">
+                            <button @onclick='() => SetOption("Home")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Home" ? "bg-gray-200 dark:bg-gray-500" : "")">Home</button>
+                            <button @onclick='() => SetOption("Type 1")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Type 1" ? "bg-gray-200 dark:bg-gray-500" : "")">Type 1</button>
+                            <button @onclick='() => SetOption("Type 2")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Type 2" ? "bg-gray-200 dark:bg-gray-500" : "")">Type 2</button>
+                        </div>
+                    }
+                </div>
+
+                <div class="relative inline-block text-left pr-2"
+                    @onmouseenter="() => ShowOptionDropdown = true"
+                    @onmouseleave="() => ShowOptionDropdown = false">
+                    <button class="rounded-md px-4 py-2 bg-white dark:!bg-gray-700 text-black dark:!text-white border-0">
+                        Program Type
+                    </button>
+                    @if (ShowOptionDropdown)
+                    {
+                        <div class="absolute left-0 mt-0 w-full py-1 bg-white dark:!bg-gray-700 border-0 rounded-md z-50">
+                            <button @onclick='() => SetType("Any")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(ProgramType == "Any" ? "bg-gray-200 dark:bg-gray-500" : "")">Any</button>
+                            <button @onclick='() => SetType("Program")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(ProgramType == "Program" ? "bg-gray-200 dark:bg-gray-500" : "")">Program</button>
+                            <button @onclick='() => SetType("CustomBlock")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(ProgramType == "CustomBlock" ? "bg-gray-200 dark:bg-gray-500" : "")">CustomBlock</button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <div class="relative pr-1">
+                <input @bind-value="SearchQuery" @bind-value:event="oninput" type="text" class="rounded-md px-2 py-2 bg-white dark:!bg-gray-700 text-black dark:!text-white border-0 outline-none" placeholder="Search">
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+<hr style="width: 83%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+
+@if(SelectedOption == "Content Detail")
+{
+    <ContentDetail SelectedArticle="SelectedArticle" />
+}
+else
+{
+    <MarketplaceList OnPageChanged="RefreshArticles" OnSelectedArticle="SetSelectedArticle" Articles="FilteredArticles" CurrentPage="CurrentPage" TotalPages="TotalPages" SelectedArticle="SelectedArticle" />
+}
+
+@code {
+    [CascadingParameter(Name = "EAPs")]
+    public List<WorkshopArticle> EAPs { get; set; }
+
+    private Stack<string> PreviousOptions = new Stack<string>();
+
+    private string _selectedOption = "Home";
+    private string SelectedOption
+    {
+        get { return _selectedOption; }
+        set
+        {
+            if (_selectedOption != value)
+            {
+                // Store the current option before changing it
+                PreviousOptions.Push(_selectedOption);
+
+                _selectedOption = value;
+                RefreshData();
+            }
+        }
+    }
+
+    private string _programType = "Any";
+    private string ProgramType
+    {
+        get { return _programType; }
+        set
+        {
+            if (_programType != value)
+            {
+                _programType = value;
+                // You may want to reset other variables when ProgramType changes
+                CurrentPage = 1;
+                RefreshData(); // Refresh data when ProgramType changes
+            }
+        }
+    }
+
+    private Timer _searchTimer; // System.Threading.Timer
+    private const int SearchDelay = 300; // Time delay in milliseconds
+
+    private bool ShowTypeDropdown { get; set; } = false;
+    private bool ShowOptionDropdown { get; set; } = false;
+    private int CurrentPage { get; set; } = 1;
+    private int ItemsPerPage { get; set; } = 20; // Number of items you want to display per page
+    private int TotalPages;
+
+    private string _searchQuery = "";
+    private string SearchQuery
+    {
+        get { return _searchQuery; }
+        set
+        {
+            if (_searchQuery != value)
+            {
+                _searchQuery = value;
+
+                // Dispose of the existing timer if it exists
+                _searchTimer?.Dispose();
+
+                // Initialize a new timer
+                _searchTimer = new Timer(PerformSearch, null, SearchDelay, Timeout.Infinite);
+            }
+        }
+    }
+
+    private WorkshopArticle SelectedArticle;
+
+    private int TotalCount { get; set; }
+    private List<WorkshopArticle> FilteredArticles { get; set; }
+
+    // Add a method to handle the "Back" button click
+    private void GoBack()
+    {
+        if (PreviousOptions.Count > 0)
+        {
+            var lastOption = PreviousOptions.Pop();
+            _selectedOption = lastOption;  // Set it directly to bypass adding to stack
+            RefreshData();
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        await RefreshData();
+    }
+
+    private void SetSelectedArticle(WorkshopArticle article)
+    {
+        SelectedArticle = article;
+        SelectedOption = "Content Detail";
+        StateHasChanged();
+    }
+
+    private void PerformSearch(object state)
+    {
+        // Dispose of the timer
+        _searchTimer.Dispose();
+
+        // Run on UI thread
+        InvokeAsync(() =>
+        {
+            RefreshData();
+        });
+    }
+
+    private async Task GetTotalCount()
+    {
+        try
+        {
+            var response = await Http.GetAsync($"Workshop/search/count?searchTerm={SearchQuery}&searchClass={SelectedOption}&type={ProgramType}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                var result = await response.Content.ReadFromJsonAsync<Dictionary<string, int>>();
+                TotalCount = result["totalCount"];
+                // Update TotalPages based on the new TotalCount
+                TotalPages = (int)Math.Ceiling((double)TotalCount / ItemsPerPage);
+            }
+            else
+            {
+                // Log the error for debugging and review
+                Console.WriteLine($"Failed to get total count. StatusCode: {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteLine($"An HttpRequestException occurred while getting total count: {e.Message}");
+        }
+        catch (TimeoutException e)
+        {
+            Console.WriteLine($"A TimeoutException occurred while getting total count: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            // Log the exception for debugging and review
+            Console.WriteLine($"An unknown exception occurred while getting total count: {e.Message}");
+        }
+    }
+
+    private async Task GetFilteredArticles()
+    {
+        try
+        {
+            var response = await Http.GetAsync($"Workshop/search?searchTerm={SearchQuery}&searchClass={SelectedOption}&type={ProgramType}&start={(CurrentPage - 1) * ItemsPerPage}&end={CurrentPage * ItemsPerPage}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                FilteredArticles = await response.Content.ReadFromJsonAsync<List<WorkshopArticle>>();
+            }
+            else
+            {
+                // Log the error for debugging and review
+                Console.WriteLine($"Failed to get filtered articles. StatusCode: {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteLine($"An HttpRequestException occurred while getting filtered articles: {e.Message}");
+        }
+        catch (TimeoutException e)
+        {
+            Console.WriteLine($"A TimeoutException occurred while getting filtered articles: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            // Log the exception for debugging and review
+            Console.WriteLine($"An unknown exception occurred while getting filtered articles: {e.Message}");
+        }
+    }
+
+    // Call these methods whenever you need to refresh the filtered articles or the total count.
+    private async Task RefreshData()
+    {
+        await GetTotalCount();
+        await GetFilteredArticles();
+        StateHasChanged();
+        Console.WriteLine("RefreshData");
+    }
+
+    private async Task RefreshArticles(int currentPage)
+    {
+        CurrentPage = currentPage;
+        await GetFilteredArticles();
+        StateHasChanged();
+        Console.WriteLine("RefreshArticles");
+    }
+
+
+    public void SetType(string type)
+    {
+        ProgramType = type;
+        ShowTypeDropdown = false; // Hide dropdown after selection
+    }
+
+    public void SetOption(string option)
+    {
+        SelectedOption = option;
+        ShowOptionDropdown = false; // Hide dropdown after selection
+    }
+
+    public void ToggleTypeDropdown()
+    {
+        ShowTypeDropdown = !ShowTypeDropdown;
+        ShowOptionDropdown = false; // Hide other dropdown
+    }
+
+    public void ToggleOptionDropdown()
+    {
+        ShowOptionDropdown = !ShowOptionDropdown;
+        ShowTypeDropdown = false; // Hide other dropdown
+    }
+}

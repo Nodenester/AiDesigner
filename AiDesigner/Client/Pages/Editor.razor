@@ -1,0 +1,1420 @@
+﻿@page "/editor"
+@inject IJSRuntime JSRuntime
+@using Newtonsoft.Json;
+@using Newtonsoft.Json.Serialization;
+@using NodeBaseApi.Version2
+@using Microsoft.AspNetCore.Authorization
+@using System.Text;
+@inject HttpClient Http
+@attribute [Authorize]
+@using AiDesigner.Client.Modals
+@using AiDesigner.Client.Components
+@using System.Reflection;
+@using System.Collections;
+@using System.Runtime.Serialization.Formatters.Binary;
+@using System.IO;
+@using AiDesigner.Shared.Data;
+@using System.Diagnostics;
+
+@if (localProgram != null)
+{
+    <AiDesigner.Client.Modals.ExacuteProgramNobtn @ref="epnb" AP="localProgram"></AiDesigner.Client.Modals.ExacuteProgramNobtn>
+    <AddInput @ref="api" OnNewOutputCreated="AddProgramInput" />
+    <AddOutput @ref="apo" OnNewOutputCreated="AddProgramOutput" />
+
+@*    <BlockSelector SendBack="HandleButtonSelection" />*@
+}
+
+<div class="editor-layout dark:bg-gray-800">
+    <!-- Navbar -->
+    <div class="navbar bg-gray-500 dark:bg-gray-700 text-white px-5 py-2 border-gray-300 dark:border-gray-600">
+        <div class="flex justify-between items-center">
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="SaveProgram">Save</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="ExecuteProgram">Execute</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="BuildProgram">Build</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="UndoAction">Undo</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="RedoAction">Redo</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="ZoomIn">+</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="ZoomOut">-</button>
+@*            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="CopyBlock">Copy</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="CutBlock">Cut</button>
+            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="PasteBlock">Paste</button>*@
+            <a class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" href="path/to/your/docs">Help</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content flex flex-grow">
+        <div id="left-side" class="resizable-x left-side bg-gray-200 dark:bg-gray-700 overflow-auto" style="width: 16.666667%;">
+            <div class="config-box p-0 border-gray-300 dark:border-gray-600">
+                <!-- Program configs -->
+            </div>
+            <div class="variable-list p-4">
+                <!-- A list of the variables -->
+            </div>
+        </div>
+
+        <div id="middle-content" class="middle-content flex-grow bg-white dark:bg-gray-900 p-0 overflow-auto">
+            <div id="whiteboard-content" class="bg-gray-500 dark:bg-gray-500 text-white py-3" style="width: 100%;
+        height: 100%;">
+                <div id="whiteboard" class="whiteboard" @oncontextmenu="ShowContextMenu">
+                    <div id="canvas" class="canvas">
+                        <div id="connection-layer" style="position: relative; z-index: 22; ">
+                        </div>
+                        @if(_localProgram is CustomProgram customProgram)
+                        {
+                            <div id="Input" class="node" style="left: @(customProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(customProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
+                                <div class="top-part dark:bg-gray-800">
+                                                                        <span style="margin-left: 10px;">Input</span>
+                                </div>
+                                <div class="main-part dark:bg-gray-700">
+                                    <div class="left-part">
+                                         <!--Left side content-->
+                                    </div>
+                                    <div class="right-part">
+                                        @foreach (var output in customProgram.ProgramStructure.ProgramStart)
+                                        {
+                                            <!--make a componenet  or something so it show the right input / output type-->
+                                            <div class="node-output d-flex ">
+                                                <span class="small-font">@output.Name</span>
+                                                <div id="@output.Id" class="@GetShape(output.Type.ToString()) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
+                                            </div>
+                                        }
+                                        @if (customProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        {
+                                            <hr style="border-top: none; height: 10px; background-color: transparent;" />
+                                        }
+                                        <button @onclick="Openapi" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                Create input
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="Output" class="node" style="left: @(customProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(customProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
+                                <div class="top-part dark:bg-gray-800">
+                                        <span style="margin-left: 10px;">Output</span>
+                                </div>
+                                <div class="main-part dark:bg-gray-700">
+                                    <div class="left-part">
+                                        @foreach (var input in customProgram.ProgramStructure.ProgramEnd)
+                                        {
+                                            <!--make a componenet  or something so it show the right input / output type-->
+                                            <div class="node-input d-flex ">
+                                                <div id="@input.Id" class="@GetShape(input.Type.ToString()) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
+                                                <span class="small-font">@input.Name</span>
+                                            </div>
+                                        }
+                                        @if (customProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        {
+                                            <hr style="border-top: none; height: 10px; background-color: transparent;" />
+                                        }
+                                        <button @onclick="Openapo" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                            Create output
+                                        </button>
+                                    </div>
+                                    <div class="right-part">
+                                        <!--Right side content-->
+                                    </div>
+                                </div>
+                            </div>
+                            @foreach (var node in customProgram.ProgramStructure.ProgramBlocks)
+                            {
+                                <div id="@node.Id" class="node" style="left: @(node.X.ToString() + "px"); top: @(node.Y.ToString() + "px");" @onclick="(() => SelectNode(node))">
+                                    <div class="top-part dark:bg-gray-800">
+                                        <span style="margin-left: 10px;">@node.Block.Name</span>
+                                    </div>
+                                    <div class="main-part dark:bg-gray-700">
+                                        <div class="left-part">
+                                            <!-- Left part content goes here -->
+                                            @foreach (var input in node.Block.Inputs)
+                                            {
+                                                <div class="node-input d-flex ">
+                                                    <div id="@input.Id" class="@GetShape(input.Type.ToString()) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
+                                                    <span class="small-font">@input.Name</span>
+                                                </div>
+                                            }
+                                        </div>
+                                        <div class="right-part">
+                                            <!-- Right part content goes here -->
+                                            @foreach (var output in node.Block.Outputs)
+                                            {
+                                                <div class="node-output d-flex ">
+                                                    <span class="small-font">@output.Name</span>
+                                                    <div id="@output.Id" class="@GetShape(output.Type.ToString()) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
+                                                </div>
+
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                        @if (_localProgram is CustomBlockProgram customBlockProgram)
+                        {
+                            <div id="Input" class="node" style="left: @(customBlockProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(customBlockProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
+                                <div class="top-part dark:bg-gray-800">
+                                    <span style="margin-left: 10px;">Input</span>
+                                </div>
+                                <div class="main-part dark:bg-gray-700">
+                                    <div class="left-part">
+                                        <!--Left side content-->
+                                    </div>
+                                    <div class="right-part">
+                                        @foreach (var output in customBlockProgram.ProgramStructure.ProgramStart)
+                                        {
+                                            <!--make a componenet  or something so it show the right input / output type-->
+                                            <div class="node-output d-flex ">
+                                                <span class="small-font">@output.Name</span>
+                                                <div id="@output.Id" class="@GetShape(output.Type.ToString()) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
+                                            </div>
+                                        }
+                                        @if (customBlockProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        {
+                                            <hr style="border-top: none; height: 10px; background-color: transparent;" />
+                                        }
+                                        <button @onclick="Openapi" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-sm d-flex" type="button">
+                                            Create input
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="Output" class="node" style="left: @(customBlockProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(customBlockProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
+                                <div class="top-part dark:bg-gray-800">
+                                    <span style="margin-left: 10px;">Output</span>
+                                </div>
+                                <div class="main-part dark:bg-gray-700">
+                                    <div class="left-part">
+                                        @foreach (var input in customBlockProgram.ProgramStructure.ProgramEnd)
+                                        {
+                                            <!--make a componenet  or something so it show the right input / output type-->
+                                            <div class="node-input d-flex ">
+                                                <div id="@input.Id" class="@GetShape(input.Type.ToString()) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
+                                                <span class="small-font">@input.Name</span>
+                                            </div>
+                                        }
+                                        @if (customBlockProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        {
+                                            <hr style="border-top: none; height: 10px; background-color: transparent;" />
+                                        }
+                                        <button @onclick="Openapo" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-sm d-flex" type="button">
+                                            Create output
+                                        </button>
+                                    </div>
+                                    <div class="right-part">
+                                        <!--Right side content-->
+                                    </div>
+                                </div>
+                            </div>
+                            @foreach (var node in customBlockProgram.ProgramStructure.ProgramBlocks)
+                            {
+                                <div id="@node.Id" class="node" style="left: @(node.X.ToString() + "px"); top: @(node.Y.ToString() + "px");" @onclick="(() => SelectNode(node))">
+                                    <div class="top-part dark:bg-gray-800">
+                                        <span style="margin-left: 10px;">@node.Block.Name</span>
+                                    </div>
+                                    <div class="main-part dark:bg-gray-700">
+                                        <div class="left-part">
+                                            <!-- Left part content goes here -->
+                                            @foreach (var input in node.Block.Inputs)
+                                            {
+                                                <div class="node-input d-flex ">
+                                                <div id="@input.Id" class="@GetShape(input.Type.ToString()) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
+                                                    <span class="small-font">@input.Name</span>
+                                                </div>
+
+                                            }
+                                        </div>
+                                        <div class="right-part">
+                                            <!-- Right part content goes here -->
+                                            @foreach (var output in node.Block.Outputs)
+                                            {
+                                                <div class="node-output d-flex ">
+                                                    <span class="small-font">@output.Name</span>
+                                                    <div id="@output.Id" class="@GetShape(output.Type.ToString()) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
+                                                </div>
+
+                                            }
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </div>
+                </div>
+            </div>
+            <div id="error-shower" class="flex-auto bg-gray-800 dark:bg-gray-800 text-white py-3 mt-auto">
+                <!-- Error Shower Content -->
+                @foreach (var x in Errors)
+                {
+                    <p class="text-white px-4" >@x</p>
+                }
+            </div>
+        </div>
+
+        <div id="right-side" class="resizable-x right-side w-2/12 bg-gray-200 dark:bg-gray-700 overflow-auto" style="width: 16.666667%;">
+            <div class="details-box p-0 border-b border-gray-300 dark:border-gray-600">
+                <p class="dark:bg-gray-700 border-gray-700 w-full align-top px-1">Details</p>
+                <!-- Block Settings Content -->
+                @if (SelectedDetail is ProgramBlock programBlock)
+                {
+                    <div class="p-1">
+                        <h4 class="mt-0">Inputs</h4>
+                        @foreach (var (input, index) in programBlock.Block.Inputs.Select((value, idx) => (value, idx)))
+                        {
+                            <div class="align-top">
+                                @if (localProgram is CustomProgram customProgram1)
+                                {
+                                    bool isInputInDirectInputs = customProgram1.ProgramStructure.DirectInputValues.ContainsKey(input.Id);
+
+                                    bool isValueEmpty = true;
+                                    // Safely get value from DirectInputValues
+                                    if (customProgram1.ProgramStructure.DirectInputValues.TryGetValue(input.Id, out var directValue))
+                                    {
+                                        isValueEmpty = string.IsNullOrEmpty(directValue?.ToString());
+                                    }
+
+                                    bool isInputConnectedToProgramInput = customProgram1.ProgramStructure.InputValues.ContainsKey(input.Id);
+
+                                    bool isInputConnectedToAnotherBlock = false;
+
+                                    // Check if programBlock.Inputs has a value at the same index
+                                    if (programBlock.Inputs != null && index < programBlock.Inputs.Count && programBlock.Inputs[index] != Guid.Empty)
+                                    {
+                                        isInputConnectedToAnotherBlock = true;
+                                    }
+
+                                    // Show the input field if:
+                                    // 1. It's in DirectInputValues and its value is not empty
+                                    // 2. It's not connected to another block
+                                    // 3. It's not connected to a program input
+                                    if ((isInputInDirectInputs && !isValueEmpty) || (!isInputConnectedToAnotherBlock && !isInputConnectedToProgramInput))
+                                    {
+                                        <label class="text-gray-200">@input.Name:</label>
+
+                                        // If the input doesn't exist in DirectInputValues, initialize it
+                                        if (!isInputInDirectInputs)
+                                        {
+                                            customProgram1.ProgramStructure.DirectInputValues[input.Id] = "";
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("Direct input value: " + customProgram1.ProgramStructure.DirectInputValues[input.Id]);
+                                        }
+
+                                        <!-- Styling the text input for dark mode using Tailwind -->
+                                        <input type="text"
+                                               value="@customProgram1.ProgramStructure.DirectInputValues[input.Id]?.ToString()"
+                                               @oninput="eventArgs => HandleInput(eventArgs, input.Id)"
+                                               class="bg-gray-800 text-gray-200 border border-gray-700 rounded p-2 w-full mt-2" />
+                                    }
+                                }
+
+                                @if (localProgram is CustomBlockProgram customBlockProgram1)
+                                {
+                                    bool isInputInDirectInputs = customBlockProgram1.ProgramStructure.DirectInputValues.ContainsKey(input.Id);
+
+                                    bool isValueEmpty = true;
+                                    // Safely get value from DirectInputValues
+                                    if (customBlockProgram1.ProgramStructure.DirectInputValues.TryGetValue(input.Id, out var directValue))
+                                    {
+                                        isValueEmpty = string.IsNullOrEmpty(directValue?.ToString());
+                                    }
+
+                                    bool isInputConnectedToProgramInput = customBlockProgram1.ProgramStructure.InputValues.ContainsKey(input.Id);
+
+                                    bool isInputConnectedToAnotherBlock = false;
+
+                                    // Check if programBlock.Inputs has a value at the same index
+                                    if (programBlock.Inputs != null && index < programBlock.Inputs.Count && programBlock.Inputs[index] != Guid.Empty)
+                                    {
+                                        isInputConnectedToAnotherBlock = true;
+                                    }
+
+                                    // Show the input field if:
+                                    // 1. It's in DirectInputValues and its value is not empty
+                                    // 2. It's not connected to another block
+                                    // 3. It's not connected to a program input
+                                    if ((isInputInDirectInputs && !isValueEmpty) || (!isInputConnectedToAnotherBlock && !isInputConnectedToProgramInput))
+                                    {
+                                        <label class="text-gray-200">@input.Name:</label>
+
+                                        // If the input doesn't exist in DirectInputValues, initialize it
+                                        if (!isInputInDirectInputs)
+                                        {
+                                            customBlockProgram1.ProgramStructure.DirectInputValues[input.Id] = "";
+                                        }
+                                        else
+                                        {
+                                            Console.WriteLine("Direct input value: " + customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]);
+                                        }
+
+                                        <!-- Styling the text input for dark mode using Tailwind -->
+                                        <input type="text"
+                                               value="@customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]?.ToString()"
+                                        @oninput="eventArgs => HandleInput(eventArgs, input.Id)"
+                                               class="bg-gray-800 text-gray-200 border border-gray-700 rounded p-2 w-full mt-2" />
+                                    }
+                                }
+                            </div>
+                        }
+
+                        <!-- You can similarly add UI for Outputs and other properties -->
+                    </div>
+                }
+                @if (SelectedDetail is Variable variable)
+                {
+                    <div class="p-4">
+                        <label>Name:</label>
+                        <input type="text" value="@variable.Name" class="border rounded p-2 w-full" />
+
+                        <label>Description:</label>
+                        <textarea class="border rounded p-2 w-full mt-2">@variable.Description</textarea>
+
+                        <!-- Variable's type, isList and other properties can also be added for editing -->
+                    </div>
+                }
+            </div>
+            <div class="no-thing p-4">
+                <!-- not sure yet -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<ContextMenu OnMenuItemClick="AddBlockToWhiteboard" />
+
+<style>
+    .whiteboard {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(90deg, rgba(0,0,0,0.1) 2px, transparent 2px), linear-gradient(rgba(0,0,0,0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+        background-size: calc(100px * @zoomvalue) calc(100px * @zoomvalue), calc(100px * @zoomvalue) calc(100px * @zoomvalue), calc(25px * @zoomvalue) calc(25px * @zoomvalue), calc(25px * @zoomvalue) calc(25px * @zoomvalue);
+        overflow: hidden;
+        cursor: move;
+    }
+
+    .node {
+        min-width: 150px;
+        max-width: 300px;
+        min-height: 80px;
+        border: 0px solid #666;
+        background-color: transparent;
+        position: absolute;
+        display: flex;
+        flex-direction: column;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        border-radius: 10px;
+        z-index: 1;
+    }
+
+
+    .top-part {
+        width: 100%;
+        height: 20%;
+        border-top-left-radius: 10px; /* top left corner */
+        border-top-right-radius: 10px; /* top right corner */
+    }
+
+    .main-part {
+        flex-grow: 1;
+        display: flex;
+        flex-direction: row;
+        border-bottom-right-radius: 10px; /* bottom right corner */
+        border-bottom-left-radius: 10px; /* bottom left corner */
+    }
+
+    .left-part {
+        width: 50%;
+        border-bottom-left-radius: 10px;  /* bottom left corner */
+    }
+
+    .right-part {
+        /* Style for right part */
+        width: 50%; /* Adjust as needed */
+        border-bottom-right-radius: 10px; /* bottom right corner */
+    }
+
+    .editor-layout {
+        display: flex;
+        flex-direction: column;
+        height: 90vh;
+        overflow: hidden;
+    }
+
+    .left-side,
+    .middle-content,
+    .right-side {
+        height: 100%;
+        overflow: hidden;
+@*        position: relative;*@
+    }
+
+    .resizable-y::after,
+    .resizable-x::after {
+        content: "";
+        position: absolute;
+        z-index: 1;
+        background: #4a5568;
+        cursor: ns-resize;
+    }
+
+    .resizable-y::after {
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: 2px;
+    }
+
+    .resizable-x::after {
+        right: 0;
+        bottom: 0;
+        width: 2px;
+        height: 100%;
+        cursor: ew-resize;
+    }
+
+    .resizable-x, .resizable-y {
+        box-sizing: border-box;
+    }
+
+    .middle-content {
+        display: flex;
+        flex-direction: column;
+    }
+
+/*    #middle-content {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }*/
+
+    #error-shower {
+        width: 100%;
+        max-height: 100px;
+        margin-top: auto;
+        overflow: hidden;
+    }
+
+    #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+    }
+
+    .shape-trigger {
+        width: 0;
+        height: 0;
+        border-top: 7px solid transparent;
+        border-bottom: 7px solid transparent;
+        border-left: 14px solid gray; 
+        margin: 3px;
+    }
+
+
+    .shape-circle {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        margin: 3px;
+    }
+
+    .shape-square {
+        width: 15px;
+        height: 15px;
+        margin: 3px;
+    }
+
+    .color-string {
+        background-color: #008000; /* Green */
+    }
+
+    .color-picture {
+        background-color: #0000ff; /* ??? */
+    }
+
+    .color-number {
+        background-color: #ffa500; /* light blue */
+    }
+
+    .color-boolean {
+        background-color: #f00; /* red */
+    }
+
+    .color-audio {
+        background-color: #800080; /* Purple */
+    }
+
+    .color-object {
+        background-color: #f5f5dc; /* Beige */
+    }
+
+    .color-default {
+        background-color: #000000; /* Black */
+    }
+
+    .small-font {
+        font-size: 12px;
+        margin: 3px;
+    }
+
+    .d-flex {
+        display: flex;
+    }
+
+    .node-input{
+        float: left;
+        margin-left: 0px;
+    }
+
+    .node-output{
+        float: right;
+        margin-right: 0px;
+    }
+
+
+</style>
+
+@code {
+    [CascadingParameter(Name = "AP")]
+    public ProgramObject APO { get; set; }
+
+    private int _currentHistoryIndex = -1;
+    private const int MaxHistoryLength = 30; // Adjust this value as per your needs
+    private ProgramObject _localProgram;
+    public float zoomvalue { get; set; } = 1;
+    public object SelectedDetail { get; set; }
+
+    public Output SelectedOutput { get; set; }
+
+    public Tuple<double, double> LastMouseLocation { get; set; } = new Tuple<double, double>(0, 0);
+
+    //modals
+    private ExacuteProgramNobtn epnb { get; set; }
+    private AddInput api { get; set; }
+    private AddOutput apo { get; set; }
+
+
+    public ProgramObject localProgram
+    {
+        get { return _localProgram; }
+        set
+        {
+            //change this if it dont always add to history, by that i mean remove if
+            if (value != _localProgram)
+            {
+                _localProgram = value;
+                //AddToHistory(value);
+            }
+        }
+    }
+
+    public List<ProgramObject> History { get; set; } = new List<ProgramObject>();
+
+    public List<string> Errors { get; set; } = new List<string>();
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JSRuntime.InvokeVoidAsync("initResizablePanels");
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
+            if (localProgram is CustomProgram customBlock)
+            {
+                await JSRuntime.InvokeVoidAsync("createInfiniteCanvas", DotNetObjectReference.Create(this), customBlock.ProgramStructure.CameraPos.Item1, customBlock.ProgramStructure.CameraPos.Item2);
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                await JSRuntime.InvokeVoidAsync("createInfiniteCanvas", DotNetObjectReference.Create(this), customBlockProgram.ProgramStructure.CameraPos.Item1, customBlockProgram.ProgramStructure.CameraPos.Item2);
+            }
+
+            if (localProgram is CustomProgram customBlock2)
+            {
+                zoomvalue = customBlock2.ProgramStructure.zoom;
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram2)
+            {
+                zoomvalue = customBlockProgram2.ProgramStructure.zoom;
+            }
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", zoomvalue);
+            await JSRuntime.InvokeVoidAsync("initializeContextMenu");
+
+            AddToHistory(localProgram);
+            StateHasChanged();
+        }
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (APO != null)
+        {
+            localProgram = APO;
+
+            if (localProgram is CustomProgram  customProgram)
+            {
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+                JSRuntime.InvokeVoidAsync("updateCameraPos", customProgram.ProgramStructure.CameraPos.Item1, customProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
+                JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customProgram.ProgramStructure.zoom);
+                zoomvalue = customProgram.ProgramStructure.zoom;
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
+            }
+            else if(localProgram is CustomBlockProgram customBlockProgram)
+            {
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+                JSRuntime.InvokeVoidAsync("updateCameraPos", customBlockProgram.ProgramStructure.CameraPos.Item1, customBlockProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
+                JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customBlockProgram.ProgramStructure.zoom);
+                zoomvalue = customBlockProgram.ProgramStructure.zoom;
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
+            }
+
+            if (localProgram is CustomProgram customProgram3)
+            {
+                await DrawConnections(customProgram3.ProgramStructure);
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram3)
+            {
+                await DrawConnections(customBlockProgram3.ProgramStructure);
+            }
+        }
+        else
+        {
+            // handle null APO, e.g., initialize it to a default value or throw an exception
+        }
+
+        StateHasChanged();
+        await base.OnParametersSetAsync();
+    }
+
+    private async Task DrawConnections(ProgramStructure programStructure)
+    {
+        foreach (var block in programStructure.ProgramBlocks)
+        {
+            // Draw connections for block inputs
+            if (block.Inputs != null)
+            {
+                for (int i = 0; i < block.Inputs.Count; i++)
+                {
+                    var output = block.Inputs[i];
+                    var input = block.Block.Inputs[i];
+
+                    if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
+                    {
+                        //Console.WriteLine("---------------------");
+                        //Console.WriteLine($"Index: {i}, Value: {output}");
+                        //Console.WriteLine($"Index: {i}, Value: {input.Id}");
+                        //Console.WriteLine("---------------------");
+
+                        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
+                    }
+                }
+            }
+        }
+
+        //Connects the end plss
+        foreach (var input in programStructure.ProgramEnd)
+        {
+            if (programStructure.ProgramEndConnections.TryGetValue(input.Id, out Guid outputId))
+            {
+                //Console.WriteLine("---------------------");
+                //Console.WriteLine($"Input Id: {input.Id}");
+                //Console.WriteLine($"Connected Output Id: {outputId}");
+                //Console.WriteLine("---------------------");
+
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", outputId, input.Id, GetLineColor(input.Type.ToString()));
+            }
+        }
+    }
+
+    //Whiteboard logic
+    private async Task ZoomIn()
+    {
+        if (zoomvalue < 1.8)
+        {
+            zoomvalue = zoomvalue + 0.1f;
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", zoomvalue);
+            if (localProgram is CustomProgram customBlock)
+            {
+                customBlock.ProgramStructure.zoom = zoomvalue;
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                customBlockProgram.ProgramStructure.zoom = zoomvalue;
+            }
+            Console.WriteLine(zoomvalue);
+        }
+    }
+
+    private async Task ZoomOut()
+    {
+        if (zoomvalue > 0.2)
+        {
+            zoomvalue = zoomvalue - 0.1f;
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", zoomvalue);
+            if (localProgram is CustomProgram customBlock)
+            {
+                customBlock.ProgramStructure.zoom = zoomvalue;
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                customBlockProgram.ProgramStructure.zoom = zoomvalue;
+            }
+            Console.WriteLine(zoomvalue);
+        }
+    }
+
+    private async Task ShowContextMenu(MouseEventArgs e)
+    {
+        await JSRuntime.InvokeVoidAsync("showContextMenu", DotNetObjectReference.Create(this), e.ClientX, e.ClientY);
+    }
+
+    private async void AddBlockToWhiteboard(Item item)
+    {
+        Console.WriteLine($"{item.Name} was clicked");
+        if (localProgram is CustomProgram customProgram)
+        {
+            ProgramBlock programBlock = new ProgramBlock();
+
+            // Create a new instance of the block type
+            programBlock.Block = (Block)Activator.CreateInstance(item.block.GetType());
+
+            // Generate new GUIDs for inputs and outputs.
+            foreach (var input in programBlock.Block.Inputs)
+            {
+                input.Id = Guid.NewGuid();
+            }
+
+            foreach (var output in programBlock.Block.Outputs)
+            {
+                output.Id = Guid.NewGuid();
+            }
+
+            programBlock.Id = Guid.NewGuid();
+            customProgram.ProgramStructure.AddProgramBlock(programBlock);
+
+            //await JSRuntime.InvokeVoidAsync("initResizablePanels");
+            //await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
+            await UpdateNodeLocation(programBlock.Id.ToString(), (int)LastMouseLocation.Item1, (int)LastMouseLocation.Item2);
+
+            await Task.Delay(10); // just temporary   alltså glöm ej bort men fattar ej hur fix
+
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addNode", programBlock.Id);
+        }
+        else if (localProgram is CustomBlockProgram customBlockProgram)
+        {
+            ProgramBlock programBlock = new ProgramBlock();
+
+            // Create a new instance of the block type
+            programBlock.Block = (Block)Activator.CreateInstance(item.block.GetType());
+
+            // Generate new GUIDs for inputs and outputs.
+            foreach (var input in programBlock.Block.Inputs)
+            {
+                input.Id = Guid.NewGuid();
+            }
+
+            foreach (var output in programBlock.Block.Outputs)
+            {
+                output.Id = Guid.NewGuid();
+            }
+
+            programBlock.Id = Guid.NewGuid();
+            customBlockProgram.ProgramStructure.AddProgramBlock(programBlock);
+
+            //await JSRuntime.InvokeVoidAsync("initResizablePanels");
+            //await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
+            await UpdateNodeLocation(programBlock.Id.ToString(), (int)LastMouseLocation.Item1, (int)LastMouseLocation.Item2);
+
+            await Task.Delay(10); // just temporary   alltså glöm ej bort men fattar ej hur fix
+
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addNode", programBlock.Id);
+        }
+        StateHasChanged();
+    }
+
+    public async void SelectOutput(Output output)
+    {
+        SelectedOutput = output;
+        Console.WriteLine("Selected ouput is: " + output.Id);
+    }
+
+    public async void TryConnect(Input input)
+    {
+        if (SelectedOutput != null)
+        {
+            Console.WriteLine("input id: " + input.Id);
+            if (localProgram is CustomProgram customProgram)
+            {
+                if (customProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
+                {
+                    await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
+                    SelectedOutput = null;
+                    Console.WriteLine("Connection Succeded");
+                }
+                else
+                {
+                    Console.WriteLine("connection failed");
+                }
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                if (customBlockProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
+                {
+                    await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
+                    SelectedOutput = null;
+                    Console.WriteLine("Connection Succeded");
+                }
+                else
+                {
+                    Console.WriteLine("connection failed");
+                }
+            }
+        }
+    }
+
+    public void SelectNode(ProgramBlock programBlock)
+    {
+        SelectedDetail = programBlock;
+        Console.WriteLine(programBlock.Block.Name);
+    }
+
+    string GetShape(string type)
+    {
+        switch (type)
+        {
+            case "Trigger":
+                return "shape-trigger";
+            case "String":
+            case "Picture":
+            case "Number":
+            case "Boolean":
+            case "Audio":
+            case "Object":
+                return "shape-circle";
+            default:
+                return "shape-square";
+        }
+    }
+
+    string GetColor(string type)
+    {
+        switch (type)
+        {
+            case "Trigger":
+                return "";
+            case "String":
+                return "color-string";
+            case "Picture":
+                return "color-picture";
+            case "Number":
+                return "color-number";
+            case "Boolean":
+                return "color-boolean";
+            case "Audio":
+                return "color-audio";
+            case "Object":
+                return "color-object";
+            default:
+                return "color-default";
+        }
+    }
+
+    string GetLineColor(string type)
+    {
+        switch (type)
+        {
+            case "Trigger":
+                return "#808080"; // Grey
+            case "String":
+                return "#008000"; // Green
+            case "Picture":
+                return "#0000ff"; // Blue
+            case "Number":
+                return "#ffa500"; // Light Blue
+            case "Boolean":
+                return "#f00"; // Red
+            case "Audio":
+                return "#800080"; // Purple
+            case "Object":
+                return "#f5f5dc"; // Beige
+            default:
+                return "#000000"; // Black (Default)
+        }
+    }
+
+    void HandleInput(ChangeEventArgs e, Guid inputId)
+    {
+        if(localProgram is CustomProgram customProgram)
+        {
+            customProgram.ProgramStructure.DirectInputValues[inputId] = e.Value?.ToString();
+        }
+        else if(localProgram is CustomBlockProgram customBlockProgram)
+        {
+            customBlockProgram.ProgramStructure.DirectInputValues[inputId] = e.Value?.ToString();
+        }
+    }
+
+    //Navbar logic
+    private async Task SaveProgram()
+    {
+        APO = localProgram;
+        if(localProgram is CustomProgram customProgram)
+        {
+            if(customProgram.ProgramStructure.ProgramBlocks.Count() != 0)
+            {
+                await UpdateDb(localProgram);
+            }
+            else
+            {
+                //Dont save if there are no blocks
+
+            }
+        }
+        else if (localProgram is CustomBlockProgram customBlockProgram)
+        {
+            if (customBlockProgram.ProgramStructure.ProgramBlocks != null)
+            {
+                await UpdateDb(localProgram);
+            }
+            else
+            {
+                //Dont save if there are no blocks
+            }
+        }
+    }
+
+    private async Task ExecuteProgram()
+    {
+        var errors = CheckErrors(localProgram);
+
+        if (errors.Count > 0)
+        {
+            Errors = errors;
+        }
+        else
+        {
+            //Also Exacute program after
+            if (localProgram is CustomProgram customProgram)
+            {
+                if (customProgram.ProgramStructure.ProgramBlocks.Count() != 0)
+                {
+                    await UpdateDb(localProgram);
+                    epnb.Open();
+                }
+                else
+                {
+                    //Dont run if there are no blocks
+
+                }
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                if (customBlockProgram.ProgramStructure.ProgramBlocks != null)
+                {
+                    await UpdateDb(localProgram);
+                    epnb.Open();
+                }
+                else
+                {
+                    //Dont run if there are no blocks
+                }
+            }
+        }
+    }
+
+    private async Task BuildProgram()
+    {
+        if (localProgram is CustomProgram customProgram)
+        {
+            if (customProgram.ProgramStructure.ProgramBlocks.Count() != 0)
+            {
+                var errors = CheckErrors(localProgram);
+
+                if (errors.Count > 0)
+                {
+                    Errors = errors;
+                }
+                else
+                {
+                    await UpdateDb(localProgram);
+                }
+            }
+            else
+            {
+                //Dont save if there are no blocks
+
+            }
+        }
+        else if (localProgram is CustomBlockProgram customBlockProgram)
+        {
+            if (customBlockProgram.ProgramStructure.ProgramBlocks != null)
+            {
+                var errors = CheckErrors(localProgram);
+
+                if (errors.Count > 0)
+                {
+                    Errors = errors;
+                }
+                else
+                {
+                    await UpdateDb(localProgram);
+                }
+            }
+            else
+            {
+                //Dont save if there are no blocks
+            }
+        }
+    }
+
+    private async Task UndoAction()
+    {
+        if (_currentHistoryIndex > 0) // make sure we don't go past the start of the history
+        {
+            _currentHistoryIndex--;
+            localProgram = Clone(History[_currentHistoryIndex]);
+            APO = localProgram;
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+            if (localProgram is CustomProgram customProgram)
+            {
+                DrawConnections(customProgram.ProgramStructure);
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                DrawConnections(customBlockProgram.ProgramStructure);
+            }
+        }
+        Console.WriteLine("History index: " + _currentHistoryIndex);
+
+        StateHasChanged();
+    }
+
+    private async Task RedoAction()
+    {
+        if (_currentHistoryIndex < History.Count - 1) // make sure we don't go past the end of the history
+        {
+            _currentHistoryIndex++;
+            localProgram = Clone(History[_currentHistoryIndex]);
+            APO = localProgram;
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+            if (localProgram is CustomProgram customProgram)
+            {
+                DrawConnections(customProgram.ProgramStructure);
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                DrawConnections(customBlockProgram.ProgramStructure);
+            }
+        }
+        Console.WriteLine("History index: " + _currentHistoryIndex);
+
+        StateHasChanged();
+    }
+
+    //Block logic
+    //private void HandleButtonSelection(BlockSelector.ButtonItem button)
+    //{
+    //    // Handle the selected button
+    //    Console.WriteLine($"Selected button: {button.Text}");
+    //}
+
+    //Logic stuff
+    private void Openapi()
+    {
+        api.Open();
+    }
+
+    private void Openapo()
+    {
+        apo.Open();
+    }
+
+    private void AddProgramInput(Output newOutput)
+    {
+        // Clone newOutput using Newtonsoft.Json
+        var clonedOutput = JsonConvert.DeserializeObject<Output>(JsonConvert.SerializeObject(newOutput));
+
+        if (localProgram is CustomProgram customProgram)
+        {
+            customProgram.ProgramStructure.AddProgramInput(clonedOutput);
+        }
+        else if (localProgram is CustomBlockProgram customBlockProgram)
+        {
+            customBlockProgram.ProgramStructure.AddProgramInput(clonedOutput);
+        }
+    }
+
+    private void AddProgramOutput(Input newInput)
+    {
+        // Clone newOutput using Newtonsoft.Json
+        var clonedInput = JsonConvert.DeserializeObject<Input>(JsonConvert.SerializeObject(newInput));
+
+        if (localProgram is CustomProgram customProgram)
+        {
+            customProgram.ProgramStructure.AddProgramOutput(clonedInput);
+        }
+        else if (localProgram is CustomBlockProgram customBlockProgram)
+        {
+            customBlockProgram.ProgramStructure.AddProgramOutput(clonedInput);
+        }
+    }
+
+    [JSInvokable]
+    public Task UpdateNodeLocation(string nodeId, int newX, int newY)
+    {
+        if(nodeId == "Input") 
+        {
+            if (localProgram is CustomProgram customProgram)
+            {
+                customProgram.ProgramStructure.ProgramStartLocation = new Tuple<int, int>(newX, newY);
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                customBlockProgram.ProgramStructure.ProgramStartLocation = new Tuple<int, int>(newX, newY);
+            }
+        }
+        else if(nodeId == "Output")
+        {
+            if (localProgram is CustomProgram customProgram)
+            {
+                customProgram.ProgramStructure.ProgramEndLocation = new Tuple<int, int>(newX, newY);
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                customBlockProgram.ProgramStructure.ProgramEndLocation = new Tuple<int, int>(newX, newY);
+            }
+        }
+        else
+        {
+            if (localProgram is CustomProgram customProgram)
+            {
+                ProgramBlock targetBlock = customProgram.ProgramStructure.ProgramBlocks.Find(block => block.Id.ToString() == nodeId);
+                if (targetBlock != null)
+                {
+                    targetBlock.X = newX;
+                    targetBlock.Y = newY;
+                }
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                ProgramBlock targetBlock = customBlockProgram.ProgramStructure.ProgramBlocks.Find(block => block.Id.ToString() == nodeId);
+                if (targetBlock != null)
+                {
+                    targetBlock.X = newX;
+                    targetBlock.Y = newY;
+                }
+            }
+        }
+
+
+        AddToHistory(localProgram);
+        Console.WriteLine("History index: " + _currentHistoryIndex);
+        Console.WriteLine(History.ToList().Count + " Objects in history");
+        // Trigger UI update
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public Task UpdateCameraPosition(double newX, double newY)
+    {
+        Console.WriteLine($"UpdateCameraPosition called with {newX}, {newY}");
+        try
+        {
+            if (localProgram is CustomProgram customBlock)
+            {
+                customBlock.ProgramStructure.CameraPos = new Tuple<double, double>(newX, newY);
+            }
+            else if (localProgram is CustomBlockProgram customBlockProgram)
+            {
+                customBlockProgram.ProgramStructure.CameraPos = new Tuple<double, double>(newX, newY);
+            }
+
+            StateHasChanged();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+        Console.WriteLine("UpdateCameraPosition execution finished");
+
+        return Task.CompletedTask;
+    }
+
+    [JSInvokable]
+    public void SetBlockSpawn(double newX, double newY)
+    {
+        LastMouseLocation = new Tuple<double, double>(newX, newY);
+        Console.WriteLine(newX + " " + newY);
+    }
+
+    private async Task UpdateDb(ProgramObject Program)
+    {
+        if (Program != null)
+        {
+            HttpResponseMessage response = null;
+            try
+            {
+                var settings = new JsonSerializerSettings
+                {
+                        TypeNameHandling = TypeNameHandling.Auto,
+                        Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                        ContractResolver = new DefaultContractResolver
+                        {
+                            NamingStrategy = new CamelCaseNamingStrategy()
+                        },
+                        ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                        ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
+
+                if (Program is CustomProgram customProgram)
+                {
+                    var json = JsonConvert.SerializeObject(customProgram, settings);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    response = await Http.PutAsync($"programs/{customProgram.Id}", content);
+                }
+                else if (Program is CustomBlockProgram customBlockProgram)
+                {
+                    var json = JsonConvert.SerializeObject(customBlockProgram, settings);
+                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                    response = await Http.PutAsync($"customblocks/{customBlockProgram.Id}", content);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("An error occurred while sending the request: " + ex.ToString());
+            }
+
+            if (response == null || !response.IsSuccessStatusCode)
+            {
+                string errorContent = await response.Content.ReadAsStringAsync();
+                throw new Exception($"Failed to update program with ID {Program.Id}. Response: {errorContent}. Code {response.StatusCode}");
+            }
+        }
+        else
+        {
+            throw new Exception($"No active program");
+        }
+    }
+
+    private List<string> CheckErrors(ProgramObject Program)
+    {
+        if (Program == null)
+        {
+            throw new ArgumentNullException(nameof(Program), "No active program");
+        }
+
+        try
+        {
+            switch (Program)
+            {
+                case CustomProgram customProgram:
+                    return customProgram.ProgramStructure.CheckErrors();
+                case CustomBlockProgram customBlockProgram:
+                    return customBlockProgram.ProgramStructure.CheckErrors();
+                default:
+                    return new List<string> { $"What type is program? This is impossible. Program type: {Program.GetType().Name}" };
+            }
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error while checking errors in the program. Inner Exception: {ex.Message}", ex);
+        }
+    }
+
+    private void AddToHistory(ProgramObject program)
+    {
+        // Clone the program before adding it to the history
+        var clonedProgram = Clone(program);
+
+        // If the current history index is not at the end, remove all entries after the current index
+        if (_currentHistoryIndex < History.Count - 1)
+        {
+            History.RemoveRange(_currentHistoryIndex + 1, History.Count - _currentHistoryIndex - 1);
+        }
+
+        // Add the cloned program to the history
+        History.Add(clonedProgram);
+        _currentHistoryIndex = History.Count - 1; // update the current index to the end of the history
+
+        if (clonedProgram is CustomProgram customBlock)
+        {
+            Console.WriteLine("Program start location in clone " + customBlock.ProgramStructure.ProgramStartLocation.Item1 + customBlock.ProgramStructure.ProgramStartLocation.Item2);
+        }
+
+        // If the history exceeds MaxHistoryLength, remove the oldest entry
+        if (History.Count > MaxHistoryLength)
+        {
+            History.RemoveAt(0);
+            _currentHistoryIndex--; // don't forget to adjust the current index accordingly
+        }
+    }
+
+    public ProgramObject Clone(ProgramObject program)
+    {
+        try
+        {
+            string jsonString = "";
+            var settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                    },
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
+
+            if (program is CustomProgram customProgram)
+            {
+                //Console.WriteLine("-------------------------Start");
+                //StackTrace stackTrace = new StackTrace();
+                //Console.WriteLine(stackTrace.GetFrame(1).GetMethod().Name);
+                //Console.WriteLine("-------------------------");
+                //foreach(var x in customProgram.ProgramStructure.ProgramBlocks)
+                //{
+                //    foreach(var y in x.Block.Inputs)
+                //    {
+                //        Console.WriteLine(y.Name);
+                //    }
+                //}
+
+                jsonString = JsonConvert.SerializeObject(customProgram, settings);
+                //Console.WriteLine("-------------------------");
+                var retur = JsonConvert.DeserializeObject<CustomProgram>(jsonString, settings);
+
+                //foreach (var x in retur.ProgramStructure.ProgramBlocks)
+                //{
+                //    foreach (var y in x.Block.Inputs)
+                //    {
+                //        Console.WriteLine(y.Name);
+                //    }
+                //}
+                //Console.WriteLine("-------------------------End");
+                return retur;
+            }
+            else if (program is CustomBlockProgram customBlockProgram)
+            {
+                jsonString = JsonConvert.SerializeObject(customBlockProgram, settings);
+
+                var retur = JsonConvert.DeserializeObject<CustomBlockProgram>(jsonString, settings);
+                return retur;
+            }
+        }
+        catch (JsonSerializationException jsonException)
+        {
+            // Handle or log the exception as needed.
+            Console.WriteLine($"An error occurred during serialization or deserialization: {jsonException.Message}");
+        }
+        catch (Exception ex)
+        {
+            // Handle or log the generic exception as needed.
+            Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+        }
+
+        return null;
+    }
+}

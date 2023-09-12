@@ -1,0 +1,105 @@
+﻿@page
+@model LoginModel
+@using System.Text.RegularExpressions
+@using System.ComponentModel.DataAnnotations
+
+<div class="row start-1">
+    <div class="col-md-4 loginPanel">
+        <h1 class="" style="display: flex; align-items: center; justify-content: center; color: white;">Login</h1>
+        <section>
+            <form id="account" method="post">
+                <hr />
+                <div asp-validation-summary="ModelOnly" class="text-danger" role="alert"></div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
+                    <label asp-for="Input.Email" class="form-label">Email</label>
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+                <div class="form-floating mb-3">
+                    <input asp-for="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="password" />
+                    <label asp-for="Input.Password" class="form-label">Password</label>
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+                <div class="checkbox mb-3">
+                    <label asp-for="Input.RememberMe" class="form-label" style="color: white;">
+                        <input class="form-check-input" asp-for="Input.RememberMe" />
+                        @Html.DisplayNameFor(m => m.Input.RememberMe)
+                    </label>
+                </div>
+                <div>
+                    <button id="login-submit" type="submit" style="background-color: #2ea44f;" class="w-100 btn btn-lg btn-primary">Log in</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+
+<style>
+    /* Set the background of the container to a dark shade */
+    .row.start-1 {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 85vh; /* This will take the full height of the viewport */
+        background-color: #2b2b2b; /* Dark background for the whole container */
+    }
+
+    /* Adjust the styling of the login panel */
+    .loginPanel {
+        background-color: #353535; /* Darker background for the login panel */
+        padding: 20px;
+        border-radius: 8px;
+    }
+
+    /* Style for the header text */
+    h1 {
+        color: #eaeaea; /* Lighter text color for contrast */
+    }
+
+    /* Checkbox label color */
+    .checkbox .form-label {
+        color: #eaeaea; /* Lighter text color for contrast */
+    }
+
+    /* Button styling */
+    #login-submit {
+        background-color: #2ea44f;
+        border: none;
+    }
+
+        #login-submit:hover {
+            background-color: #249739; /* A slightly darker green for hover */
+        }
+
+    .form-control {
+        background-color: #2b2b2b;
+        color: #eaeaea;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 15px;
+        outline: none;
+    }
+
+        .form-control:focus {
+            background-color: #2b2b2b;
+            box-shadow: none;
+            color: #eaeaea;
+            border: none !important;
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background-color: #2b2b2b;
+            opacity: 0.7;
+            border: none !important;
+            /*          Gives a slight faded effect to indicate it's disabled color: #eaeaea; */
+        }
+
+    .form-label {
+        color: #eaeaea;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
