@@ -243,6 +243,18 @@
     //Make this update when loggin in and other stuff and make it api     this might work
     protected override async Task OnInitializedAsync()
     {
+        AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        await UpdatePrograms();
+    }
+
+    private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        AuthState = task.Result;
+        UpdatePrograms();
+    }
+
+    private async Task UpdatePrograms()
+    {
         AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = AuthState.User;
         if (user.Identity.IsAuthenticated)
@@ -269,11 +281,7 @@
                             };
                         var userPrograms = JsonConvert.DeserializeObject<List<ProgramObject>>(responseContent, settings);
                         EAPs = userPrograms.ToList();
-                        //varför??
-                        //if (EAPs.Any())
-                        //{
-                        //    AP = EAPs.First();
-                        //}
+                        Console.WriteLine(EAPs.Count);   // this happens but it dont show in the pagese under it just when the page is changed 
                     }
                     else
                     {
