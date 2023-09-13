@@ -4,14 +4,16 @@
 @using AiDesigner.Shared.Data;
 @using Newtonsoft.Json;
 @using NodeBaseApi.Version2;
+@using System.Linq;
 @using AiDesigner.Client.Modals;
 @using AiDesigner.Client.Components;
 @using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
 @inject HttpClient Http
+@inject AuthenticationStateProvider AuthenticationStateProvider;
 @using System.Net.Http.Json
 @using System.Text;
 @using System.Text.Json;
+@attribute [Authorize]
 
 <PageTitle>Library</PageTitle>
 
@@ -73,13 +75,14 @@
 </div>
 
 <div class="flex flex-wrap gap-4 mt-8">
-    @foreach (var eap in EAPs)
+    @if (workshopArticles != null)
     {
-        if (eap is CustomBlockProgram customBlockProgram)
+        @foreach (var article in workshopArticles)
         {
-            <button class="w-64 h-32 p-4 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center">
-                <h3 class="dark:text-white">@eap.Name</h3>
-                <p class="rounded dark:text-white">@eap.Description</p>
+            <button class="w-64 h-32 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center">
+                <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 120px; height: 120px; object-fit: cover; border-radius: 4px; margin-right: 4px;" />
+                <h3 class="dark:text-white">@article.Name</h3>
+                <p class="rounded dark:text-white">@article.Description</p>
             </button>
         }
     }
@@ -97,9 +100,61 @@
     [CascadingParameter(Name = "NewAps")]
     protected EventCallback<ProgramObject> NewAps { get; set; }
 
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
     //Vars For modal
     public CustomProgram NewProgram { get; set; } = new CustomProgram();
     public CustomBlockProgram NewBlockProgram { get; set; } = new CustomBlockProgram();
+
+    public List<WorkshopArticle> workshopArticles { get; set; }
+
+    public bool Hasloaded = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Hasloaded = false;
+        await UpdateVault();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        await UpdateVault();
+    }
+
+    public async Task UpdateVault()
+    {
+        if (CascAuth?.User != null && !Hasloaded)
+        {
+            Hasloaded = true;
+            var user = CascAuth.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                if (Guid.TryParse(userIdClaim, out Guid userId))
+                {
+                    try
+                    {
+                        var response = await Http.GetAsync($"Workshop/get-articles-connected-to-user/{userId}");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Deserialize the response to the expected data model.
+                            workshopArticles = (await response.Content.ReadFromJsonAsync<IEnumerable<WorkshopArticle>>()).ToList();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"The call failed with status code {response.StatusCode}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Request exception: {ex.Message}");
+                    }
+                }
+            }
+        }
+    }
 
     bool isSingleClick = true;
     private async Task HandleButtonClick(ProgramObject eap)
