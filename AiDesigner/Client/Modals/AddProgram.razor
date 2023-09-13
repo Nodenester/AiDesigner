@@ -84,7 +84,10 @@
         NewProgram.ApiKey = Guid.NewGuid();
         NewProgram.Author = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
         NewProgram.AuthorName = user.Identity.Name;
-        NewProgram.ProgramStructure = new ProgramStructure();
+        if (NewProgram.ProgramStructure == null)
+        {
+            NewProgram.ProgramStructure = new ProgramStructure();
+        }
 
         var settings = new JsonSerializerSettings
             {

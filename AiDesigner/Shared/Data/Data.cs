@@ -19,7 +19,7 @@ namespace NodeBaseApi.Version2
         public string AuthorName { get; set; }
         public bool IsPublic { get; set; }
         public bool SupportsSessions { get; set; }
-        public byte[] Image { get; set; }
+        public byte[]? Image { get; set; }
     }
 
     public class CustomProgram : ProgramObject

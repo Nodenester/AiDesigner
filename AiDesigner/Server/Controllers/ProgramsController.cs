@@ -104,16 +104,37 @@ namespace NodeBaseApi.Controllers
 
         // GET api/programs/{id}
         [HttpGet("{id}")]
-        public async Task<ActionResult<ProgramObject>> GetProgram(Guid id)
+        public async Task<ActionResult<string>> GetProgram(Guid id)
         {
-            ProgramObject programObject = await _dbConnection.LoadProgramAsync(id);
-
-            if (programObject == null)
+            try
             {
-                return NotFound();
-            }
+                ProgramObject programObject = await _dbConnection.LoadProgramAsync(id);
 
-            return programObject;
+                var settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                    },
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
+
+                if (programObject == null)
+                {
+                    return NotFound();
+                }
+
+                var serializedUserPrograms = JsonConvert.SerializeObject(programObject, Formatting.Indented, settings);
+
+                return Ok(serializedUserPrograms);
+            }
+            catch (Exception ex) 
+            { 
+                return BadRequest(ex.Message);
+            }
         }
 
         // DELETE api/programs/{id}

@@ -96,32 +96,23 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    SELECT ProgramData, IsCustomBlock, Image
-                    FROM programs
+                    SELECT ProgramData, IsCustomBlock
+                    FROM Ludde.programs
                     WHERE Id = @Id;
                 ";
 
                 var result = await connection.QueryFirstOrDefaultAsync(query, new { Id = id });
 
-                if (result == null)
-                {
-                    return null;
-                }
-
                 string programDataJson = result.ProgramData;
-
-                byte[] image = result.Image;
 
                 if (result.IsCustomBlock)
                 {
                     var program = JsonConvert.DeserializeObject<CustomBlockProgram>(programDataJson, _jsonSerializerSettings);
-                    program.Image = image;
                     return program;
                 }
                 else
                 {
                     var program = JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings);
-                    program.Image = image;
                     return program;
                 }
             }

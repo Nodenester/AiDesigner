@@ -1,6 +1,7 @@
 ﻿@using Microsoft.AspNetCore.Authorization
 @using NodeBaseApi.Version2;
 @inject HttpClient Http;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
 @attribute [Authorize]
 
 <div class="flex justify-center items-center">
@@ -73,6 +74,9 @@
     [Parameter]
     public EventCallback<WorkshopArticle> OnSelectedArticle { get; set; }
 
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
     // Number of additional pages to show around the current page.
     private int PageRange { get; set; } = 2; // Change this value based on your requirements
 
@@ -91,17 +95,22 @@
 
     private async Task Addtovault(WorkshopArticle article)
     {
-        string requestUri = "Workshop/connect-article-to-user";
-        UserArticle userArticle = new UserArticle
-            {
-                ArticleId = article.Id,
-                UserId = article.AuthorId,
-                IsCreator = false,   //fix this  to tired now
-                Rating = 0,
-                Review = "",
-                IsFavorite = false
-            };
-        var response = await Http.PostAsJsonAsync(requestUri, userArticle);
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            string requestUri = "Workshop/connect-article-to-user";
+            UserArticle userArticle = new UserArticle
+                {
+                    ArticleId = article.Id,
+                    UserId = userId.ToString(),
+                    IsCreator = false,   //fix this  to tired now
+                    Rating = 0,
+                    Review = "",
+                    IsFavorite = false
+                };
+            var response = await Http.PostAsJsonAsync(requestUri, userArticle);
+        }
     }
 }
 
