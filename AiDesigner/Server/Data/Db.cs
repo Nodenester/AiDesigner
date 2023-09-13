@@ -449,7 +449,6 @@ namespace AiDesigner.Server.Data
             return await connection.QueryAsync<WorkshopArticle>(query, new { Start = start, End = end });
         }
 
-
         //Article handeling
         public async Task<string> SaveArticleAsync(WorkshopArticle article)
         {
@@ -508,6 +507,21 @@ namespace AiDesigner.Server.Data
             await connection.ExecuteAsync(query, new { Id = id });
         }
 
+        public async Task<IEnumerable<WorkshopArticle>> GetArticlesConnectedToUserAsync(string userId)
+        {
+            const string query = @"
+                SELECT a.*, u.IsCreator, u.Rating, u.Review, u.IsFavorite, AVG(ua.Rating) as AverageRating
+                FROM Ludde.Workshop_Article a
+                INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                LEFT JOIN Ludde.User_Article ua ON a.Id = ua.ArticleId
+                WHERE u.UserId = @UserId
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, u.IsCreator, u.Rating, u.Review, u.IsFavorite;
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<WorkshopArticle>(query, new { UserId = userId });
+        }
+
         //Article image handeling
         public async Task<string> InsertArticleImageAsync(ArticleImages articleImages)
         {
@@ -556,6 +570,19 @@ namespace AiDesigner.Server.Data
             return await connection.QueryAsync<ArticleImages>(query, new { ArticleId = articleId });
         }
 
+        public async Task ConnectArticleToUserAsync(UserArticle userArticle)
+        {
+            var query = @"
+                IF NOT EXISTS (SELECT 1 FROM Ludde.User_Article WHERE UserId = @UserId AND ArticleId = @ArticleId)
+                BEGIN
+                    INSERT INTO Ludde.User_Article (UserId, ArticleId, IsCreator, Rating, Review, IsFavorite)
+                    VALUES (@UserId, @ArticleId, @IsCreator, @Rating, @Review, @IsFavorite);
+                END
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(query, new { UserId = userArticle.UserId, ArticleId = userArticle.ArticleId, IsCreator = userArticle.IsCreator, Rating = userArticle.Rating, Review = userArticle.Review, IsFavorite = userArticle.IsFavorite });
+        }
     }
 }
  

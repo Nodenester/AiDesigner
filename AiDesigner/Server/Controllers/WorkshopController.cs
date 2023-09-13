@@ -166,12 +166,38 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
-        //Get Article images
         [HttpGet("article-images/{articleId}")]
         public async Task<IActionResult> GetArticleImages(string articleId)
         {
             var articleImages = await _dbConnection.GetArticleImagesAsync(articleId);
             return Ok(articleImages);
         }
+
+        [HttpPost("connect-article-to-user")]
+        public async Task<IActionResult> ConnectArticleToUser([FromBody] UserArticle userArticle)
+        {
+            await _dbConnection.ConnectArticleToUserAsync(userArticle);
+            return Ok();
+        }
+
+        [HttpGet("get-articles-connected-to-user/{userId}")]
+        public async Task<IActionResult> GetArticlesConnectedToUser([FromRoute] string userId)
+        {
+            try
+            {
+                var articles = await _dbConnection.GetArticlesConnectedToUserAsync(userId);
+                if (articles == null || !articles.Any())
+                {
+                    return NotFound("No articles found for this user.");
+                }
+                return Ok(articles);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., _logger.LogError(ex, "An error occurred while getting articles."));
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
     }
 }
