@@ -79,14 +79,34 @@
     {
         @foreach (var article in workshopArticles)
         {
-            <button class="w-64 h-32 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center">
-                <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 120px; height: 120px; object-fit: cover; border-radius: 4px; margin-right: 4px;" />
-                <h3 class="dark:text-white">@article.Name</h3>
-                <p class="rounded dark:text-white">@article.Description</p>
-            </button>
+            <div class="relative w-64 h-40 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center">
+                <!-- Remove Button -->
+                <button @onclick="(() => RemoveArticle(article.Id))" class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                    X
+                </button>
+
+                <!-- Image -->
+                <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 130px; height: 130px; object-fit: cover; border-radius: 4px;" />
+
+                <!-- Text and Clone Button -->
+                <div class="flex flex-col ml-4 flex-grow justify-between">
+                    <!-- Name -->
+                    <div class="self-start">
+                        <h3 class="dark:text-white">@article.Name</h3>
+                    </div>
+
+                    <!-- Clone Button -->
+                    <div class="self-end">
+                        <button @onclick="(() => CloneArticle(article.Id))" class="py-1 bg-green-500 text-white rounded" style="margin-right: 2rem; padding-left: 1.5rem; padding-right: 1.5rem; margin-top: 4rem;">
+                            Clone
+                        </button>
+                    </div>
+                </div>
+            </div>
         }
     }
 </div>
+
 
 @*Lägg till project som man fått från market och blocks*@
 
@@ -266,5 +286,45 @@
             throw new Exception($"No program found with ID matching {AP.Id}");
         }
     }
+
+    //Vault
+    private async Task RemoveArticle(string id)
+    {
+        try
+        {
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                var response = await Http.DeleteAsync($"Workshop/remove-user-article/{userId}/{id}");
+
+                Console.WriteLine("Article id: " + id + ", User id: " + userId);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Article removed successfully");
+                    workshopArticles.RemoveAll(article => article.Id == id);
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Log or display the error
+                    Console.WriteLine($"Failed to remove article connection. Status code: {response.StatusCode}");
+                }
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            // Log or display the error
+            Console.WriteLine($"Request error: {ex.Message}");
+        }
+    }
+
+
+    private async Task CloneArticle(string id)
+    {
+        // Code to clone the article
+    }
+
 
 }

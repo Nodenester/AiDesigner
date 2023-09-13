@@ -11,8 +11,6 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NodeBaseApi.Version2;
 
-
-
 namespace AiDesigner.Server.Controllers
 {
     [Authorize]
@@ -199,5 +197,42 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
+        [HttpPut("update-user-article")]
+        public async Task<IActionResult> UpdateUserArticle([FromBody] UserArticle userArticle)
+        {
+            try
+            {
+                await _dbConnection.UpdateUserArticleAsync(userArticle);
+                return Ok("Successfully updated.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., _logger.LogError(ex, "An error occurred while updating user-article."));
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        [HttpDelete("remove-user-article/{userId}/{articleId}")]
+        public async Task<IActionResult> RemoveUserArticle([FromRoute] string userId, [FromRoute] string articleId)
+        {
+            try
+            {
+                var result = await _dbConnection.RemoveUserArticleAsync(userId, articleId);
+                if (result == "Successfully Removed")
+                {
+                    return Ok("Successfully removed.");
+                }
+                else if (result == "Removal Failed")
+                {
+                    return NotFound("User-article relationship not found.");
+                }
+                return BadRequest("An unknown error occurred.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (e.g., _logger.LogError(ex, "An error occurred while removing user-article."));
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
     }
 }
