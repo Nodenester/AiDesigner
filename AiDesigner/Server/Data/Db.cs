@@ -583,6 +583,46 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, new { UserId = userArticle.UserId, ArticleId = userArticle.ArticleId, IsCreator = userArticle.IsCreator, Rating = userArticle.Rating, Review = userArticle.Review, IsFavorite = userArticle.IsFavorite });
         }
+
+        public async Task UpdateUserArticleAsync(UserArticle userArticle)
+        {
+            var query = @"
+                UPDATE Ludde.User_Article 
+                SET IsCreator = @IsCreator, Rating = @Rating, Review = @Review, IsFavorite = @IsFavorite
+                WHERE UserId = @UserId AND ArticleId = @ArticleId;
+            ";
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(query, userArticle);
+        }
+
+        public async Task<string> RemoveUserArticleAsync(string userId, string articleId)
+        {
+            var query = @"
+                DELETE FROM Ludde.User_Article 
+                WHERE UserId = @UserId AND ArticleId = @ArticleId;
+            ";
+
+            try
+            {
+                await using SqlConnection connection = new SqlConnection(_connectionString);
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    UserId = userId,
+                    ArticleId = articleId
+                };
+
+                int rowsAffected = await connection.ExecuteAsync(query, parameters);
+
+                return rowsAffected > 0 ? "Successfully Removed" : "Removal Failed";
+            }
+            catch (Exception ex)
+            {
+                return "An error occurred";
+            }
+        }
+
     }
 }
  
