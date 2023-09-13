@@ -123,6 +123,9 @@
     [Parameter]
     public WorkshopArticle SelectedArticle { get; set; }
 
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
         string requestUri = $"Workshop/article-images/{SelectedArticle.Id}";
@@ -145,17 +148,22 @@
 
     private async Task Addtovault()
     {
-        string requestUri = "Workshop/connect-article-to-user";
-        UserArticle userArticle = new UserArticle
-            {
-                ArticleId = SelectedArticle.Id,
-                UserId = SelectedArticle.AuthorId,
-                IsCreator = false,   //fix this  to tired now
-                Rating = 0,
-                Review = "",
-                IsFavorite = false
-    };
-        var response = await Http.PostAsJsonAsync(requestUri, userArticle);
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            string requestUri = "Workshop/connect-article-to-user";
+            UserArticle userArticle = new UserArticle
+                {
+                    ArticleId = SelectedArticle.Id,
+                    UserId = userId.ToString(),
+                    IsCreator = false,   //fix this  to tired now
+                    Rating = 0,
+                    Review = "",
+                    IsFavorite = false
+                };
+            var response = await Http.PostAsJsonAsync(requestUri, userArticle);
+        }
     }
 
     private void SetSelectedImage(int index)

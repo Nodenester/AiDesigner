@@ -3,6 +3,7 @@
 @inject NavigationManager NavigationManager
 @using AiDesigner.Shared.Data;
 @using Newtonsoft.Json;
+@using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2;
 @using System.Linq;
 @using AiDesigner.Client.Modals;
@@ -26,7 +27,7 @@
 <div style="display: flex; align-items: center; justify-content: space-between;">
     <h1 style="margin-right: 10px;">My projects</h1>
     <hr style="flex-grow: 1; margin: 0;">
-    <AiDesigner.Client.Modals.AddProgram CreateNew="CreateProgram"></AiDesigner.Client.Modals.AddProgram>
+    <AiDesigner.Client.Modals.AddProgram @ref="ap" CreateNew="CreateProgram"></AiDesigner.Client.Modals.AddProgram>
 </div>
 </CascadingValue>
 
@@ -50,7 +51,7 @@
     <div style="display: flex; align-items: center; justify-content: space-between;">
         <h1 style="margin-right: 10px;">My custom blocks</h1>
         <hr style="flex-grow: 1; margin: 0;">
-        <AiDesigner.Client.Modals.AddCustomBlock CreateNew="CreateBlockProgram"></AiDesigner.Client.Modals.AddCustomBlock>
+        <AiDesigner.Client.Modals.AddCustomBlock @ref="acb" CreateNew="CreateBlockProgram"></AiDesigner.Client.Modals.AddCustomBlock>
     </div>
 </CascadingValue>
 
@@ -79,25 +80,29 @@
     {
         @foreach (var article in workshopArticles)
         {
-            <div class="relative w-64 h-40 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center">
+            <div class="relative h-40 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center" style="width: 17rem;">
                 <!-- Remove Button -->
                 <button @onclick="(() => RemoveArticle(article.Id))" class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
                     X
                 </button>
 
-                <!-- Image -->
-                <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 130px; height: 130px; object-fit: cover; border-radius: 4px;" />
+                <!-- Image Container -->
+                <div style="width: 130px; height: 130px; position: relative; padding-left: 8rem;">
+                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")"
+                         alt="@article.Name"
+                         style="min-width: 120px; min-height: 120px; max-width: 120px; max-height: 120px; object-fit: cover; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
+                </div>
 
                 <!-- Text and Clone Button -->
-                <div class="flex flex-col ml-4 flex-grow justify-between">
+                <div class="flex flex-col ml-3 flex-grow justify-between">
                     <!-- Name -->
-                    <div class="self-start">
-                        <h3 class="dark:text-white">@article.Name</h3>
+                    <div class="self-start" style="margin-left: 0.2rem;">
+                        <h3 class="dark:text-white text-xl">@article.Name</h3>
                     </div>
 
                     <!-- Clone Button -->
                     <div class="self-end">
-                        <button @onclick="(() => CloneArticle(article.Id))" class="py-1 bg-green-500 text-white rounded" style="margin-right: 2rem; padding-left: 1.5rem; padding-right: 1.5rem; margin-top: 4rem;">
+                        <button @onclick="(() => CloneArticle(article.ProgramId))" class="py-1 bg-green-500 text-white rounded" style="margin-right: 2rem; padding-left: 1.5rem; padding-right: 1.5rem; margin-top: 2rem;">
                             Clone
                         </button>
                     </div>
@@ -126,6 +131,9 @@
     //Vars For modal
     public CustomProgram NewProgram { get; set; } = new CustomProgram();
     public CustomBlockProgram NewBlockProgram { get; set; } = new CustomBlockProgram();
+
+    private AddProgram ap { get; set; }
+    private AddCustomBlock acb { get; set; }
 
     public List<WorkshopArticle> workshopArticles { get; set; }
 
@@ -323,8 +331,64 @@
 
     private async Task CloneArticle(string id)
     {
-        // Code to clone the article
+        var response = await Http.GetAsync($"Programs/{id}");
+        if (response.IsSuccessStatusCode)
+        {
+            var responseContent = await response.Content.ReadAsStringAsync();
+            Console.WriteLine(responseContent);
+            var settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                    },
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
+
+
+            if (responseContent.Contains("\"apiKey\":"))
+            {
+                var userProgram = JsonConvert.DeserializeObject<CustomProgram>(responseContent, settings);
+                if (userProgram.IsPublic)
+                {
+                    ap.Open();
+                    NewProgram = userProgram;
+                    Console.WriteLine("CustomProgram cloned successfully");
+                }
+                else
+                {
+                    Console.WriteLine("CustomProgram is not public");
+                }
+            }
+            else
+            {
+                var userBlockProgram = JsonConvert.DeserializeObject<CustomBlockProgram>(responseContent, settings);
+                if (userBlockProgram.IsPublic)
+                {
+                    acb.Open();
+                    NewBlockProgram = userBlockProgram;
+                    Console.WriteLine("CustomProgram cloned successfully");
+                }
+                else
+                {
+                    Console.WriteLine("CustomProgram is not public");
+                }
+            }
+
+            if (true)
+            {
+                string jsonuserProgram = JsonConvert.SerializeObject(NewProgram, settings);
+                Console.WriteLine("---------------------------------------");
+                Console.WriteLine("UserProgram: " + jsonuserProgram);
+            }
+        }
+        else
+        {
+            // Log or display the error
+            Console.WriteLine($"Failed to get article for cloning. Status code: {response.StatusCode}");
+        }
     }
-
-
 }

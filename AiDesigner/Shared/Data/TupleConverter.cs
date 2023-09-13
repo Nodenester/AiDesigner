@@ -1,9 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NodeBaseApi.Version2;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -95,9 +93,5 @@ namespace AiDesigner.Shared.Data
             }
             jo.WriteTo(writer);
         }
-
-
-
     }
-
 }
