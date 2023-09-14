@@ -226,10 +226,12 @@ else
         try
         {
             var response = await Http.GetAsync($"Workshop/search?searchTerm={SearchQuery}&searchClass={SelectedOption}&type={ProgramType}&start={(CurrentPage - 1) * ItemsPerPage}&end={CurrentPage * ItemsPerPage}");
+            Console.WriteLine("get workshop--------------------------------------------");
 
             if (response.IsSuccessStatusCode)
             {
                 FilteredArticles = await response.Content.ReadFromJsonAsync<List<WorkshopArticle>>();
+                Console.WriteLine("deserialized workshop--------------------------------------------");
             }
             else
             {

@@ -82,8 +82,14 @@
                                        @foreach (var CAP in APs)
                                         {
                                             <li class="@(AP == CAP ? "selected" : "") group" @onclick="() => SetAP(CAP)">
-                                                @CAP.Name
-                                                <span class="project-remove float-right px-1 py-0.5 ml-2 text-sm font-semibold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full hidden" @onclick="(() => RemoveProject(CAP))" @onclick:stopPropagation @onmouseover:stopPropagation>X</span>
+                                                <div class="flex items-center">
+                                                    <div style="overflow: hidden;" class="mr-2">
+                                                        @CAP.Name
+                                                    </div>
+                                                    <span class="project-remove px-1 py-0.5 text-sm font-semibold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full hidden" @onclick="(() => RemoveProject(CAP))" @onclick:stopPropagation @onmouseover:stopPropagation>
+                                                        X
+                                                    </span>
+                                                </div>
                                             </li>
                                         }
                                     </ul>
