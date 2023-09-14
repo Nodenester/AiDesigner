@@ -163,23 +163,19 @@ namespace AiDesigner.Server.Data
         }
         public async Task<IEnumerable<CustomProgram>> GetAllUserCustomProgramsAsync(Guid userId)
         {
-            using (var connection = new SqlConnection(_connectionString))
-            {
-                var query = @"
-                    SELECT p.ProgramData
-                    FROM programs p
-                    JOIN user_program_connections upc ON p.Id = upc.ProgramId
-                    WHERE upc.UserId = @UserId AND p.IsCustomBlock = 0;
-                ";
+            var query = @"
+                SELECT p.ProgramData
+                FROM programs p
+                JOIN user_program_connections upc ON p.Id = upc.ProgramId
+                WHERE upc.UserId = @UserId AND p.IsCustomBlock = 0;
+            ";
 
-                var result = await connection.QueryAsync<string>(query, new { UserId = userId });
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            var result = await connection.QueryAsync<string>(query, new { UserId = userId });
 
-                return result.Select((dynamic row) =>
-                {
-                    string programDataJson = row.ProgramData;
-                    return JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings);
-                });
-            }
+            return result.Select(programDataJson =>
+                JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings)
+            );
         }
         public async Task<IEnumerable<CustomBlockProgram>> GetAllUserCustomBlocksAsync(Guid userId)
         {
