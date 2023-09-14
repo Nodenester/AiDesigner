@@ -217,7 +217,7 @@
         if (file != null && imageTypes.Contains(file.ContentType))
         {
             // Resizing the image
-            var resized = await file.RequestImageFileAsync(file.ContentType, 800, 400);
+            var resized = await file.RequestImageFileAsync(file.ContentType, 260, 260);
 
             var buffer = new byte[resized.Size];
             await using var stream = resized.OpenReadStream((int)resized.Size);
@@ -242,7 +242,7 @@
             {
                 Console.WriteLine($"Processing File: {file.Name}");
                 // Resizing the image
-                var resized = await file.RequestImageFileAsync(file.ContentType, 260, 260);
+                var resized = await file.RequestImageFileAsync(file.ContentType, 400, 260);
 
                 var buffer = new byte[resized.Size];
                 await using var stream = resized.OpenReadStream((int)resized.Size);
@@ -251,6 +251,5 @@
             }
         }
         Console.WriteLine($"Total Buffer Count: {multipleFileContents.Count}");
-
     }
 }

@@ -34,7 +34,7 @@
                                         var prevImage = SelectedArticle.ArticleImages[SelectedImageIndex - 1];
                                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(prevImage.ImageData)}")" alt="@prevImage.Description"
                                              style="width: 120px; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer; margin-left: 3px;"
-                                        @onclick="() => SetSelectedImage(SelectedImageIndex - 1)" />
+                                        @onclick="() => SetSelectedImage(SelectedImageIndex - 1)" loading="lazy" />
                                     }
                                     else
                                     {

@@ -132,6 +132,7 @@ namespace AiDesigner.Server.Data
                 return count > 0;
             }
         }
+
         public async Task<IEnumerable<ProgramObject>> GetAllUserProgramsAsync(Guid userId)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -157,6 +158,26 @@ namespace AiDesigner.Server.Data
                     {
                         return JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings) as ProgramObject;
                     }
+                });
+            }
+        }
+        public async Task<IEnumerable<CustomProgram>> GetAllUserCustomProgramsAsync(Guid userId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    SELECT p.ProgramData
+                    FROM programs p
+                    JOIN user_program_connections upc ON p.Id = upc.ProgramId
+                    WHERE upc.UserId = @UserId AND p.IsCustomBlock = 0;
+                ";
+
+                var result = await connection.QueryAsync<string>(query, new { UserId = userId });
+
+                return result.Select((dynamic row) =>
+                {
+                    string programDataJson = row.ProgramData;
+                    return JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings);
                 });
             }
         }
@@ -513,6 +534,7 @@ namespace AiDesigner.Server.Data
             return await connection.QueryAsync<WorkshopArticle>(query, new { UserId = userId });
         }
 
+
         //Article image handeling
         public async Task<string> InsertArticleImageAsync(ArticleImages articleImages)
         {
@@ -613,6 +635,30 @@ namespace AiDesigner.Server.Data
                 return "An error occurred";
             }
         }
+
+        //Chat handeling
+        public async Task<IEnumerable<CustomProgram>> GetAllProgramsFromUserWorkshopArticlesAsync(string userId)
+        {
+            const string query = @"
+                SELECT p.ProgramData
+                FROM programs p
+                WHERE p.Id IN (
+                    SELECT a.ProgramId
+                    FROM Ludde.Workshop_Article a
+                    INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                    WHERE u.UserId = @UserId
+                )
+                AND p.IsCustomBlock = 0;
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            var result = await connection.QueryAsync<string>(query, new { UserId = userId });
+
+            return result.Select(programDataJson =>
+                JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings)
+            );
+        }
+
 
     }
 }
