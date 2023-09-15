@@ -10,7 +10,7 @@
 @attribute [Authorize]
 
 <div class="flex bo" style="height: 81%;">
-    <!-- Box 1 -->
+    <!-- Select Program box -->
     <div class="flex-shrink-0 flex flex-col dark:bg-gray-700 w-72 rounded-lg">
         @if (customPrograms != null && workshopPrograms != null)
         {
@@ -19,7 +19,7 @@
                 @foreach (var program in customPrograms)
                 {
                     <div class="mb-2 h-12">
-                        <button class="bg-blue-500 dark:!bg-gray-800 hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
+                        <button class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
                         @onclick="() => SetSelectedProgram(program)">
                             @program.Name
                         </button>
@@ -31,7 +31,7 @@
                 @foreach (var program in workshopPrograms)
                 {
                     <div class="mb-2 h-12">
-                        <button class="bg-blue-500 dark:!bg-gray-800 hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
+                        <button class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
                         @onclick="() => SetSelectedProgram(program)">
                             @program.Name
                         </button>
@@ -46,84 +46,90 @@
         @if (selectedProgram != null)
         {
             <div style="margin-top: 0rem;">
-            @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
-            {
-                <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                    @switch (input.Type)
-                    {
-                        case NodeBaseApi.Version2.Type.Trigger:
-                            <div class="mb-2">
-                                <p class="font-semibold">Type: Trigger</p>
-                                <button class="bg-blue-500 dark:!bg-gray-800 hover:dark:!bg-gray-600 text-white w-full mt-2 p-2 rounded hover:bg-blue-600">
-                                    Trigger @input.Name
-                                </button>
-                            </div>
-                            break;
-                        case NodeBaseApi.Version2.Type.String:
-                            <div class="mb-2">
-                                <p class="font-semibold">Type: Text</p>
-                                <input type="text" @onchange="@(e => UpdateValue(e, input.Id))"
-                                       class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
-                            </div>
-                            break;
-                        case NodeBaseApi.Version2.Type.Picture:
-                            <div class="mb-2">
-                                <p class="font-semibold">Type: Picture</p>
-                                <div>
-                                    <div class="flex items-center justify-center w-full">
-                                        <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                </svg>
-                                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG or JPG (MAX. 000x000px)</p>
-                                            </div>
-                                            <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnSingleFileChanged(e, input.Id))" />
-                                        </label>
+                @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
+                {
+                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                        @switch (input.Type)
+                        {
+                            case NodeBaseApi.Version2.Type.Trigger:
+                                <div class="mb-2">
+                                    <p class="font-semibold">Type: Trigger</p>
+                                    <button class="bg-blue-500 dark:!bg-gray-800 hover:dark:!bg-gray-600 text-white w-full mt-2 p-2 rounded hover:bg-blue-600">
+                                        Trigger @input.Name
+                                    </button>
+                                </div>
+                                break;
+                            case NodeBaseApi.Version2.Type.String:
+                                <div class="mb-2">
+                                    <p class="font-semibold">Type: Text</p>
+                                    <input type="text" @onchange="@(e => UpdateValue(e, input.Id))"
+                                           class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
+                                </div>
+                                break;
+                            case NodeBaseApi.Version2.Type.Picture:
+                                <div class="mb-2">
+                                    <p class="font-semibold">Type: Picture</p>
+                                    <div>
+                                        <div class="flex items-center justify-center w-full">
+                                            <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                                    </svg>
+                                                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">SVG, PNG or JPG (MAX. 000x000px)</p>
+                                                </div>
+                                                <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnSingleFileChanged(e, input.Id))" />
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            break;
-                        case NodeBaseApi.Version2.Type.Number:
-                            <div class="mb-2">
-                                <p class="font-semibold">Type: Number</p>
-                                <input type="number" @onchange="@(e => UpdateValue(e, input.Id))"
-                                       class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
-                            </div>
-                            break;
-                        case NodeBaseApi.Version2.Type.Boolean:
-                            <div class="mb-2">
-                                <p class="font-semibold">Type: Boolean</p>
-                                <input type="checkbox" @onchange="@(e => UpdateValue(e, input.Id))"
-                                       class="p-2 rounded" />
-                            </div>
-                            break;
-                        case NodeBaseApi.Version2.Type.Audio:
-                            <div class="mb-2">
-                                <p class="font-semibold">Type: Audio</p>
-                                <div>
-                                    <div class="flex items-center justify-center w-full">
-                                        <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
-                                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                </svg>
-                                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
-                                            </div>
-                                            <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnSingleAudioFileChanged(e, input.Id))" />
-                                        </label>
+                                break;
+                            case NodeBaseApi.Version2.Type.Number:
+                                <div class="mb-2">
+                                    <p class="font-semibold">Type: Number</p>
+                                    <input type="number" @onchange="@(e => UpdateValue(e, input.Id))"
+                                           class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
+                                </div>
+                                break;
+                            case NodeBaseApi.Version2.Type.Boolean:
+                                <div class="mb-2">
+                                    <p class="font-semibold w-full">Type: Boolean</p>
+                                    <div class="mt-2 w-full flex justify-center">
+                                        <div class="w-72 cursor-pointer flex items-center justify-center">
+                                            <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
+                                                <input type="checkbox" id="@input.Id" @onchange="@(e => UpdateValue(e, input.Id))"
+                                                       class="w-6 h-6 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                            break;
-                        default:
-                            <p>Unknown input type</p>
-                            break;
-                    }
-                </div>
-            }
+                                break;
+                            case NodeBaseApi.Version2.Type.Audio:
+                                <div class="mb-2">
+                                    <p class="font-semibold">Type: Audio</p>
+                                    <div>
+                                        <div class="flex items-center justify-center w-full">
+                                            <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
+                                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                                    </svg>
+                                                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                                    <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
+                                                </div>
+                                                <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnSingleAudioFileChanged(e, input.Id))" />
+                                            </label>
+                                        </div>
+                                    </div>
+                                </div>
+                                break;
+                            default:
+                                <p>Unknown input type</p>
+                                break;
+                        }
+                    </div>
+                }
             </div>
         }
     </div>

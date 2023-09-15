@@ -82,11 +82,11 @@
                                        @foreach (var CAP in APs)
                                         {
                                             <li class="@(AP == CAP ? "selected" : "") group" @onclick="() => SetAP(CAP)">
-                                                <div class="flex items-center">
-                                                    <div style="overflow: hidden;" class="mr-2">
+                                                <div class="flex">
+                                                    <div style="overflow: hidden;" class="mr-0">
                                                         @CAP.Name
                                                     </div>
-                                                    <span class="project-remove px-1 py-0.5 text-sm font-semibold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full hidden" @onclick="(() => RemoveProject(CAP))" @onclick:stopPropagation @onmouseover:stopPropagation>
+                                                    <span class="project-remove px-1 py-0.5 text-sm font-semibold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full hidden justify-self-end ml-auto" @onclick="(() => RemoveProject(CAP))" @onclick:stopPropagation @onmouseover:stopPropagation>
                                                         X
                                                     </span>
                                                 </div>
@@ -184,12 +184,12 @@
     }
 
     .dark #menu .selected {
-        background-color: #4d4d4d; /* Lighter Very Dark Gray */
+        background-color: #353535; /* Lighter Very Dark Gray */
         color: #fff; /* White Text */
     }
 
     .dark #menu li:hover {
-        background-color: #555; /* Darker Gray */
+        background-color: #353535; /* Darker Gray */
         color: #fff; /* White Text */
     }
 
