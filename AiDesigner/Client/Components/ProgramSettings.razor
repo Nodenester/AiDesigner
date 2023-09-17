@@ -12,16 +12,16 @@
             <h2 class="text-xl font-semibold mb-2">@localProgram.Name Settings</h2>
             <div class="mt-4">
                 <label for="name" class="block text-sm font-medium text-gray-700 dark:text-white">Name</label>
-                <input type="text" @bind="localProgram.Name" id="name" class="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-700 rounded-md focus:outline-none focus:border-gray-500 dark:focus:border-gray-400" />
+                <input @bind="localProgram.Name" type="text" id="name" class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0 outline-none" placeholder="Name" />
             </div>
             <div class="mt-4">
                 <label for="description" class="block text-sm font-medium text-gray-700 dark:text-white">Description</label>
-                <textarea @bind="localProgram.Description" id="description" class="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-700 rounded-md focus:outline-none focus:border-gray-500 dark:focus:border-gray-400"></textarea>
+                <textarea @bind="localProgram.Description" id="description" class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0 outline-none" placeholder="Description"></textarea>
             </div>
             <div class="mt-4">
                 <label for="IsPublic" class="block text-sm font-medium text-gray-700 dark:text-white">Is public</label>
                 <div class="mt-1">
-                    <input type="checkbox" @bind="localProgram.IsPublic" id="IsPublic" class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded" />
+                    <input type="checkbox" @bind="localProgram.IsPublic" id="IsPublic" class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded outline-none" />
                     <label for="IsPublic" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
                 </div>
             </div>
@@ -29,12 +29,12 @@
             {
                 <label for="SupportsSessions" class="block text-sm font-medium text-gray-700 dark:text-white">Supports sessions</label>
                 <div class="mt-1">
-                    <input type="checkbox" @bind="localProgram.SupportsSessions" id="IsPublic" class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded" />
-                    <label for="IsPublic" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
+                    <input type="checkbox" @bind="localProgram.SupportsSessions" id="SuportSession" class="focus:ring-green-500 h-4 w-4 text-green-600 border-gray-300 rounded" />
+                    <label for="SuportSession" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
                 </div>
                 <div class="mt-4">
                     <label for="apiKey" class="block text-sm font-medium text-gray-700 dark:text-white">API Key</label>
-                    <input type="text" @bind="((CustomProgram)localProgram).ApiKey" id="apiKey" class="mt-1 block w-full py-2 px-3 border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 rounded-md focus:outline-none focus:border-gray-500 dark:focus:border-gray-400" readonly />
+                    <input type="text" @bind="((CustomProgram)localProgram).ApiKey" id="apiKey" class="w-full p-2 border rounded dark:bg-gray-600 dark:text-gray-300 outline-none border-0" readonly />
                 </div>
                 <div class="mt-4 flex justify-center">
                     <AiDesigner.Client.Modals.ExacuteProgram AP="localProgram"></AiDesigner.Client.Modals.ExacuteProgram>
@@ -54,7 +54,7 @@
             <div class="w-1/2 p-4 rounded-lg bg-gray-100 dark:bg-gray-700 mx-8">
                 <h2 class="text-xl font-semibold mb-2">Code</h2>
             <div class="relative inline-block w-full mb-4">
-                <select @bind="SelectedLanguage" class="block appearance-none w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-600 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500 dark:focus:border-gray-400">
+                    <select @bind="SelectedLanguage" class="block appearance-none w-full w-full rounded dark:bg-gray-600 dark:text-white outline-none border-0 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500 dark:focus:border-gray-400">
                     <option value="csharp">C#</option>
                     <option value="python">Python</option>
                     <option value="javascript">JavaScript</option>
@@ -63,7 +63,7 @@
                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-5.082 4.892-0.387 0.389-1.039 0.389-1.427 0-0.387-0.39-4.675-4.474-5.082-4.892-0.409-0.418-0.436-1.17 0-1.615z" /></svg>
                 </div>
             </div>
-            <textarea class="form-control mt-2 w-full bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-400 border border-gray-300 dark:border-gray-600 rounded p-2 focus:outline-none focus:border-gray-500 dark:focus:border-gray-400 text-lg leading-relaxed" rows="10" readonly>@CodeSnippet</textarea>
+                <textarea class="form-control mt-2 w-full w-full p-2 border-0 rounded dark:bg-gray-600 dark:text-white outline-none focus:outline-none focus:ring-0" style="outline: none;" rows="10" readonly>@CodeSnippet</textarea>
         </div>
         }
     </div>
