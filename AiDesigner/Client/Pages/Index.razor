@@ -1,29 +1,188 @@
 ﻿@page "/home"
-@using Microsoft.AspNetCore.Authorization
+@using Newtonsoft.Json;
+@using Microsoft.AspNetCore.Authorization;
+@using NodeBaseApi.Version2;
+@inject HttpClient Http;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
 @attribute [Authorize]
 
-<PageTitle>Index</PageTitle>
+<PageTitle>Home</PageTitle>
+@* <AiDesigner.Client.Modals.AddNews></AiDesigner.Client.Modals.AddNews> *@
 
+<div class="flex justify-between h-full">
+    <!-- bottom part-->
+    <div class="self-end dark:bg-gray-700 rounded-lg">
+        <!-- projects part-->
 
-<style>
+        <!-- articles part-->
+        <div class="flex flex-col items-start align-baseline">
+            <div class="flex flex-nowrap gap-4 m-4">
+                @if (Articles != null)
+                {
+                    @foreach (var article in Articles)
+                    {
+                        <button class="min-w-[16.2rem] h-auto p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-center">
+                            <!-- Add Image Here -->
+                            <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 260px; height: 180px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" loading="lazy" />
+                            <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+                            <p class="w-full text-left dark:text-white ml-4">@article.AuthorName</p>
+                            <br />
+                            <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+                            <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                                <p class="text-left dark:text-white text-lg m-1 ml-3">@article.SearchClass</p>
+                                <button @onclick="() => Addtovault(article)" @onclick:stopPropagation="true" class="bg-green-500 text-white rounded p-1 m-1">Add to vault</button>
+                            </div>
+                            <br />
+                        </button>
+                    }
+                }
+            </div>
+        </div>
+    </div>
 
-</style>
+    <div class="flex flex-col justify-start dark:bg-gray-700 w-96 rounded-lg">
+        <!-- Notice the 'justify-end' -->
+        <!-- News Section -->
+        <div class="text-center p-4 overflow-y-auto">
+            <p class="text-lg font-semibold mb-4">Latest News</p>
+            @if (LatestArticles != null)
+            {
+                @foreach (var article in LatestArticles)
+                {
+                    <div class="mb-2">
+                        <button class="w-full h-auto p-2 rounded-lg shadow hover:shadow-lg transition
+                        @(selectedArticle == article ? "dark:bg-gray-500 bg-gray-100" : "dark:bg-gray-600 bg-gray-200") text-black"
+                        @onclick="() => SetSelectedNewsArticle(article)">
+                            <div class="truncate dark:text-white text-lg">@article.Title</div>
+                            <div>@article.PublishDate.ToShortDateString()</div>
+                            @if (selectedArticle == article)
+                            {
+                                <div class="mt-2 flex flex-col items-center">
+                                    @if (article.ImageData != null)
+                                    {
+                                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ImageData)}")" alt="@article.Title" style="width: 300px; height: 300px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" loading="lazy" />
+                                    }
+                                    <p class="dark:text-white">@article.Content</p>
+                                </div>
+                            }
+                            else
+                            {
+                                <div class="mt-2">
+                                    <p class="truncate dark:text-white">@article.Content.Substring(0, 50)...</p>
+                                </div>
+                            }
+                        </button>
+                    </div>
+                }
+            
+            }
+        </div>
+    </div>
+</div>
 
 @code {
-    Random rnd = new Random();
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
 
-    public string Name = "minecraft";
+    private List<NewsArticle> LatestArticles;
+    private NewsArticle selectedArticle;
+    private List<WorkshopArticle> Articles;
 
-    private void SetName()
+    protected override async Task OnInitializedAsync()
     {
-        Name = _names[rnd.Next(0, 3)];
+        if (LatestArticles == null)
+        {
+            await GetLatestNews();
+        }
+        if (Articles == null)
+        {
+            await GetLatestThreeArticles();
+        }
     }
 
-    private List<string> _names = new List<string> {
-        "minecraft", 
-        "calamari", 
-        "roblox" 
-    };
+    private async Task Addtovault(WorkshopArticle article)
+    {
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            string requestUri = "Workshop/connect-article-to-user";
+            UserArticle userArticle = new UserArticle
+                {
+                    ArticleId = article.Id,
+                    UserId = userId.ToString(),
+                    IsCreator = false,   //fix this  to tired now
+                    Rating = 0,
+                    Review = "",
+                    IsFavorite = false
+                };
+            var response = await Http.PostAsJsonAsync(requestUri, userArticle);
+        }
+    }
+
+    void SetSelectedNewsArticle(NewsArticle article)
+    {
+        selectedArticle = article;
+    }
+
+    //Api / db
+    private async Task GetLatestThreeArticles()
+    {
+        try
+        {
+            // Assuming that the server API sorts the articles in descending order by date,
+            // so start=0&end=3 would give you the latest 3 articles.
+            var response = await Http.GetAsync($"Workshop/search?searchTerm=&searchClass=&type=&start=0&end=3");
+            Console.WriteLine("get latest 3 workshop articles--------------------------------------------");
+
+            if (response.IsSuccessStatusCode)
+            {
+                Articles = await response.Content.ReadFromJsonAsync<List<WorkshopArticle>>();
+                Console.WriteLine("deserialized latest 3 workshop articles--------------------------------------------");
+            }
+            else
+            {
+                // Log the error for debugging and review
+                Console.WriteLine($"Failed to get latest 3 articles. StatusCode: {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
+            }
+        }
+        catch (HttpRequestException e)
+        {
+            Console.WriteLine($"An HttpRequestException occurred while getting latest 3 articles: {e.Message}");
+        }
+        catch (TimeoutException e)
+        {
+            Console.WriteLine($"A TimeoutException occurred while getting latest 3 articles: {e.Message}");
+        }
+        catch (Exception e)
+        {
+            // Log the exception for debugging and review
+            Console.WriteLine($"An unknown exception occurred while getting latest 3 articles: {e.Message}");
+        }
+    }
+    private async Task GetLatestNews()
+    {
+        try
+        {
+            var response = await Http.GetAsync("Chat/News/Latest");
+
+            if (response.IsSuccessStatusCode)
+            {
+                LatestArticles = (await response.Content.ReadFromJsonAsync<IEnumerable<NewsArticle>>()).ToList();
+
+                if (LatestArticles.Count > 0)
+                {
+                    selectedArticle = LatestArticles[0];
+                }
+            }
+            else
+            {
+                Console.WriteLine($"Failed to load articles. Status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"An error occurred while fetching articles: {ex.Message}");
+        }
+    }
 }
-
-

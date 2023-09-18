@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -79,6 +80,43 @@ namespace NodeBaseApi.Controllers
             }
         }
 
+        // GET api/Chat/News/Latest
+        [HttpGet("News/Latest")]
+        public async Task<ActionResult<IEnumerable<NewsArticle>>> GetLatestNews()
+        {
+            try
+            {
+                IEnumerable<NewsArticle> latestArticles = await _dbConnection.GetLatestArticlesAsync();
+
+                return Ok(latestArticles);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                Console.WriteLine(ex);
+                // Return a 500 status code
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+        // POST api/Chat/News/Create
+        [HttpPost("News/Create")]
+        public async Task<ActionResult> CreateNews([FromBody] NewsArticle article)
+        {
+            try
+            {
+                await _dbConnection.CreateArticleAsync(article.Id, article.Title, article.Content, article.ImageData);
+
+                return Ok("Article created successfully.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                Console.WriteLine(ex);
+                // Return a 500 status code
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
 
     }
 }
