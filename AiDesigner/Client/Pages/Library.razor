@@ -36,11 +36,21 @@
     {
         if (eap is CustomProgram customProgram)
         {
-            <button class="w-64 h-32 p-4 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center"
-            @onmousedown="@(async () => await HandleButtonClick(eap))"
-            @ondblclick="@(async () => await HandleDButtonClick(eap))">
-                <h3 class="dark:text-white">@eap.Name</h3>
-                <p class="rounded dark:text-white">@eap.Description</p>
+            <button class="w-72 h-48 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between" @onmousedown="@(async () => await HandleButtonClick(eap))"
+            @ondblclick="@(async () => await HandleDButtonClick(customProgram))">
+                <!-- Add Image Here -->
+                @if (customProgram.Image != null)
+                {
+                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(customProgram.Image)}")" alt="@customProgram.Name" style="width: 100%; height: 50%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
+                }
+                else
+                {
+                    <div style="margin-top: 9.7rem;" />
+                }
+                <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+                <div class="w-full align-middle content-center">
+                    <h1 class="dark:text-white mb-2 text-xl m-auto">@customProgram.Name</h1>
+                </div>
             </button>
         }
     }
@@ -60,11 +70,21 @@
     {
         if (eap is CustomBlockProgram customBlockProgram)
         {
-            <button class="w-64 h-32 p-4 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center justify-center"
-            @onmousedown="@(async () => await HandleButtonClick(eap))"
-            @ondblclick="@(async () => await HandleDButtonClick(eap))">
-                <h3 class="dark:text-white">@eap.Name</h3>
-                <p class="rounded dark:text-white">@eap.Description</p>
+            <button class="w-72 h-32 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between" @onmousedown="@(async () => await HandleButtonClick(eap))"
+            @ondblclick="@(async () => await HandleDButtonClick(customBlockProgram))">
+                <!-- Add Image Here -->
+                @if (customBlockProgram.Image != null)
+                {
+                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(customBlockProgram.Image)}")" alt="@customBlockProgram.Name" style="width: 100%; height: 50%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
+                }
+                else
+                {
+                    <div class="margin-top: 9.7rem;" />
+                }
+                <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+                <div class="w-full align-middle content-center">
+                    <h1 class="dark:text-white mb-2 text-xl m-auto">@customBlockProgram.Name</h1>
+                </div>
             </button>
         }
     }
@@ -137,24 +157,18 @@
 
     public List<WorkshopArticle> workshopArticles { get; set; }
 
-    public bool Hasloaded = false;
+    private bool HasLoaded = false;
 
-    protected override async Task OnInitializedAsync()
-    {
-        Hasloaded = false;
-        await UpdateVault();
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnParametersSetAsync()
     {
         await UpdateVault();
     }
 
     public async Task UpdateVault()
     {
-        if (CascAuth?.User != null && !Hasloaded)
+        if (CascAuth?.User != null && workshopArticles == null && HasLoaded == false)
         {
-            Hasloaded = true;
+            HasLoaded = true;
             var user = CascAuth.User;
 
             if (user.Identity.IsAuthenticated)
@@ -173,13 +187,19 @@
                         else
                         {
                             Console.WriteLine($"The call failed with status code {response.StatusCode}");
+                            HasLoaded = false;
                         }
                     }
                     catch (HttpRequestException ex)
                     {
                         Console.WriteLine($"Request exception: {ex.Message}");
+                        HasLoaded = false;
                     }
                 }
+            }
+            else
+            {
+                HasLoaded = false;
             }
         }
     }

@@ -45,10 +45,34 @@ namespace NodeBaseApi.Version2
     {
         public List<ProgramBlock> ProgramBlocks { get; set; } = new List<ProgramBlock>();
         public Dictionary<Guid, Variable> Variables { get; set; } = new Dictionary<Guid, Variable>();
-        public List<Output> ProgramStart { get; set; } = new List<Output>();
+        public List<Output> ProgramStart { get; set; } = new List<Output>(
+            new Output[]
+            {
+                new Output()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Start",
+                    Type = Type.Trigger,
+                    IsList = false,
+                    Description = "The start of the program."
+                }
+            }
+            );
         public Tuple<int, int> ProgramStartLocation { get; set; } = new Tuple<int, int>(0, 200);
 
-        public List<Input> ProgramEnd { get; set; } = new List<Input>();
+        public List<Input> ProgramEnd { get; set; } = new List<Input>(
+            new Input[]
+            {
+                new Input()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "End",
+                    Type = Type.Trigger,
+                    IsList = false,
+                    Description = "The end of the program."
+                }
+            }
+            );
         public Dictionary<Guid, Guid> ProgramEndConnections { get; set; } = new Dictionary<Guid, Guid>();
         public Tuple<int, int> ProgramEndLocation { get; set; } = new Tuple<int, int>(300, 200);
         public float zoom { get; set; } = 1;
@@ -99,7 +123,6 @@ namespace NodeBaseApi.Version2
 
             return null;
         }
-
 
         public void AddProgramBlock(ProgramBlock block)
         {
@@ -364,12 +387,12 @@ namespace NodeBaseApi.Version2
 
     public enum Type
     {
-        Trigger,
         String,
         Picture,
         Number,
         Boolean,
         Audio,
+        Trigger,
         Object
     }
 
@@ -448,6 +471,17 @@ namespace NodeBaseApi.Version2
         // Navigation property for the relationship
         public WorkshopArticle WorkshopArticle { get; set; }
     }
+
+    //News
+    public class NewsArticle
+    {
+        public string Id { get; set; }
+        public string Title { get; set; }
+        public string Content { get; set; }
+        public DateTime PublishDate { get; set; }
+        public byte[] ImageData { get; set; }
+    }
+
 
     //Error handling------------------------------------------------
     public class InvalidConnectionException : Exception

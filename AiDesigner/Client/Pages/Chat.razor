@@ -41,13 +41,17 @@
         }
     </div>
     <!-- Input box -->
-    <div class="flex-grow text-center p-4 border-r overflow-y-auto border-gray-500" style="max-height: 100%; max-width: 45%;">
+    <div class="flex-grow text-center p-4 overflow-y-auto" style="max-height: 100%; max-width: 45%;">
         <p class="text-lg font-semibold mb-4">Program Inputs</p>
         @if (selectedProgram != null)
         {
             <div style="margin-top: 0rem;">
                 @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
                 {
+                    if (input.Name == "Start")
+                    {
+                        continue;
+                    }
                     <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
                         @switch (input.Type)
                         {
@@ -133,6 +137,20 @@
             </div>
         }
     </div>
+
+    <!-- Center line -->
+    <div class="flex flex-col items-center h-full">
+        <!-- Vertical Line -->
+        <div class="bg-gray-500 w-[2px] flex-grow"></div>
+
+        <!-- Button -->
+        <div class="align-center mb-0 mt-auto">
+            <button class="py-1 bg-green-500 text-white rounded mt-4 px-6 h-12">
+                Execute Program
+            </button>
+        </div>
+    </div>
+
     <!-- Output box -->
     <div class="flex-grow text-center p-4">
         <p class="text-lg font-semibold mb-4">Program Outputs</p>
@@ -141,6 +159,10 @@
             <div style="margin-top: 0rem;">
                 @foreach (var output in selectedProgram.ProgramStructure.ProgramEnd)
                 {
+                    if (output.Name == "End")
+                    {
+                        continue;
+                    }
                     <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
                         @switch (output.Type)
                         {
@@ -252,7 +274,7 @@
     {
         string requestUri = $"Chat/Programs/{userId}";
         HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
-        if (httpResponse.IsSuccessStatusCode)
+        if (httpResponse.IsSuccessStatusCode && customPrograms == null)
         {
             string content = await httpResponse.Content.ReadAsStringAsync();
             customPrograms = JsonConvert.DeserializeObject<List<CustomProgram>>(content, settings);
@@ -268,7 +290,7 @@
     {
         string requestUri = $"Chat/Workshop/{userId}";
         HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
-        if (httpResponse.IsSuccessStatusCode)
+        if (httpResponse.IsSuccessStatusCode && workshopPrograms == null)
         {
             string content = await httpResponse.Content.ReadAsStringAsync();
             workshopPrograms = JsonConvert.DeserializeObject<List<CustomProgram>>(content, settings);

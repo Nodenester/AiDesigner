@@ -655,6 +655,31 @@ namespace AiDesigner.Server.Data
             );
         }
 
+        //News article handeling
+        public async Task<IEnumerable<NewsArticle>> GetLatestArticlesAsync()
+        {
+            string query = @"SELECT TOP 10 * FROM Ludde.News_Article 
+                     ORDER BY PublishDate DESC";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<NewsArticle>(query);
+        }
+
+        public async Task CreateArticleAsync(string id, string title, string content, byte[] imageData)
+        {
+            string query = @"INSERT INTO Ludde.News_Article (Id, Title, Content, PublishDate, ImageData)
+                     VALUES (@Id, @Title, @Content, @PublishDate, @ImageData)";
+
+            var parameters = new DynamicParameters();
+            parameters.Add("Id", id);
+            parameters.Add("Title", title);
+            parameters.Add("Content", content);
+            parameters.Add("PublishDate", DateTime.UtcNow); // Assuming you want to set it to the current UTC date-time
+            parameters.Add("ImageData", imageData);
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(query, parameters);
+        }
 
     }
 }
