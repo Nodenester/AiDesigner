@@ -55,8 +55,7 @@
         </div>
 
         <div id="middle-content" class="middle-content flex-grow bg-white dark:bg-gray-900 p-0 overflow-auto">
-            <div id="whiteboard-content" class="bg-gray-500 dark:bg-gray-500 text-white py-3" style="width: 100%;
-        height: 100%;">
+            <div id="whiteboard-content" class="bg-gray-500 dark:bg-gray-500 text-white py-3" style="width: 100%; height: 100%;">
                 <div id="whiteboard" class="whiteboard" @oncontextmenu="ShowContextMenu">
                     <div id="canvas" class="canvas">
                         <div id="connection-layer" style="position: relative; z-index: 22; ">
@@ -300,7 +299,7 @@
                                         }
                                         else
                                         {
-                                            Console.WriteLine("Direct input value: " + customProgram1.ProgramStructure.DirectInputValues[input.Id]);
+                                            //Console.WriteLine("Direct input value: " + customProgram1.ProgramStructure.DirectInputValues[input.Id]);
                                         }
 
                                         if (input.Name != "Trigger")
@@ -430,7 +429,7 @@
                                         }
                                         else
                                         {
-                                            Console.WriteLine("Direct input value: " + customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]);
+                                            //Console.WriteLine("Direct input value: " + customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]);
                                         }
 
                                         if (input.Name != "Trigger")
@@ -783,6 +782,7 @@
     {
         if (firstRender)
         {
+            await JSRuntime.InvokeVoidAsync("registerGlobalKeyPress", DotNetObjectReference.Create(this));
             await JSRuntime.InvokeVoidAsync("initResizablePanels");
             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
             if (localProgram is CustomProgram customBlock)
@@ -810,6 +810,7 @@
         }
     }
 
+    bool HasDrawn = false;
     protected override async Task OnParametersSetAsync()
     {
         if (APO != null)
@@ -819,16 +820,16 @@
             if (localProgram is CustomProgram  customProgram)
             {
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-                JSRuntime.InvokeVoidAsync("updateCameraPos", customProgram.ProgramStructure.CameraPos.Item1, customProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
-                JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customProgram.ProgramStructure.zoom);
+                await JSRuntime.InvokeVoidAsync("updateCameraPos", customProgram.ProgramStructure.CameraPos.Item1, customProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customProgram.ProgramStructure.zoom);
                 zoomvalue = customProgram.ProgramStructure.zoom;
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
             }
             else if(localProgram is CustomBlockProgram customBlockProgram)
             {
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-                JSRuntime.InvokeVoidAsync("updateCameraPos", customBlockProgram.ProgramStructure.CameraPos.Item1, customBlockProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
-                JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customBlockProgram.ProgramStructure.zoom);
+                await JSRuntime.InvokeVoidAsync("updateCameraPos", customBlockProgram.ProgramStructure.CameraPos.Item1, customBlockProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customBlockProgram.ProgramStructure.zoom);
                 zoomvalue = customBlockProgram.ProgramStructure.zoom;
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
             }
@@ -844,49 +845,53 @@
         }
         else
         {
-            // handle null APO, e.g., initialize it to a default value or throw an exception
+            
         }
 
         StateHasChanged();
         await base.OnParametersSetAsync();
     }
 
+    bool hasloaded = false;
     private async Task DrawConnections(ProgramStructure programStructure)
     {
-        foreach (var block in programStructure.ProgramBlocks)
+        if (hasloaded == false)
         {
-            // Draw connections for block inputs
-            if (block.Inputs != null)
+            hasloaded = true;
+            foreach (var block in programStructure.ProgramBlocks)
             {
-                for (int i = 0; i < block.Inputs.Count; i++)
+                // Draw connections for block inputs
+                if (block.Inputs != null)
                 {
-                    var output = block.Inputs[i];
-                    var input = block.Block.Inputs[i];
-
-                    if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
+                    for (int i = 0; i < block.Inputs.Count; i++)
                     {
-                        //Console.WriteLine("---------------------");
-                        //Console.WriteLine($"Index: {i}, Value: {output}");
-                        //Console.WriteLine($"Index: {i}, Value: {input.Id}");
-                        //Console.WriteLine("---------------------");
+                        var output = block.Inputs[i];
+                        var input = block.Block.Inputs[i];
 
-                        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
+                        if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
+                        {
+                            Console.WriteLine("---------------------");
+                            Console.WriteLine($"Index: {i}, Value: {output}");
+                            Console.WriteLine($"Index: {i}, Value: {input.Id}");
+                            Console.WriteLine("---------------------");
+
+                            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
+                        }
                     }
                 }
             }
-        }
 
-        //Connects the end plss
-        foreach (var input in programStructure.ProgramEnd)
-        {
-            if (programStructure.ProgramEndConnections.TryGetValue(input.Id, out Guid outputId))
+            foreach (var input in programStructure.ProgramEnd)
             {
-                //Console.WriteLine("---------------------");
-                //Console.WriteLine($"Input Id: {input.Id}");
-                //Console.WriteLine($"Connected Output Id: {outputId}");
-                //Console.WriteLine("---------------------");
+                if (programStructure.ProgramEndConnections.TryGetValue(input.Id, out Guid outputId))
+                {
+                    Console.WriteLine("---------------------");
+                    Console.WriteLine($"Input Id: {input.Id}");
+                    Console.WriteLine($"Connected Output Id: {outputId}");
+                    Console.WriteLine("---------------------");
 
-                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", outputId, input.Id, GetLineColor(input.Type.ToString()));
+                    await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", outputId, input.Id, GetLineColor(input.Type.ToString()));
+                }
             }
         }
     }
@@ -895,6 +900,16 @@
     public async Task Take()
     {
         await JSRuntime.InvokeVoidAsync("takeScreenshot", DotNetObjectReference.Create(this));
+    }
+
+    [JSInvokable]
+    public void OnGlobalKeyPress(string key, string code)
+    {
+        Console.WriteLine($"Key pressed: {key}, Code: {code}");
+        if (code == "Delete" || code == "Backspace")
+        {
+            DeleteCurrentNode();
+        }
     }
 
     [JSInvokable]
@@ -967,7 +982,7 @@
             {
                 customBlockProgram.ProgramStructure.zoom = zoomvalue;
             }
-            Console.WriteLine(zoomvalue);
+            // Console.WriteLine(zoomvalue);
         }
     }
 
@@ -985,7 +1000,7 @@
             {
                 customBlockProgram.ProgramStructure.zoom = zoomvalue;
             }
-            Console.WriteLine(zoomvalue);
+            // Console.WriteLine(zoomvalue);
         }
     }
 
@@ -996,7 +1011,7 @@
 
     private async void AddBlockToWhiteboard(Item item)
     {
-        Console.WriteLine($"{item.Name} was clicked");
+        // Console.WriteLine($"{item.Name} was clicked");
         if (localProgram is CustomProgram customProgram)
         {
             ProgramBlock programBlock = new ProgramBlock();
@@ -1061,25 +1076,25 @@
     public async void SelectOutput(Output output)
     {
         SelectedOutput = output;
-        Console.WriteLine("Selected ouput is: " + output.Id);
+        //Console.WriteLine("Selected ouput is: " + output.Id);
     }
 
     public async void TryConnect(Input input)
     {
         if (SelectedOutput != null)
         {
-            Console.WriteLine("input id: " + input.Id);
+            //Console.WriteLine("input id: " + input.Id);
             if (localProgram is CustomProgram customProgram)
             {
                 if (customProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
                 {
                     await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
                     SelectedOutput = null;
-                    Console.WriteLine("Connection Succeded");
+                    //Console.WriteLine("Connection Succeded");
                 }
                 else
                 {
-                    Console.WriteLine("connection failed");
+                    //Console.WriteLine("connection failed");
                 }
             }
             else if (localProgram is CustomBlockProgram customBlockProgram)
@@ -1088,11 +1103,11 @@
                 {
                     await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
                     SelectedOutput = null;
-                    Console.WriteLine("Connection Succeded");
+                    //Console.WriteLine("Connection Succeded");
                 }
                 else
                 {
-                    Console.WriteLine("connection failed");
+                    //Console.WriteLine("connection failed");
                 }
             }
         }
@@ -1101,7 +1116,7 @@
     public void SelectNode(ProgramBlock programBlock)
     {
         SelectedDetail = programBlock;
-        Console.WriteLine(programBlock.Block.Name);
+        //Console.WriteLine(programBlock.Block.Name);
     }
 
     string GetShape(string type)
@@ -1177,6 +1192,43 @@
         else if(localProgram is CustomBlockProgram customBlockProgram)
         {
             customBlockProgram.ProgramStructure.DirectInputValues[inputId] = e.Value?.ToString();
+        }
+    }
+
+    private async Task DeleteCurrentNode()
+    {
+        try
+        {
+            if (SelectedDetail is ProgramBlock programObject)
+            {
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+                //Console.WriteLine("waaawss");
+                if (_localProgram is CustomProgram customProgram)
+                {
+                    customProgram.ProgramStructure.RemoveProgramBlock(programObject.Id);
+                    SelectedDetail = null;
+                    await DrawConnections(customProgram.ProgramStructure);
+                    StateHasChanged();
+                    //Console.WriteLine("okokokok");
+                }
+                else if (_localProgram is CustomBlockProgram customBlockProgram)
+                {
+                    customBlockProgram.ProgramStructure.RemoveProgramBlock(programObject.Id);
+                    customBlockProgram.ProgramStructure.ProgramBlocks.Remove(programObject);
+                    SelectedDetail = null;
+                    await DrawConnections(customBlockProgram.ProgramStructure);
+                    StateHasChanged();
+                    //Console.WriteLine("idiota");
+                }
+                else
+                {
+                    //Console.WriteLine("nigga whaaat");
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            //Console.WriteLine("Exception caught: " + e.Message);
         }
     }
 
@@ -1311,7 +1363,7 @@
                 DrawConnections(customBlockProgram.ProgramStructure);
             }
         }
-        Console.WriteLine("History index: " + _currentHistoryIndex);
+        //Console.WriteLine("History index: " + _currentHistoryIndex);
 
         StateHasChanged();
     }
@@ -1333,7 +1385,7 @@
                 DrawConnections(customBlockProgram.ProgramStructure);
             }
         }
-        Console.WriteLine("History index: " + _currentHistoryIndex);
+        //Console.WriteLine("History index: " + _currentHistoryIndex);
 
         StateHasChanged();
     }
@@ -1342,7 +1394,7 @@
     //private void HandleButtonSelection(BlockSelector.ButtonItem button)
     //{
     //    // Handle the selected button
-    //    Console.WriteLine($"Selected button: {button.Text}");
+    //    //Console.WriteLine($"Selected button: {button.Text}");
     //}
 
     //Logic stuff
@@ -1435,8 +1487,8 @@
 
 
         AddToHistory(localProgram);
-        Console.WriteLine("History index: " + _currentHistoryIndex);
-        Console.WriteLine(History.ToList().Count + " Objects in history");
+        //Console.WriteLine("History index: " + _currentHistoryIndex);
+        //Console.WriteLine(History.ToList().Count + " Objects in history");
         // Trigger UI update
         StateHasChanged();
         return Task.CompletedTask;
@@ -1445,7 +1497,7 @@
     [JSInvokable]
     public Task UpdateCameraPosition(double newX, double newY)
     {
-        Console.WriteLine($"UpdateCameraPosition called with {newX}, {newY}");
+        //Console.WriteLine($"UpdateCameraPosition called with {newX}, {newY}");
         try
         {
             if (localProgram is CustomProgram customBlock)
@@ -1461,9 +1513,9 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
+            //Console.WriteLine(ex);
         }
-        Console.WriteLine("UpdateCameraPosition execution finished");
+        //Console.WriteLine("UpdateCameraPosition execution finished");
 
         return Task.CompletedTask;
     }
@@ -1472,7 +1524,7 @@
     public void SetBlockSpawn(double newX, double newY)
     {
         LastMouseLocation = new Tuple<double, double>(newX, newY);
-        Console.WriteLine(newX + " " + newY);
+        //Console.WriteLine(newX + " " + newY);
     }
 
     private async Task UpdateDb(ProgramObject Program)
@@ -1511,7 +1563,7 @@
             }
             catch (Exception ex)
             {
-                Console.WriteLine("An error occurred while sending the request: " + ex.ToString());
+                //Console.WriteLine("An error occurred while sending the request: " + ex.ToString());
             }
 
             if (response == null || !response.IsSuccessStatusCode)
@@ -1568,7 +1620,7 @@
 
         if (clonedProgram is CustomProgram customBlock)
         {
-            Console.WriteLine("Program start location in clone " + customBlock.ProgramStructure.ProgramStartLocation.Item1 + customBlock.ProgramStructure.ProgramStartLocation.Item2);
+            //Console.WriteLine("Program start location in clone " + customBlock.ProgramStructure.ProgramStartLocation.Item1 + customBlock.ProgramStructure.ProgramStartLocation.Item2);
         }
 
         // If the history exceeds MaxHistoryLength, remove the oldest entry
@@ -1598,30 +1650,30 @@
 
             if (program is CustomProgram customProgram)
             {
-                //Console.WriteLine("-------------------------Start");
+                ////Console.WriteLine("-------------------------Start");
                 //StackTrace stackTrace = new StackTrace();
-                //Console.WriteLine(stackTrace.GetFrame(1).GetMethod().Name);
-                //Console.WriteLine("-------------------------");
+                ////Console.WriteLine(stackTrace.GetFrame(1).GetMethod().Name);
+                ////Console.WriteLine("-------------------------");
                 //foreach(var x in customProgram.ProgramStructure.ProgramBlocks)
                 //{
                 //    foreach(var y in x.Block.Inputs)
                 //    {
-                //        Console.WriteLine(y.Name);
+                //        //Console.WriteLine(y.Name);
                 //    }
                 //}
 
                 jsonString = JsonConvert.SerializeObject(customProgram, settings);
-                //Console.WriteLine("-------------------------");
+                ////Console.WriteLine("-------------------------");
                 var retur = JsonConvert.DeserializeObject<CustomProgram>(jsonString, settings);
 
                 //foreach (var x in retur.ProgramStructure.ProgramBlocks)
                 //{
                 //    foreach (var y in x.Block.Inputs)
                 //    {
-                //        Console.WriteLine(y.Name);
+                //        //Console.WriteLine(y.Name);
                 //    }
                 //}
-                //Console.WriteLine("-------------------------End");
+                ////Console.WriteLine("-------------------------End");
                 return retur;
             }
             else if (program is CustomBlockProgram customBlockProgram)
@@ -1635,12 +1687,12 @@
         catch (JsonSerializationException jsonException)
         {
             // Handle or log the exception as needed.
-            Console.WriteLine($"An error occurred during serialization or deserialization: {jsonException.Message}");
+            //Console.WriteLine($"An error occurred during serialization or deserialization: {jsonException.Message}");
         }
         catch (Exception ex)
         {
             // Handle or log the generic exception as needed.
-            Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+            //Console.WriteLine($"An unexpected error occurred: {ex.Message}");
         }
 
         return null;

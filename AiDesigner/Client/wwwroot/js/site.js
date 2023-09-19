@@ -124,6 +124,7 @@ window.jsPlumbInterop = {
                 // variable to track if any endpoint position was updated
                 var endpointsUpdated = false;
 
+                // update the jsPlumb instance about each connection's position changes
                 for (var i = 0; i < connections.length; i++) {
                     var connectionId = connections[i].id;
 
@@ -167,7 +168,6 @@ window.jsPlumbInterop = {
                             var connectorType = ["Bezier", { curviness: 100 }];
                             if (verticalDistance < 10 || overallDistance < 50) {
                                 connectorType = "Straight";
-                                console.log("connector straight");
                             }
 
                             // Set the connector type for the connection
@@ -279,6 +279,32 @@ window.jsPlumbInterop = {
                     // only repaint everything if any endpoint position was updated
                     if (endpointsUpdated) {
                         requestAnimationFrame(function () {
+                            var associatedConnections = jsPlumbInterop.instance.getConnections({ element: params.el });
+
+                            // Iterate over each connection
+                            associatedConnections.forEach(function (connection) {
+                                var sourceTop = connection.source.offsetTop;
+                                var targetTop = connection.target.offsetTop;
+                                var sourceLeft = connection.source.offsetLeft;
+                                var targetLeft = connection.target.offsetLeft;
+
+                                // Calculate vertical and overall distances
+                                var verticalDistance = Math.abs(sourceTop - targetTop);
+                                var horizontalDistance = Math.abs(sourceLeft - targetLeft);
+                                var overallDistance = Math.sqrt(Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2));
+
+                                // Determine the connector type based on the vertical and overall distances
+                                var connectorType = ["Bezier", { curviness: 100 }];
+                                if (verticalDistance < 10 || overallDistance < 50) {
+                                    connectorType = "Straight";
+                                    console.log("connector straight");
+                                }
+
+                                // Set the connector type for the connection
+                                connection.setConnector(connectorType);
+                            });
+
+                            // Since the connector type might have changed, request a repaint
                             jsPlumbInterop.instance.repaintEverything();
                         });
                     }
@@ -308,6 +334,8 @@ window.jsPlumbInterop = {
     },
 
     connectInputs: function (sourceId, targetId, color) {
+        console.log(jsPlumbInterop.instance.getConnections());
+        console.log("--------------------------------")
         var source = document.getElementById(sourceId);
         var target = document.getElementById(targetId);
 
@@ -370,6 +398,9 @@ window.jsPlumbInterop = {
             if (!source) console.error('Source does not exist');
             if (!target) console.error('Target does not exist');
         }
+        console.log(sourceEndpoint.id);
+        console.log(targetEndpoint.id);
+        console.log(jsPlumbInterop.instance.getConnections());
     },
 
     addZoom: function (zoomValue) {
@@ -467,7 +498,6 @@ function logParentNodeName(sourceId) {
         console.log("Source element not found.");
     }
 }
-
 
 window.updateNodeLocation = (refrence, nodeId, newX, newY) => {
     newX = Math.round(newX);
@@ -638,5 +668,8 @@ window.addClickListener = (dotNetObjRef) => {
     });
 };
 
-
-
+window.registerGlobalKeyPress = (dotNetObject) => {
+    document.addEventListener('keydown', function (event) {
+        dotNetObject.invokeMethodAsync('OnGlobalKeyPress', event.key, event.code);
+    });
+};
