@@ -281,11 +281,11 @@
                                         isInputConnectedToAnotherBlock = true;
                                     }
 
-                                    // Show the input field if:
-                                    // 1. It's in DirectInputValues and its value is not empty
-                                    // 2. It's not connected to another block
-                                    // 3. It's not connected to a program input
-                                    if ((isInputInDirectInputs && !isValueEmpty) || (!isInputConnectedToAnotherBlock && !isInputConnectedToProgramInput))
+                                    // Only show the input field if:
+                                    // 1. It's not connected to another block's output
+                                    // 2. It's not connected to a program input
+                                    // 3. It's in DirectInputValues, or its value is empty
+                                    if (!isInputConnectedToAnotherBlock && !isInputConnectedToProgramInput && (isInputInDirectInputs || isValueEmpty))
                                     {
                                         if(input.Name != "Trigger")
                                         {
@@ -295,7 +295,7 @@
                                         // If the input doesn't exist in DirectInputValues, initialize it
                                         if (!isInputInDirectInputs)
                                         {
-                                            customProgram1.ProgramStructure.DirectInputValues[input.Id] = "";
+                                            customProgram1.ProgramStructure.DirectInputValues[input.Id] = new object();
                                         }
                                         else
                                         {
@@ -319,7 +319,7 @@
                                                     case NodeBaseApi.Version2.Type.String:
                                                         <div class="mb-2">
                                                             <p class="font-semibold">Type: Text</p>
-                                                            <input type="text" @onchange="@(e => HandleInput(e, input.Id))"
+                                                            <input type="text" @oninput="eventArgs => HandleInput(eventArgs, input.Id)" value="@customProgram1.ProgramStructure.DirectInputValues[input.Id]"
                                                             class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
                                                         </div>
                                                         break;
@@ -345,17 +345,17 @@
                                                     case NodeBaseApi.Version2.Type.Number:
                                                         <div class="mb-2">
                                                             <p class="font-semibold">Type: Number</p>
-                                                            <input type="number" @onchange="@(e => HandleInput(e, input.Id))"
+                                                            <input type="number" @oninput="eventArgs => HandleInput(eventArgs, input.Id)" value="@customProgram1.ProgramStructure.DirectInputValues[input.Id]"
                                                             class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
                                                         </div>
                                                         break;
                                                     case NodeBaseApi.Version2.Type.Boolean:
                                                         <div class="mb-2">
                                                             <p class="font-semibold w-full">Type: Boolean</p>
-                                                            <div class="mt-2 w-full flex justify-center">
+                                                            <div class="mt-2 w-full flex justify-center"> 
                                                                 <div class="w-72 cursor-pointer flex items-center justify-center">
                                                                     <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
-                                                                        <input type="checkbox" id="@input.Id" @onchange="@(e => HandleInput(e, input.Id))"
+                                                                        <input type="checkbox" id="@input.Id" @onchange="eventArgs => HandleInput(eventArgs, input.Id)" checked="@customProgram1.ProgramStructure.DirectInputValues[input.Id]"
                                                                         class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                                                     </label>
                                                                 </div>
@@ -449,7 +449,7 @@
                                                     case NodeBaseApi.Version2.Type.String:
                                                         <div class="mb-2">
                                                             <p class="font-semibold">Type: Text</p>
-                                                            <input type="text" @onchange="@(e => HandleInput(e, input.Id))"
+                                                            <input type="text" @oninput="eventArgs => HandleInput(eventArgs, input.Id)" value="@customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]"
                                                                    class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
                                                         </div>
                                                         break;
@@ -475,7 +475,7 @@
                                                     case NodeBaseApi.Version2.Type.Number:
                                                         <div class="mb-2">
                                                             <p class="font-semibold">Type: Number</p>
-                                                            <input type="number" @onchange="@(e => HandleInput(e, input.Id))"
+                                                            <input type="number" @oninput="eventArgs => HandleInput(eventArgs, input.Id)" value="@customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]"
                                                                    class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
                                                         </div>
                                                         break;
@@ -485,7 +485,7 @@
                                                             <div class="mt-2 w-full flex justify-center">
                                                                 <div class="w-72 cursor-pointer flex items-center justify-center">
                                                                     <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
-                                                                        <input type="checkbox" id="@input.Id" @onchange="@(e => HandleInput(e, input.Id))"
+                                                                        <input type="checkbox" id="@input.Id" @onchange="eventArgs => HandleInput(eventArgs, input.Id)" checked="@customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]"
                                                                                class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                                                     </label>
                                                                 </div>
@@ -845,7 +845,7 @@
         }
         else
         {
-            
+
         }
 
         StateHasChanged();
@@ -853,11 +853,12 @@
     }
 
     bool hasloaded = false;
-    private async Task DrawConnections(ProgramStructure programStructure)
+    private async Task DrawConnections(ProgramStructure programStructure, bool allowanyways = false)
     {
-        if (hasloaded == false)
+        if (hasloaded == false || allowanyways)
         {
             hasloaded = true;
+            Console.WriteLine(programStructure.ProgramBlocks.Count());
             foreach (var block in programStructure.ProgramBlocks)
             {
                 // Draw connections for block inputs
@@ -871,6 +872,8 @@
                         if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
                         {
                             Console.WriteLine("---------------------");
+                            Console.WriteLine($"Node id: {block.Id}");
+                            Console.WriteLine("-                   -");
                             Console.WriteLine($"Index: {i}, Value: {output}");
                             Console.WriteLine($"Index: {i}, Value: {input.Id}");
                             Console.WriteLine("---------------------");
@@ -903,12 +906,16 @@
     }
 
     [JSInvokable]
-    public void OnGlobalKeyPress(string key, string code)
+    public async void OnGlobalKeyPress(string key, string code)
     {
         Console.WriteLine($"Key pressed: {key}, Code: {code}");
-        if (code == "Delete" || code == "Backspace")
+        if (code == "Delete" || code == "Backspace test test")
         {
-            DeleteCurrentNode();
+            await DeleteCurrentNode();
+        }
+        else if(code == "keyA")
+        {
+
         }
     }
 
@@ -1185,13 +1192,40 @@
 
     void HandleInput(ChangeEventArgs e, Guid inputId)
     {
-        if(localProgram is CustomProgram customProgram)
+        // Convert the value to object to avoid null-related issues
+        object value = e.Value;
+
+        if (localProgram is CustomProgram customProgram)
         {
-            customProgram.ProgramStructure.DirectInputValues[inputId] = e.Value?.ToString();
+            // Check the type of value and store it appropriately
+            if (float.TryParse(value?.ToString(), out float floatValue))
+            {
+                customProgram.ProgramStructure.DirectInputValues[inputId] = floatValue;
+            }
+            else if (bool.TryParse(value?.ToString(), out bool boolValue))
+            {
+                customProgram.ProgramStructure.DirectInputValues[inputId] = boolValue;
+            }
+            else
+            {
+                customProgram.ProgramStructure.DirectInputValues[inputId] = value?.ToString();
+            }
         }
-        else if(localProgram is CustomBlockProgram customBlockProgram)
+        else if (localProgram is CustomBlockProgram customBlockProgram)
         {
-            customBlockProgram.ProgramStructure.DirectInputValues[inputId] = e.Value?.ToString();
+            // Check the type of value and store it appropriately
+            if (float.TryParse(value?.ToString(), out float floatValue))
+            {
+                customBlockProgram.ProgramStructure.DirectInputValues[inputId] = floatValue;
+            }
+            else if (bool.TryParse(value?.ToString(), out bool boolValue))
+            {
+                customBlockProgram.ProgramStructure.DirectInputValues[inputId] = boolValue;
+            }
+            else
+            {
+                customBlockProgram.ProgramStructure.DirectInputValues[inputId] = value?.ToString();
+            }
         }
     }
 
@@ -1199,31 +1233,31 @@
     {
         try
         {
-            if (SelectedDetail is ProgramBlock programObject)
+            if (SelectedDetail is ProgramBlock programBlock)
             {
-                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-                //Console.WriteLine("waaawss");
-                if (_localProgram is CustomProgram customProgram)
+                try
                 {
-                    customProgram.ProgramStructure.RemoveProgramBlock(programObject.Id);
+                    await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+                    //await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearConnections");
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine("Exception caught: " + e.Message);
+                }
+
+                if (localProgram is CustomProgram customProgram)
+                {
+                    await customProgram.ProgramStructure.RemoveProgramBlock(programBlock.Id);
                     SelectedDetail = null;
-                    await DrawConnections(customProgram.ProgramStructure);
-                    StateHasChanged();
-                    //Console.WriteLine("okokokok");
+                    await DrawConnections(customProgram.ProgramStructure, true);
                 }
-                else if (_localProgram is CustomBlockProgram customBlockProgram)
+                else if (localProgram is CustomBlockProgram customBlockProgram)
                 {
-                    customBlockProgram.ProgramStructure.RemoveProgramBlock(programObject.Id);
-                    customBlockProgram.ProgramStructure.ProgramBlocks.Remove(programObject);
+                    await customBlockProgram.ProgramStructure.RemoveProgramBlock(programBlock.Id);
                     SelectedDetail = null;
-                    await DrawConnections(customBlockProgram.ProgramStructure);
-                    StateHasChanged();
-                    //Console.WriteLine("idiota");
+                    await DrawConnections(customBlockProgram.ProgramStructure, true);
                 }
-                else
-                {
-                    //Console.WriteLine("nigga whaaat");
-                }
+                StateHasChanged();
             }
         }
         catch (Exception e)
@@ -1356,11 +1390,11 @@
             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
             if (localProgram is CustomProgram customProgram)
             {
-                DrawConnections(customProgram.ProgramStructure);
+                await DrawConnections(customProgram.ProgramStructure, true);
             }
             else if (localProgram is CustomBlockProgram customBlockProgram)
             {
-                DrawConnections(customBlockProgram.ProgramStructure);
+                await DrawConnections(customBlockProgram.ProgramStructure, true);
             }
         }
         //Console.WriteLine("History index: " + _currentHistoryIndex);
@@ -1378,11 +1412,11 @@
             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
             if (localProgram is CustomProgram customProgram)
             {
-                DrawConnections(customProgram.ProgramStructure);
+                await DrawConnections(customProgram.ProgramStructure, true);
             }
             else if (localProgram is CustomBlockProgram customBlockProgram)
             {
-                DrawConnections(customBlockProgram.ProgramStructure);
+                await DrawConnections(customBlockProgram.ProgramStructure, true);
             }
         }
         //Console.WriteLine("History index: " + _currentHistoryIndex);

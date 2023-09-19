@@ -193,23 +193,49 @@ window.jsPlumbInterop = {
         });
     },
 
+    //----------------------------remove   probably
+    clearConnections: function () {
+        try {
+            if (this.instance) {
+                var connections = this.instance.getAllConnections();
+                for (var i = 0; i < connections.length; i++) {
+                    this.instance.detach(connections[i]);
+                }
+            }
+        } catch (error) {
+            console.error("Failed to clear connections:", error);
+        }
+    },
+
+    removeNodeConnections: function (sourceId, targetId) {
+        try {
+            // Get the jsPlumb instance
+            var instance = this.instance;
+
+            if (!instance) {
+                console.error("jsPlumb instance is not initialized.");
+                return;
+            }
+
+            // Retrieve the connections between the given source and target
+            var connections = instance.getConnections({
+                source: sourceId,
+                target: targetId
+            });
+
+            // Loop over connections and detach them
+            connections.forEach(function (connection) {
+                instance.detach(connection);
+            });
+
+        } catch (error) {
+            console.error("Failed to remove single connection:", error);
+        }
+    },
+    //----------------------------
+
     clearAllConnections: function () {
         try {
-            // Check for a valid jsPlumb instance
-            //if (this.instance) {
-            //    // Clear every connection
-            //    this.instance.deleteEveryConnection();
-
-            //    // Remove every endpoint
-            //    this.instance.removeAllEndpoints();
-            //}
-
-            //// Remove every child of connectionLayer
-            //var connectionLayer = document.getElementById('connection-layer');
-            //while (connectionLayer.firstChild) {
-            //    connectionLayer.removeChild(connectionLayer.firstChild);
-            //}
-
             if (this.instance) {
                 var connectionLayer = document.getElementById('connection-layer');
                 this.instance.empty(connectionLayer);
@@ -227,6 +253,7 @@ window.jsPlumbInterop = {
         if (newNode) {
             // Make the new node draggable
             this.instance.draggable(newNode, {
+                grid: [5, 5], 
                 start: function (params) {
                     var zoom = currentZoom;
                     var left = parseFloat(params.el.style.left);

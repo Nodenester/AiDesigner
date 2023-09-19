@@ -3,9 +3,9 @@ using Type = NodeBaseApi.Version2.Type;
 
 namespace AiDesigner.Shared.Blocks
 {
-    public class StringConcatenationBlock : Block
+    public class Concatenation : Block
     {
-        public StringConcatenationBlock()
+        public Concatenation()
         {
             Id = Guid.NewGuid();
             Name = "Concatenation";
@@ -29,9 +29,9 @@ namespace AiDesigner.Shared.Blocks
         }
     }
 
-    public class StringLengthBlock : Block
+    public class Length : Block
     {
-        public StringLengthBlock()
+        public Length()
         {
             Id = Guid.NewGuid();
             Name = "Length";
@@ -54,9 +54,9 @@ namespace AiDesigner.Shared.Blocks
         }
     }
 
-    public class StringSubstringBlock : Block
+    public class Substring : Block
     {
-        public StringSubstringBlock()
+        public Substring()
         {
             Id = Guid.NewGuid();
             Name = "Substring";
@@ -81,9 +81,9 @@ namespace AiDesigner.Shared.Blocks
         }
     }
 
-    public class ToLowercaseBlock : Block
+    public class Lowercase : Block
     {
-        public ToLowercaseBlock()
+        public Lowercase()
         {
             Id = Guid.NewGuid();
             Name = "Lowercase";
@@ -106,9 +106,9 @@ namespace AiDesigner.Shared.Blocks
         }
     }
 
-    public class ToUppercaseBlock : Block
+    public class Uppercase : Block
     {
-        public ToUppercaseBlock()
+        public Uppercase()
         {
             Id = Guid.NewGuid();
             Name = "Uppercase";
