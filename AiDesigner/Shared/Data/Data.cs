@@ -247,15 +247,21 @@ namespace NodeBaseApi.Version2
             if (blockToRemove != null)
             {
                 // Remove connections to the block's inputs
-                foreach (Guid inputId in blockToRemove.Inputs)
+                if (blockToRemove.Inputs != null)
                 {
-                    RemoveConnection(inputId);
+                    foreach (Guid inputId in blockToRemove.Inputs)
+                    {
+                        RemoveConnection(inputId);
+                    }
                 }
 
                 // Remove connections to the block's outputs
-                foreach (Guid outputId in blockToRemove.Outputs)
+                if (blockToRemove.Outputs != null)
                 {
-                    OutputValues.Remove(outputId);
+                    foreach (Guid outputId in blockToRemove.Outputs)
+                    {
+                        OutputValues.Remove(outputId);
+                    }
                 }
 
                 ProgramBlocks.Remove(blockToRemove);
