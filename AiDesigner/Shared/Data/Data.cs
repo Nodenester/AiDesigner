@@ -240,12 +240,25 @@ namespace NodeBaseApi.Version2
             InputValues.Remove(inputId);
         }
 
-        public void RemoveProgramBlock(Guid blockId)
+        public async Task<bool> RemoveProgramBlock(Guid blockId)
         {
-            ProgramBlock blockToRemove = ProgramBlocks.FirstOrDefault(block => block.Id == blockId);
-
-            if (blockToRemove != null)
+            try
             {
+                // Check if ProgramBlocks is null
+                if (ProgramBlocks == null)
+                {
+                    throw new NullReferenceException("ProgramBlocks is null.");
+                }
+
+                // Find the block to remove
+                ProgramBlock blockToRemove = ProgramBlocks.FirstOrDefault(block => block.Id == blockId);
+
+                // Check if the block exists
+                if (blockToRemove == null)
+                {
+                    throw new KeyNotFoundException($"No block with ID {blockId} exists.");
+                }
+
                 // Remove connections to the block's inputs
                 if (blockToRemove.Inputs != null)
                 {
@@ -256,15 +269,53 @@ namespace NodeBaseApi.Version2
                 }
 
                 // Remove connections to the block's outputs
-                if (blockToRemove.Outputs != null)
+                if (blockToRemove.Block?.Outputs != null) // Ensure block and Outputs are not null
                 {
-                    foreach (Guid outputId in blockToRemove.Outputs)
+                    foreach (var output in blockToRemove.Block.Outputs)
                     {
+                        Guid outputId = output.Id;
+
+                        // Remove from OutputValues
                         OutputValues.Remove(outputId);
+
+                        // Remove from ProgramEndConnections
+                        var keysToRemove = ProgramEndConnections
+                            .Where(kv => kv.Value == outputId)
+                            .Select(kv => kv.Key)
+                            .ToList();
+
+                        foreach (var key in keysToRemove)
+                        {
+                            ProgramEndConnections.Remove(key);
+                        }
+
+                        // Remove from other blocks' inputs
+                        foreach (var otherBlock in ProgramBlocks)
+                        {
+                            if (otherBlock.Inputs != null)
+                            {
+                                for (int i = 0; i < otherBlock.Inputs.Count; i++)
+                                {
+                                    if (otherBlock.Inputs[i] == outputId)
+                                    {
+                                        otherBlock.Inputs[i] = Guid.Empty; // or set to some default value
+                                    }
+                                }
+                            }
+                        }
                     }
                 }
 
+                // Remove the block
                 ProgramBlocks.Remove(blockToRemove);
+
+                return true;
+            }
+            catch (Exception ex)
+            {
+                // Log the exception or handle it accordingly
+                Console.WriteLine($"An error occurred while removing the block: {ex.Message}");
+                return false;
             }
         }
 
@@ -319,7 +370,6 @@ namespace NodeBaseApi.Version2
                     //throw new DisconnectedInputException($"Input '{input.Name}' is not connected.");
                 }
             }
-
             // Additional error checks can be added here...
 
             return errors;
