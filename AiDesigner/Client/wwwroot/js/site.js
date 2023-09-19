@@ -334,8 +334,6 @@ window.jsPlumbInterop = {
     },
 
     connectInputs: function (sourceId, targetId, color) {
-        console.log(jsPlumbInterop.instance.getConnections());
-        console.log("--------------------------------")
         var source = document.getElementById(sourceId);
         var target = document.getElementById(targetId);
 
@@ -398,9 +396,6 @@ window.jsPlumbInterop = {
             if (!source) console.error('Source does not exist');
             if (!target) console.error('Target does not exist');
         }
-        console.log(sourceEndpoint.id);
-        console.log(targetEndpoint.id);
-        console.log(jsPlumbInterop.instance.getConnections());
     },
 
     addZoom: function (zoomValue) {
