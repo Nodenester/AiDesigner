@@ -182,7 +182,7 @@ namespace NodeBaseApi.Version2
             // Check that the output and input are compatible.
             if ((output.Type != input.Type || output.IsList != input.IsList) && (output.Type != Type.Object && input.Type != Type.Object))
             {
-                throw new InvalidConnectionException($"Incompatible types or list property between output '{output.Name}' and input '{input.Name}'.");
+                //throw new InvalidConnectionException($"Incompatible types or list property between output '{output.Name}' and input '{input.Name}'.");
             }
 
             if (inputProgramBlock != null)
