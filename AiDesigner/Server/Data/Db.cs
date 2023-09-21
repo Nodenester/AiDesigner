@@ -202,9 +202,9 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-        INSERT INTO nestor.user_program_connections (UserId, ProgramId, IsCustomBlock)
-        VALUES (@UserId, @ProgramId, @IsCustomBlock);
-    ";
+                    INSERT INTO nestor.user_program_connections (UserId, ProgramId, IsCustomBlock)
+                    VALUES (@UserId, @ProgramId, @IsCustomBlock);
+                ";
 
                 await connection.ExecuteAsync(query, new { UserId = userId, ProgramId = programId, IsCustomBlock = false });
             }
@@ -214,9 +214,9 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-        DELETE FROM nestor.user_program_connections
-        WHERE UserId = @UserId AND ProgramId = @ProgramId;
-    ";
+                    DELETE FROM nestor.user_program_connections
+                    WHERE UserId = @UserId AND ProgramId = @ProgramId;
+                ";
 
                 await connection.ExecuteAsync(query, new { UserId = userId, ProgramId = programId });
             }
@@ -226,9 +226,9 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-        DELETE FROM nestor.programs
-        WHERE Id = @Id;
-    ";
+                DELETE FROM nestor.programs
+                WHERE Id = @Id;
+            ";
 
                 await connection.ExecuteAsync(query, new { Id = id });
             }
@@ -238,10 +238,10 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-    SELECT ProgramData, IsCustomBlock
-    FROM nestor.programs
-    WHERE IsPublic = 1 AND (Name LIKE @SearchTerm OR Description LIKE @SearchTerm);
-";
+                    SELECT ProgramData, IsCustomBlock
+                    FROM nestor.programs
+                    WHERE IsPublic = 1 AND (Name LIKE @SearchTerm OR Description LIKE @SearchTerm);
+                ";
 
                 var result = await connection.QueryAsync(query, new { SearchTerm = $"%{searchTerm}%" });
 

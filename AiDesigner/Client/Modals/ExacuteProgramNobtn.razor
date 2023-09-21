@@ -1,4 +1,5 @@
-﻿@using NodeBaseApi.Version2;
+﻿@using AiDesigner.Shared.Data;
+@using NodeBaseApi.Version2;
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 
@@ -18,7 +19,7 @@
             <!-- Modal body -->
             <div class="p-6 space-y-6 dark:text-gray-300 dark:bg-gray-600 dark:text-white">
                 <div class="flex space-x-4" style="height: 30rem;">
-                    <div class="w-1/2 border-r !border-gray-300 dark:border-gray-500 overflow-auto">
+                    <div class="w-1/2 border-r !border-gray-300 dark:!border-gray-500 overflow-auto">
                         @if (AP is CustomProgram customProgram)
                         {
                             <h3 class="text-lg font-semibold">Inputs:</h3>
@@ -27,7 +28,7 @@
                                 <div style="margin-top: 0rem; margin-right: 1rem;">
                                     @foreach (var input in customProgram.ProgramStructure.ProgramStart)
                                     {
-                                        <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                                        <div class="bg-white dark:!bg-gray-800 px-4 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
                                             @switch (input.Type)
                                             {
                                                 case NodeBaseApi.Version2.Type.Trigger:
@@ -41,8 +42,9 @@
                                                 case NodeBaseApi.Version2.Type.String:
                                                     <div class="mb-2">
                                                         <p class="font-semibold">Type: Text</p>
-                                                        <input type="text" @onchange="@(e => UpdateValue(e, input.Id))"
-                                                               class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
+                                                        <textarea @onchange="@(e => UpdateValue(e, input.Id))"
+                                                                  class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"
+                                                                  placeholder="@input.Name"></textarea>
                                                     </div>
                                                     break;
                                                 case NodeBaseApi.Version2.Type.Picture:
@@ -120,7 +122,7 @@
                                 <div style="margin-top: 0rem; margin-right: 1rem;">
                                     @foreach (var input in customBlockProgram.ProgramStructure.ProgramStart)
                                     {
-                                        <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                                        <div class="bg-white dark:!bg-gray-800 px-4 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
                                             @switch (input.Type)
                                             {
                                                 case NodeBaseApi.Version2.Type.Trigger:
@@ -134,8 +136,9 @@
                                                 case NodeBaseApi.Version2.Type.String:
                                                     <div class="mb-2">
                                                         <p class="font-semibold">Type: Text</p>
-                                                        <input type="text" @onchange="@(e => UpdateValue(e, input.Id))"
-                                                               class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
+                                                        <textarea @onchange="@(e => UpdateValue(e, input.Id))"
+                                                                  class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"
+                                                                  placeholder="@input.Name"></textarea>
                                                     </div>
                                                     break;
                                                 case NodeBaseApi.Version2.Type.Picture:
@@ -216,31 +219,58 @@
                                 <div style="margin-top: 0rem;">
                                     @foreach (var output in customProgram2.ProgramStructure.ProgramEnd)
                                     {
-                                        <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                                        if (output.Name == "End")
+                                        {
+                                            continue;
+                                        }
+                                        var index = customProgram2.ProgramStructure.ProgramEnd.IndexOf(output) - 1;
+                                        <div class="bg-white dark:!bg-gray-800 px-4 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
                                             @switch (output.Type)
                                             {
                                                 case NodeBaseApi.Version2.Type.Picture:
                                                     <p class="font-semibold">Type: Picture</p>
-                                                    <img src="@($"data:image/png;base64,{Convert.ToBase64String((byte[])customProgram2.ProgramStructure.OutputValues[output.Id])}")" alt="@output.Name" />
+                                                    if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                                    {
+                                                        <img src="@($"data:image/png;base64,{Convert.ToBase64String((byte[])ProgramOutput.ToArray()[index])}")" alt="@output.Name" />
+                                                    }
                                                     break;
                                                 case NodeBaseApi.Version2.Type.String:
                                                     <p class="font-semibold">Type: Text</p>
-                                                    <p>@customProgram2.ProgramStructure.OutputValues[output.Id]</p>
+                                                    if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                                    {
+                                                        <p>@ProgramOutput.ToArray()[index]</p>
+                                                    }
                                                     break;
                                                 case NodeBaseApi.Version2.Type.Number:
                                                     <p class="font-semibold">Type: Number</p>
-                                                    <p>@customProgram2.ProgramStructure.OutputValues[output.Id]</p>
+                                                    if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                                    {
+                                                        <p>@ProgramOutput.ToArray()[index]</p>
+                                                    }
                                                     break;
                                                 case NodeBaseApi.Version2.Type.Boolean:
                                                     <p class="font-semibold">Type: Boolean</p>
-                                                    <p>@((bool)customProgram2.ProgramStructure.OutputValues[output.Id] ? "True" : "False")</p>
+                                                    if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                                    {
+                                                        if (ProgramOutput.ToArray()[index].ToString() == "True")
+                                                        {
+                                                            <p>True</p>
+                                                        }
+                                                        else
+                                                        {
+                                                            <p>False</p>
+                                                        }
+                                                    }
                                                     break;
                                                 case NodeBaseApi.Version2.Type.Audio:
                                                     <p class="font-semibold">Type: Audio</p>
-                                                    <audio controls>
-                                                        <source src="@($"data:audio/wav;base64,{Convert.ToBase64String((byte[])customProgram2.ProgramStructure.OutputValues[output.Id])}")" type="audio/wav">
-                                                        Your browser does not support the audio element.
-                                                    </audio>
+                                                    if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                                    {
+                                                        <audio controls>
+                                                            <source src="@($"data:audio/wav;base64,{Convert.ToBase64String((byte[])ProgramOutput.ToArray()[index])}")" type="audio/wav">
+                                                            Your browser does not support the audio element.
+                                                        </audio>
+                                                    }
                                                     break;
                                                 default:
                                                     <p>Unknown output type</p>
@@ -258,7 +288,7 @@
                                 <div style="margin-top: 0rem;">
                                     @foreach (var output in customBlockProgram2.ProgramStructure.ProgramEnd)
                                     {
-                                        <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                                        <div class="bg-white dark:!bg-gray-800 px-4 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
                                             @switch (output.Type)
                                             {
                                                 case NodeBaseApi.Version2.Type.Picture:
@@ -275,7 +305,11 @@
                                                     break;
                                                 case NodeBaseApi.Version2.Type.Boolean:
                                                     <p class="font-semibold">Type: Boolean</p>
-                                                    <p>@((bool)customBlockProgram2.ProgramStructure.OutputValues[output.Id] ? "True" : "False")</p>
+                                                    if (customBlockProgram2.ProgramStructure.OutputValues[output.Id] != null)
+                                                    {
+                                                        <p>@((bool)customBlockProgram2.ProgramStructure.OutputValues[output.Id] ? "True" : "False")</p>
+                                                        break;
+                                                    }
                                                     break;
                                                 case NodeBaseApi.Version2.Type.Audio:
                                                     <p class="font-semibold">Type: Audio</p>
@@ -296,8 +330,8 @@
                 </div>
             </div>
             <!-- Modal footer -->
-            <div class="flex items-center justify-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600">
-                <button type="button" class="btn btn-primary px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 border-0" @onclick="@HandleNextButtonClick">Exacute</button>
+            <div class="flex items-center justify-center p-6 pt-0 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600 outline-none">
+                <button type="button" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded border-0" @onclick="@ExecuteProgram">Exacute</button>
             </div>
         </div>
     </div>
@@ -310,6 +344,9 @@
 
     [Parameter]
     public ProgramObject AP { get; set; }
+
+    List<object> ProgramOutput { get; set; } = new List<object>();
+    ApiService apiService = new ApiService("https://localhost:44313/");
 
     protected override async Task OnParametersSetAsync()
     {
@@ -432,8 +469,19 @@
         }
     }
 
-    private async Task HandleNextButtonClick()
+    private async Task ExecuteProgram()
     {
-        
+        if (AP is CustomProgram customProgram)
+        {
+            var nonNullInputValues = customProgram.ProgramStructure.InputValues
+                .Where(kvp => kvp.Value != null)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            ProgramOutput = await apiService.ExecuteProgramAsync(customProgram.ApiKey, nonNullInputValues, "56a2d82a-5595-4a8f-b1fd-9a1482e02d20", null, true);
+        }
+        else if (AP is CustomBlockProgram customBlockProgram)
+        {
+
+        }
     }
 }
