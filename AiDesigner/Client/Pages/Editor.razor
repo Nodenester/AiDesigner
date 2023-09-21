@@ -871,12 +871,12 @@
 
                         if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
                         {
-                            Console.WriteLine("---------------------");
-                            Console.WriteLine($"Node id: {block.Id}");
-                            Console.WriteLine("-                   -");
-                            Console.WriteLine($"Index: {i}, Value: {output}");
-                            Console.WriteLine($"Index: {i}, Value: {input.Id}");
-                            Console.WriteLine("---------------------");
+                            // Console.WriteLine("---------------------");
+                            // Console.WriteLine($"Node id: {block.Id}");
+                            // Console.WriteLine("-                   -");
+                            // Console.WriteLine($"Index: {i}, Value: {output}");
+                            // Console.WriteLine($"Index: {i}, Value: {input.Id}");
+                            // Console.WriteLine("---------------------");
 
                             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
                         }
@@ -888,10 +888,10 @@
             {
                 if (programStructure.ProgramEndConnections.TryGetValue(input.Id, out Guid outputId))
                 {
-                    Console.WriteLine("---------------------");
-                    Console.WriteLine($"Input Id: {input.Id}");
-                    Console.WriteLine($"Connected Output Id: {outputId}");
-                    Console.WriteLine("---------------------");
+                    // Console.WriteLine("---------------------");
+                    // Console.WriteLine($"Input Id: {input.Id}");
+                    // Console.WriteLine($"Connected Output Id: {outputId}");
+                    // Console.WriteLine("---------------------");
 
                     await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", outputId, input.Id, GetLineColor(input.Type.ToString()));
                 }
@@ -1194,7 +1194,6 @@
     {
         // Convert the value to object to avoid null-related issues
         object value = e.Value;
-
         if (localProgram is CustomProgram customProgram)
         {
             // Check the type of value and store it appropriately

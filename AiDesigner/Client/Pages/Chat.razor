@@ -55,19 +55,20 @@
                     <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
                         @switch (input.Type)
                         {
-                            case NodeBaseApi.Version2.Type.Trigger:
+@*                             case NodeBaseApi.Version2.Type.Trigger:
                                 <div class="mb-2">
                                     <p class="font-semibold">Type: Trigger</p>
                                     <button class="bg-blue-500 dark:!bg-gray-800 hover:dark:!bg-gray-600 text-white w-full mt-2 p-2 rounded hover:bg-blue-600">
                                         Trigger @input.Name
                                     </button>
                                 </div>
-                                break;
+                                break; *@
                             case NodeBaseApi.Version2.Type.String:
                                 <div class="mb-2">
                                     <p class="font-semibold">Type: Text</p>
-                                    <input type="text" @onchange="@(e => UpdateValue(e, input.Id))"
-                                           class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
+                                    <textarea @onchange="@(e => UpdateValue(e, input.Id))"
+                                              class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"
+                                              placeholder="@input.Name"></textarea>
                                 </div>
                                 break;
                             case NodeBaseApi.Version2.Type.Picture:
@@ -145,7 +146,7 @@
 
         <!-- Button -->
         <div class="align-center mb-0 mt-auto">
-            <button class="py-1 bg-green-500 text-white rounded mt-4 px-6 h-12">
+            <button class="py-1 bg-green-600 text-white rounded mt-4 px-6 h-12" @onclick="ExecuteProgram">
                 Execute Program
             </button>
         </div>
@@ -163,31 +164,54 @@
                     {
                         continue;
                     }
+                    var index = selectedProgram.ProgramStructure.ProgramEnd.IndexOf(output) - 1;
                     <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
                         @switch (output.Type)
                         {
                             case NodeBaseApi.Version2.Type.Picture:
                                 <p class="font-semibold">Type: Picture</p>
-                                <img src="@($"data:image/png;base64,{Convert.ToBase64String((byte[])selectedProgram.ProgramStructure.OutputValues[output.Id])}")" alt="@output.Name" />
+                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                {
+                                    <img src="@($"data:image/png;base64,{Convert.ToBase64String((byte[])ProgramOutput.ToArray()[index])}")" alt="@output.Name" />
+                                }
                                 break;
                             case NodeBaseApi.Version2.Type.String:
                                 <p class="font-semibold">Type: Text</p>
-                                <p>@selectedProgram.ProgramStructure.OutputValues[output.Id]</p>
+                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                {
+                                    <p>@ProgramOutput.ToArray()[index]</p>
+                                }
                                 break;
                             case NodeBaseApi.Version2.Type.Number:
                                 <p class="font-semibold">Type: Number</p>
-                                <p>@selectedProgram.ProgramStructure.OutputValues[output.Id]</p>
+                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                {
+                                    <p>@ProgramOutput.ToArray()[index]</p>
+                                }
                                 break;
                             case NodeBaseApi.Version2.Type.Boolean:
                                 <p class="font-semibold">Type: Boolean</p>
-                                <p>@((bool)selectedProgram.ProgramStructure.OutputValues[output.Id] ? "True" : "False")</p>
+                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                {
+                                    if (ProgramOutput.ToArray()[index].ToString() == "True")
+                                    {
+                                        <p>True</p>
+                                    }
+                                    else
+                                    {
+                                        <p>False</p>
+                                    }
+                                }
                                 break;
                             case NodeBaseApi.Version2.Type.Audio:
                                 <p class="font-semibold">Type: Audio</p>
-                                <audio controls>
-                                    <source src="@($"data:audio/wav;base64,{Convert.ToBase64String((byte[])selectedProgram.ProgramStructure.OutputValues[output.Id])}")" type="audio/wav">
-                                    Your browser does not support the audio element.
-                                </audio>
+                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                {
+                                    <audio controls>
+                                        <source src="@($"data:audio/wav;base64,{Convert.ToBase64String((byte[])ProgramOutput.ToArray()[index])}")" type="audio/wav">
+                                        Your browser does not support the audio element.
+                                    </audio>
+                                }
                                 break;
                             default:
                                 <p>Unknown output type</p>
@@ -222,9 +246,22 @@
             ObjectCreationHandling = ObjectCreationHandling.Replace
         };
 
+    ApiService apiService = new ApiService("https://localhost:44313/");
+
+    List<object> ProgramOutput { get; set; } = new List<object>();
+
     protected override async Task OnInitializedAsync()
     {
-  
+
+    }
+
+    private async Task ExecuteProgram()
+    {
+        var nonNullInputValues = selectedProgram.ProgramStructure.InputValues
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        ProgramOutput = await apiService.ExecuteProgramAsync(selectedProgram.ApiKey, nonNullInputValues, "56a2d82a-5595-4a8f-b1fd-9a1482e02d20", null, true);
     }
 
     protected override async Task OnParametersSetAsync()
