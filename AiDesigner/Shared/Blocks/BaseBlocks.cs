@@ -103,9 +103,9 @@ namespace AiDesigner.Shared.Blocks
     }
 
     //Variable handeling
-    public class SetVariableBlock : Block
+    public class SetVariable : Block
     {
-        public SetVariableBlock()
+        public SetVariable()
         {
             Id = Guid.NewGuid();
             Name = "Set Variable";
@@ -114,7 +114,6 @@ namespace AiDesigner.Shared.Blocks
             Inputs = new List<Input>
         {
             new Input { Name = "Trigger", Type = Type.Trigger, Description = "Triggers Set Variable" },
-            new Input {Id = Guid.NewGuid(),Name = "VariableId",Description = "The ID of the variable to set",Type = Type.Object,IsRequired = true,IsList = false},
             new Input {Id = Guid.NewGuid(),Name = "Value",Description = "The value to set",Type = Type.Object,IsRequired = true,IsList = false}
         };
 
@@ -127,26 +126,15 @@ namespace AiDesigner.Shared.Blocks
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
-    public class GetVariableBlock : Block
+    public class GetVariable : Block
     {
-        public GetVariableBlock()
+        public GetVariable()
         {
             Id = Guid.NewGuid();
             Name = "Get Variable";
             Description = "Gets the value of a variable";
 
-            Inputs = new List<Input>
-        {
-            new Input
-            {
-                Id = Guid.NewGuid(),
-                Name = "VariableId",
-                Description = "The ID of the variable to get",
-                Type = Type.Object,
-                IsRequired = true,
-                IsList = false
-            }
-        };
+            Inputs = new List<Input>{};
 
             Outputs = new List<Output>
         {
@@ -172,7 +160,7 @@ namespace AiDesigner.Shared.Blocks
         public CustomBlock()
         {
             Id = Guid.NewGuid();
-            Name = "Block with Sub-Program";
+            Name = "Custom Block";
             Description = "A block that contains a sub-program";
             Inputs = new List<Input>();
             Outputs = new List<Output>

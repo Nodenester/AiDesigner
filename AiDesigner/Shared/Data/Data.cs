@@ -187,41 +187,34 @@ namespace NodeBaseApi.Version2
 
             if (inputProgramBlock != null)
             {
-                // Find the index of the input in its block's list of inputs.
                 int index = inputProgramBlock.Block.Inputs.FindIndex(i => i.Id == inputId);
                 if (index != -1)
                 {
                     if (inputProgramBlock.Inputs == null)
                     {
-                        // Initialize the list with the same size as inputBlock.Inputs list
                         inputProgramBlock.Inputs = new List<Guid>(new Guid[inputProgramBlock.Block.Inputs.Count]);
                     }
 
-                    // Set the element at index position
                     inputProgramBlock.Inputs[index] = outputId;
                 }
                 else
                 {
                     throw new Exception($"No input with id '{inputId}' found in the block's inputs.");
                 }
+                //mayby add  InputValues[inputId] = null;
             }
 
-            // For connections to the program's end (outputs), we don't have to store the connection in a block. 
-            // We can use the OutputValues dictionary directly.
             if (programEndInput != null)
             {
                 // Store the connection
                 ProgramEndConnections[inputId] = outputId;
 
-                // We need to ensure that OutputValues contains the output's Id, as GetOutputValue uses this to fetch the value.
-                // The actual value will be set when the output block is executed.
                 if (!OutputValues.ContainsKey(outputId))
                 {
                     OutputValues[outputId] = null;
                 }
             }
 
-            // For connections from the program's start (inputs), we need to store the input value to be used later.
             if (programStartOutput != null)
             {
                 InputValues[inputId] = null;
@@ -398,10 +391,10 @@ namespace NodeBaseApi.Version2
     {
         public Guid Id { get; set; }
         public Block Block { get; set; }
-        //Connected input id    should be in same index and block input
         public List<Guid> Inputs { get; set; }
-        //Just A guid for every output
         public List<Guid> Outputs { get; set; }
+        public Guid CustomProgramId { get; set; }
+        public Guid VariableId { get; set; }
         public int X { get; set; }
         public int Y { get; set; }
     }
