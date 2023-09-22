@@ -41,8 +41,8 @@
         }
     </div>
     <!-- Input box -->
-    <div class="flex-grow text-center p-4 overflow-y-auto" style="max-height: 100%; max-width: 45%;">
-        <p class="text-lg font-semibold mb-4">Program Inputs</p>
+    <div class="flex-grow text-center p-4 pt-2 overflow-y-auto" style="max-height: 100%; max-width: 45%;">
+        <p class="text-lg font-semibold mb-2">Program Inputs</p>
         @if (selectedProgram != null)
         {
             <div style="margin-top: 0rem;">
@@ -104,7 +104,7 @@
                                         <div class="w-72 cursor-pointer flex items-center justify-center">
                                             <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
                                                 <input type="checkbox" id="@input.Id" @onchange="@(e => UpdateValue(e, input.Id))"
-                                                       class="w-6 h-6 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                       class="w-6 h-6 accent-green-600 rounded" />
                                             </label>
                                         </div>
                                     </div>
@@ -153,8 +153,8 @@
     </div>
 
     <!-- Output box -->
-    <div class="flex-grow text-center p-4">
-        <p class="text-lg font-semibold mb-4">Program Outputs</p>
+    <div class="flex-grow text-center p-4 pt-2">
+        <p class="text-lg font-semibold mb-2">Program Outputs</p>
         @if (selectedProgram != null)
         {
             <div style="margin-top: 0rem;">

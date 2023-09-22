@@ -4,7 +4,7 @@
 @using System.Security.Claims
 
 <button @onclick="Open" class="btn btn-primary px-6 py-3 text-lg font-semibold text-white bg-green-600 hover:bg-green-700 rounded-md" type="button">
-    Exacute Program
+    Execute Program
 </button>
 
 <div class="@($"fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full {(IsModalOpen ? "block" : "hidden")}")" style="background-color: rgba(0, 0, 0, 0.5);">
@@ -88,7 +88,7 @@
                                                             <div class="w-72 cursor-pointer flex items-center justify-center">
                                                                 <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
                                                                     <input type="checkbox" id="@input.Id" @onchange="@(e => UpdateValue(e, input.Id))"
-                                                                           class="w-6 h-6 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                                           class="w-6 h-6 accent-green-600 rounded" />
                                                                 </label>
                                                             </div>
                                                         </div>
