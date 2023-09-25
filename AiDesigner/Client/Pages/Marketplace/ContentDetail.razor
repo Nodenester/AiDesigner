@@ -102,9 +102,24 @@
                     </ul>
 
                     <!-- Add to Vault Button -->
-                    <button @onclick="Addtovault" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
-                        Add to Vault
-                    </button>
+                    @if(true)
+                    {
+                        bool isVaulted = false;
+                        @if (VaultedArticles != null)
+                        {
+                            isVaulted = VaultedArticles.Any(x => x.Id == SelectedArticle.Id);
+                        }
+                        @if (isVaulted)
+                        {
+                            <button @onclick:stopPropagation="true" class="bg-gray-600 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">✔️ Vaulted</button>
+                        }
+                        else
+                        {
+                            <button @onclick="Addtovault" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
+                                Add to Vault
+                            </button>
+                        }
+                    }
                 </div>
             }
         </div>
@@ -122,6 +137,9 @@
 
     [Parameter]
     public WorkshopArticle SelectedArticle { get; set; }
+
+    [Parameter]
+    public List<WorkshopArticle> VaultedArticles { get; set; }
 
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
