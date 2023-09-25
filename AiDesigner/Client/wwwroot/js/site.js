@@ -106,7 +106,7 @@ window.jsPlumbInterop = {
                 params.el.style.left = (left * zoom) + 'px';
                 params.el.style.top = (top * zoom) + 'px';
             },
-            drag: function (params) {
+            drag: throttle(function (params) {
                 var zoom = currentZoom;
                 var left = parseFloat(params.pos[0]) / zoom;
                 var top = parseFloat(params.pos[1]) / zoom;
@@ -179,7 +179,7 @@ window.jsPlumbInterop = {
                     });
 
                 }
-            },
+            }, 16),
 
             stop: function (params) {
                 var zoom = currentZoom;
@@ -446,6 +446,27 @@ window.jsPlumbInterop = {
     },
     // Other jsPlumb related functions...
 };
+
+function throttle(func, limit) {
+    let lastFunc;
+    let lastRan;
+    return function () {
+        const context = this;
+        const args = arguments;
+        if (!lastRan) {
+            func.apply(context, args);
+            lastRan = Date.now();
+        } else {
+            clearTimeout(lastFunc);
+            lastFunc = setTimeout(function () {
+                if ((Date.now() - lastRan) >= limit) {
+                    func.apply(context, args);
+                    lastRan = Date.now();
+                }
+            }, limit - (Date.now() - lastRan));
+        }
+    };
+}
 
 function resetEndpoints(id, currentZoom) {
     element = document.getElementById(id);

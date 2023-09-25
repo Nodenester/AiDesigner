@@ -205,11 +205,11 @@ else
         public bool IsChangeEventArgs => ChangeEventArgs != null;
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnParametersSetAsync()
     {
-        if (IsList)
+        if(IsList)
         {
-            var objList = (List<object>)Value;
+            List<object> objList = Value as List<object>;
             if (objList != null)
             {
                 inputItems = objList.Select(x => new InputItem { Data = x }).ToList();
@@ -219,20 +219,10 @@ else
                 }
                 SelectedInput = inputItems.FirstOrDefault();
             }
-        }
-    }
-    protected override async Task OnParametersSetAsync()
-    {
-        if(IsList)
-        {
-            var objList = inputItems.Select(item => item.Data).ToList();
-            if(objList != null)
+            else
             {
-                inputItems = objList.Select(x => new InputItem { Data = x }).ToList();
-                if(inputItems.Count == 0)
-                {
-                    inputItems.Add(new InputItem()); 
-                }
+                inputItems = new List<InputItem>();
+                inputItems.Add(new InputItem());
                 SelectedInput = inputItems.FirstOrDefault();
             }
         }
