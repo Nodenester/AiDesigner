@@ -1,7 +1,9 @@
-﻿@using AiDesigner.Shared.Data;
+﻿@using AiDesigner.Client.Components
+@using AiDesigner.Shared.Data;
 @using NodeBaseApi.Version2;
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using static AiDesigner.Client.Components.InputList;
 
 <div class="@($"fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full {(IsModalOpen ? "block" : "hidden")}")" style="background-color: rgba(0, 0, 0, 0.5);">
     <div class="relative w-full max-w-2xl max-h-full mx-auto">
@@ -27,86 +29,7 @@
                                 @foreach (var input in AP.ProgramStructure.ProgramStart)
                                 {
                                     <div class="bg-white dark:!bg-gray-800 px-4 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                                        @switch (input.Type)
-                                        {
-                                            case NodeBaseApi.Version2.Type.Trigger:
-                                                <div class="mb-2">
-                                                    <p class="font-semibold">Type: Trigger</p>
-                                                    <button class="bg-blue-500 dark:!bg-gray-800 hover:dark:!bg-gray-600 text-white w-full mt-2 p-2 rounded hover:bg-blue-600">
-                                                        Trigger @input.Name
-                                                    </button>
-                                                </div>
-                                                break;
-                                            case NodeBaseApi.Version2.Type.String:
-                                                <div class="mb-2">
-                                                    <p class="font-semibold">Type: Text</p>
-                                                    <textarea @onchange="@(e => UpdateValue(e, input.Id))"
-                                                                class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"
-                                                                placeholder="@input.Name"></textarea>
-                                                </div>
-                                                break;
-                                            case NodeBaseApi.Version2.Type.Picture:
-                                                <div class="mb-2">
-                                                    <p class="font-semibold">Type: Picture</p>
-                                                    <div>
-                                                        <div class="flex items-center justify-center w-full">
-                                                            <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                                    </svg>
-                                                                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">PNG or JPG (MAX. 260x260px)</p>
-                                                                </div>
-                                                                <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnSingleFileChanged(e, input.Id))" />
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                break;
-                                            case NodeBaseApi.Version2.Type.Number:
-                                                <div class="mb-2">
-                                                    <p class="font-semibold">Type: Number</p>
-                                                    <input type="number" @onchange="@(e => UpdateValue(e, input.Id))"
-                                                            class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
-                                                </div>
-                                                break;
-                                            case NodeBaseApi.Version2.Type.Boolean:
-                                                <div class="mb-2">
-                                                    <p class="font-semibold w-full">Type: Boolean</p>
-                                                    <div class="mt-2 w-full flex justify-center">
-                                                        <div class="w-72 cursor-pointer flex items-center justify-center">
-                                                            <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
-                                                                <input type="checkbox" id="@input.Id" @onchange="@(e => UpdateValue(e, input.Id))"
-                                                                        class="w-6 h-6 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                break;
-                                            case NodeBaseApi.Version2.Type.Audio:
-                                                <div class="mb-2">
-                                                    <p class="font-semibold">Type: Audio</p>
-                                                    <div>
-                                                        <div class="flex items-center justify-center w-full">
-                                                            <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
-                                                                <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                    <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                                        <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                                    </svg>
-                                                                    <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                                    <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
-                                                                </div>
-                                                                <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnSingleAudioFileChanged(e, input.Id))" />
-                                                            </label>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                break;
-                                            default:
-                                                <p>Unknown input type</p>
-                                                break;
-                                        }
+                                        <InputList Id="input.Id" Type="input.Type" Value="null" IsList="input.IsList" Placeholdervalue="input.Name" SendbackValue="SetValue"></InputList>
                                     </div>
                                 }
                             </div>
@@ -204,44 +127,23 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (AP is CustomProgram customProgram)
+        if (AP != null)
         {
-            foreach (var input in customProgram.ProgramStructure.ProgramStart)
+            foreach (var input in AP.ProgramStructure.ProgramStart)
             {
-                if (!customProgram.ProgramStructure.InputValues.ContainsKey(input.Id))
+                if (!AP.ProgramStructure.InputValues.ContainsKey(input.Id))
                 {
-                    customProgram.ProgramStructure.InputValues[input.Id] = customProgram.ProgramStructure.InputValues.ContainsKey(input.Id)
-                        ? customProgram.ProgramStructure.InputValues[input.Id]
+                    AP.ProgramStructure.InputValues[input.Id] = AP.ProgramStructure.InputValues.ContainsKey(input.Id)
+                        ? AP.ProgramStructure.InputValues[input.Id]
                         : null;
                 }
             }
-            foreach (var input in customProgram.ProgramStructure.ProgramEnd)
+            foreach (var input in AP.ProgramStructure.ProgramEnd)
             {
-                if (!customProgram.ProgramStructure.OutputValues.ContainsKey(input.Id))
+                if (!AP.ProgramStructure.OutputValues.ContainsKey(input.Id))
                 {
-                    customProgram.ProgramStructure.OutputValues[input.Id] = customProgram.ProgramStructure.OutputValues.ContainsKey(input.Id)
-                        ? customProgram.ProgramStructure.OutputValues[input.Id]
-                        : null;
-                }
-            }
-        }
-        else if (AP is CustomBlockProgram customBlockProgram)
-        {
-            foreach (var input in customBlockProgram.ProgramStructure.ProgramStart)
-            {
-                if (!customBlockProgram.ProgramStructure.InputValues.ContainsKey(input.Id))
-                {
-                    customBlockProgram.ProgramStructure.InputValues[input.Id] = customBlockProgram.ProgramStructure.InputValues.ContainsKey(input.Id)
-                        ? customBlockProgram.ProgramStructure.InputValues[input.Id]
-                        : null;
-                }
-            }
-            foreach (var input in customBlockProgram.ProgramStructure.ProgramEnd)
-            {
-                if (!customBlockProgram.ProgramStructure.OutputValues.ContainsKey(input.Id))
-                {
-                    customBlockProgram.ProgramStructure.OutputValues[input.Id] = customBlockProgram.ProgramStructure.OutputValues.ContainsKey(input.Id)
-                        ? customBlockProgram.ProgramStructure.OutputValues[input.Id]
+                    AP.ProgramStructure.OutputValues[input.Id] = AP.ProgramStructure.OutputValues.ContainsKey(input.Id)
+                        ? AP.ProgramStructure.OutputValues[input.Id]
                         : null;
                 }
             }
@@ -260,67 +162,9 @@
         StateHasChanged();
     }
 
-    private async Task OnSingleFileChanged(InputFileChangeEventArgs e, Guid id)
+    private void SetValue(InputItem inputItem)
     {
-        var file = e.File;
-        string[] imageTypes = new[] { "image/jpeg", "image/png" };
-
-        if (file != null && imageTypes.Contains(file.ContentType))
-        {
-            // Resizing the image
-            var resized = await file.RequestImageFileAsync(file.ContentType, 260, 260);
-
-            var buffer = new byte[resized.Size];
-            await using var stream = resized.OpenReadStream((int)resized.Size);
-            await stream.ReadAsync(buffer, 0, (int)resized.Size);
-
-            if (AP is CustomProgram customProgram)
-            {
-                customProgram.ProgramStructure.InputValues[id] = buffer;
-
-            }
-            else if (AP is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.InputValues[id] = buffer;
-            }
-        }
-    }
-
-    private async Task OnSingleAudioFileChanged(InputFileChangeEventArgs e, Guid inputId)
-    {
-        var file = e.File;
-        if (file != null)
-        {
-            using (var ms = new MemoryStream())
-            {
-                await file.OpenReadStream().CopyToAsync(ms);
-                var bytes = ms.ToArray();
-                // Now 'bytes' is a byte array you can use.
-
-                if (AP is CustomProgram customProgram)
-                {
-                    customProgram.ProgramStructure.InputValues[inputId] = bytes;
-
-                }
-                else if (AP is CustomBlockProgram customBlockProgram)
-                {
-                    customBlockProgram.ProgramStructure.InputValues[inputId] = bytes;
-                }
-            }
-        }
-    }
-
-    private void UpdateValue(ChangeEventArgs e, Guid id)
-    {
-        if (AP is CustomProgram customProgram)
-        {
-            customProgram.ProgramStructure.InputValues[id] = e.Value?.ToString();
-
-        }
-        else if (AP is CustomBlockProgram customBlockProgram)
-        {
-            customBlockProgram.ProgramStructure.InputValues[id] = e.Value?.ToString();
-        }
+        AP.ProgramStructure.InputValues[inputItem.Id] = inputItem.Data;
     }
 
     private async Task ExecuteProgram()
