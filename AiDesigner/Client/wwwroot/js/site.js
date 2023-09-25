@@ -253,7 +253,7 @@ window.jsPlumbInterop = {
         if (newNode) {
             // Make the new node draggable
             this.instance.draggable(newNode, {
-                grid: [5, 5], 
+                grid: [5, 5],
                 start: function (params) {
                     var zoom = currentZoom;
                     var left = parseFloat(params.el.style.left);
@@ -262,7 +262,7 @@ window.jsPlumbInterop = {
                     params.el.style.left = (left * zoom) + 'px';
                     params.el.style.top = (top * zoom) + 'px';
                 },
-                drag: function (params) {
+                drag: throttle(function (params) {
                     var zoom = currentZoom;
                     var left = parseFloat(params.pos[0]) / zoom;
                     var top = parseFloat(params.pos[1]) / zoom;
@@ -335,7 +335,7 @@ window.jsPlumbInterop = {
                             jsPlumbInterop.instance.repaintEverything();
                         });
                     }
-                },
+                }, 16),
 
                 stop: function (params) {
                     var zoom = currentZoom;
