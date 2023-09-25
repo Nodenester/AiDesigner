@@ -73,11 +73,11 @@
 
 @if(SelectedOption == "Content Detail")
 {
-    <ContentDetail SelectedArticle="SelectedArticle" />
+    <ContentDetail SelectedArticle="SelectedArticle" VaultedArticles="VaultedArticles" />
 }
 else
 {
-    <MarketplaceList OnPageChanged="RefreshArticles" OnSelectedArticle="SetSelectedArticle" Articles="FilteredArticles" CurrentPage="CurrentPage" TotalPages="TotalPages" SelectedArticle="SelectedArticle" />
+    <MarketplaceList OnPageChanged="RefreshArticles" OnSelectedArticle="SetSelectedArticle" VaultedArticles="VaultedArticles" Articles="FilteredArticles" CurrentPage="CurrentPage" TotalPages="TotalPages" SelectedArticle="SelectedArticle" />
 }
 
 @code {
@@ -85,6 +85,8 @@ else
     public List<WorkshopArticle> EAPs { get; set; }
 
     private Stack<string> PreviousOptions = new Stack<string>();
+
+    public List<WorkshopArticle> VaultedArticles { get; set; } = new List<WorkshopArticle>();
 
     private string _selectedOption = "Home";
     private string SelectedOption
