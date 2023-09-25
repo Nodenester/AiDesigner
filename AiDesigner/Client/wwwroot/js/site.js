@@ -361,10 +361,9 @@ window.jsPlumbInterop = {
     },
 
     connectInputs: function (sourceId, targetId, color) {
-        var source = document.getElementById(sourceId);
-        var target = document.getElementById(targetId);
-
-/*        console.log(color);*/
+        // Use attribute selectors to select elements by ID, even when the ID starts with a digit
+        var source = document.querySelector('[id="' + sourceId + '"].Connection');
+        var target = document.querySelector('[id="' + targetId + '"].Connection');
 
         if (source && target) {
             var connectionLayer = document.getElementById('connection-layer');
@@ -401,6 +400,15 @@ window.jsPlumbInterop = {
 
             this.instance.addEndpoint(sourceEndpoint.id, { anchor: 'Right' });
             this.instance.addEndpoint(targetEndpoint.id, { anchor: 'Left' });
+
+            console.log('Source Position and Dimensions:', source.getBoundingClientRect());
+            console.log('Target Position and Dimensions:', target.getBoundingClientRect());
+            console.log(source);
+
+            if (color == "#ff0000") {
+                console.log('Source Endpoint Position:', sourceEndpoint.style.left, sourceEndpoint.style.top);
+                console.log('Target Endpoint Position:', targetEndpoint.style.left, targetEndpoint.style.top);
+            }
 
             var sourceTop = (source.getBoundingClientRect().top - offsetY) / zoom;
             var targetTop = (target.getBoundingClientRect().top - offsetY) / zoom;
