@@ -15,6 +15,7 @@
 @using System.IO;
 @using AiDesigner.Shared.Data;
 @using System.Diagnostics;
+@using static AiDesigner.Client.Components.InputList;
 
 @if (localProgram != null)
 {
@@ -132,9 +133,9 @@
                     <div id="canvas" class="canvas">
                         <div id="connection-layer" style="position: relative; z-index: 22; ">
                         </div>
-                        @if(_localProgram is CustomProgram customProgram)
+                        @if(_localProgram != null)
                         {
-                            <div id="Input" class="node" style="left: @(customProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(customProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
+                            <div id="Input" class="node" style="left: @(_localProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(_localProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
                                 <div class="top-part dark:bg-gray-800">
                                                                         <span style="margin-left: 10px;">Input</span>
                                 </div>
@@ -143,7 +144,7 @@
                                          <!--Left side content-->
                                     </div>
                                     <div class="right-part">
-                                        @foreach (var output in customProgram.ProgramStructure.ProgramStart)
+                                        @foreach (var output in _localProgram.ProgramStructure.ProgramStart)
                                         {
                                             <!--make a componenet  or something so it show the right input / output type-->
                                             <div class="node-output d-flex ">
@@ -151,7 +152,7 @@
                                                 <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
                                             </div>
                                         }
-                                        @if (customProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        @if (_localProgram.ProgramStructure.ProgramStart.Count() == 0)
                                         {
                                             <hr style="border-top: none; height: 10px; background-color: transparent;" />
                                         }
@@ -161,13 +162,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="Output" class="node" style="left: @(customProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(customProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
+                            <div id="Output" class="node" style="left: @(_localProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(_localProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
                                 <div class="top-part dark:bg-gray-800">
                                         <span style="margin-left: 10px;">Output</span>
                                 </div>
                                 <div class="main-part dark:bg-gray-700">
                                     <div class="left-part">
-                                        @foreach (var input in customProgram.ProgramStructure.ProgramEnd)
+                                        @foreach (var input in _localProgram.ProgramStructure.ProgramEnd)
                                         {
                                             <!--make a componenet  or something so it show the right input / output type-->
                                             <div class="node-input d-flex ">
@@ -175,7 +176,7 @@
                                                 <span class="small-font">@input.Name</span>
                                             </div>
                                         }
-                                        @if (customProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        @if (_localProgram.ProgramStructure.ProgramStart.Count() == 0)
                                         {
                                             <hr style="border-top: none; height: 10px; background-color: transparent;" />
                                         }
@@ -188,7 +189,7 @@
                                     </div>
                                 </div>
                             </div>
-                            @foreach (var node in customProgram.ProgramStructure.ProgramBlocks)
+                            @foreach (var node in _localProgram.ProgramStructure.ProgramBlocks)
                             {
                                 <div id="@node.Id" class="node" style="left: @(node.X.ToString() + "px"); top: @(node.Y.ToString() + "px");" @onclick="(() => SelectNode(node))">
                                     <div class="top-part dark:bg-gray-800">
@@ -199,7 +200,7 @@
                                                 <div style="margin-left:-0.6rem;">
                                                     <select @bind="node.VariableId" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="@Guid.Empty"disabled selected hidden>Select Variable</option>
-                                                        @foreach (var Variable in customProgram.ProgramStructure.Variables)
+                                                        @foreach (var Variable in _localProgram.ProgramStructure.Variables)
                                                         {
                                                             <option value="@Variable.Value.Id">@Variable.Value.Name</option>
                                                         }
@@ -228,108 +229,6 @@
                                                     <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
                                                 </div>
 
-                                            }
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-                        }
-                        @if (_localProgram is CustomBlockProgram customBlockProgram)
-                        {
-                            <div id="Input" class="node" style="left: @(customBlockProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(customBlockProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
-                                <div class="top-part dark:bg-gray-800">
-                                    <span style="margin-left: 10px;">Input</span>
-                                </div>
-                                <div class="main-part dark:bg-gray-700">
-                                    <div class="left-part">
-                                        <!--Left side content-->
-                                    </div>
-                                    <div class="right-part">
-                                        @foreach (var output in customBlockProgram.ProgramStructure.ProgramStart)
-                                        {
-                                            <!--make a componenet  or something so it show the right input / output type-->
-                                            <div class="node-output d-flex ">
-                                                <span class="small-font">@output.Name</span>
-                                                <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
-                                            </div>
-                                        }
-                                        @if (customBlockProgram.ProgramStructure.ProgramStart.Count() == 0)
-                                        {
-                                            <hr style="border-top: none; height: 10px; background-color: transparent;" />
-                                        }
-                                        <button @onclick="Openapi" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-sm d-flex" type="button">
-                                            Create input
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                            <div id="Output" class="node" style="left: @(customBlockProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(customBlockProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
-                                <div class="top-part dark:bg-gray-800">
-                                    <span style="margin-left: 10px;">Output</span>
-                                </div>
-                                <div class="main-part dark:bg-gray-700">
-                                    <div class="left-part">
-                                        @foreach (var input in customBlockProgram.ProgramStructure.ProgramEnd)
-                                        {
-                                            <!--make a componenet  or something so it show the right input / output type-->
-                                            <div class="node-input d-flex ">
-                                                <div id="@input.Id" class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
-                                                <span class="small-font">@input.Name</span>
-                                            </div>
-                                        }
-                                        @if (customBlockProgram.ProgramStructure.ProgramStart.Count() == 0)
-                                        {
-                                            <hr style="border-top: none; height: 10px; background-color: transparent;" />
-                                        }
-                                        <button @onclick="Openapo" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-sm d-flex" type="button">
-                                            Create output
-                                        </button>
-                                    </div>
-                                    <div class="right-part">
-                                        <!--Right side content-->
-                                    </div>
-                                </div>
-                            </div>
-                            @foreach (var node in customBlockProgram.ProgramStructure.ProgramBlocks)
-                            {
-                                <div id="@node.Id" class="node" style="left: @(node.X.ToString() + "px"); top: @(node.Y.ToString() + "px");" @onclick="(() => SelectNode(node))">
-                                    <div class="top-part dark:bg-gray-800">
-                                        <div style="display: inline-block; margin-left: 10px;">
-                                            <span>@node.Block.Name</span>
-                                            @if (node.Block.Name == "Get Variable" || node.Block.Name == "Set Variable")
-                                            {
-                                                <div style="margin-left:-0.6rem;">
-                                                    <select @bind="node.VariableId" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
-                                                        <option value="@Guid.Empty" disabled selected hidden>Select Variable</option>
-                                                        @foreach (var Variable in customBlockProgram.ProgramStructure.Variables)
-                                                        {
-                                                            <option value="@Variable.Value.Id">@Variable.Value.Name</option>
-                                                        }
-                                                    </select>
-                                                </div>
-                                            }
-                                        </div>
-                                    </div>
-                                    <div class="main-part dark:bg-gray-700">
-                                        <div class="left-part">
-                                            <!-- Left part content goes here -->
-                                            @foreach (var input in node.Block.Inputs)
-                                            {
-                                                <div class="node-input d-flex ">
-                                                    <div id="@input.Id" class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
-                                                    <span class="small-font">@input.Name</span>
-                                                </div>
-
-                                            }
-                                        </div>
-                                        <div class="right-part">
-                                            <!-- Right part content goes here -->
-                                            @foreach (var output in node.Block.Outputs)
-                                            {
-                                                <div class="node-output d-flex ">
-                                                    <span class="small-font">@output.Name</span>
-                                                    <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
-                                                </div>
                                             }
                                         </div>
                                     </div>
@@ -359,18 +258,18 @@
                         @foreach (var (input, index) in programBlock.Block.Inputs.Select((value, idx) => (value, idx)))
                         {
                             <div class="align-top">
-                                @if (localProgram is CustomProgram customProgram1)
+                                @if (localProgram != null)
                                 {
-                                    bool isInputInDirectInputs = customProgram1.ProgramStructure.DirectInputValues.ContainsKey(input.Id);
+                                    bool isInputInDirectInputs = localProgram.ProgramStructure.DirectInputValues.ContainsKey(input.Id);
 
                                     bool isValueEmpty = true;
                                     // Safely get value from DirectInputValues
-                                    if (customProgram1.ProgramStructure.DirectInputValues.TryGetValue(input.Id, out var directValue))
+                                    if (localProgram.ProgramStructure.DirectInputValues.TryGetValue(input.Id, out var directValue))
                                     {
                                         isValueEmpty = string.IsNullOrEmpty(directValue?.ToString());
                                     }
 
-                                    bool isInputConnectedToProgramInput = customProgram1.ProgramStructure.InputValues.ContainsKey(input.Id);
+                                    bool isInputConnectedToProgramInput = localProgram.ProgramStructure.InputValues.ContainsKey(input.Id);
 
                                     bool isInputConnectedToAnotherBlock = false;
 
@@ -394,7 +293,7 @@
                                         // If the input doesn't exist in DirectInputValues, initialize it
                                         if (!isInputInDirectInputs)
                                         {
-                                            customProgram1.ProgramStructure.DirectInputValues[input.Id] = new object();
+                                            localProgram.ProgramStructure.DirectInputValues[input.Id] = new object();
                                         }
                                         else
                                         {
@@ -405,202 +304,7 @@
                                         {
                                             <!-- Styling the text input for dark mode using Tailwind -->
                                             <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                                                @switch (input.Type)
-                                                {
-                                                    case NodeBaseApi.Version2.Type.Trigger:
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.String:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Text</p>
-                                                            <textarea @onchange="@(eventArgs => HandleInput(eventArgs, input.Id))" value="@customProgram1.ProgramStructure.DirectInputValues[input.Id]"
-                                                                      class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Picture:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Picture</p>
-                                                            <div>
-                                                                <div class="flex items-center justify-center w-full">
-                                                                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                                            </svg>
-                                                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">PNG or JPG (MAX. 260x260px)</p>
-                                                                        </div>
-                                                                        <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnSingleFileChanged(e, input.Id))" />
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Number:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Number</p>
-                                                            <input type="number" @oninput="eventArgs => HandleInput(eventArgs, input.Id)" value="@customProgram1.ProgramStructure.DirectInputValues[input.Id]"
-                                                            class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Boolean:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold w-full">Type: Boolean</p>
-                                                            <div class="mt-2 w-full flex justify-center"> 
-                                                                <div class="w-72 cursor-pointer flex items-center justify-center">
-                                                                    <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
-                                                                        <input type="checkbox" id="@input.Id" @onchange="eventArgs => HandleInput(eventArgs, input.Id)" checked="@customProgram1.ProgramStructure.DirectInputValues[input.Id]"
-                                                                        class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Audio:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Audio</p>
-                                                            <div>
-                                                                <div class="flex items-center justify-center w-full">
-                                                                    <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
-                                                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                                            </svg>
-                                                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
-                                                                        </div>
-                                                                        <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnSingleAudioFileChanged(e, input.Id))" />
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        break;
-                                                    default:
-                                                        <p>Unknown input type</p>
-                                                        break;
-                                                }
-                                            </div>
-                                        }
-                                    }
-                                }
-                                @if (localProgram is CustomBlockProgram customBlockProgram1)
-                                {
-                                    bool isInputInDirectInputs = customBlockProgram1.ProgramStructure.DirectInputValues.ContainsKey(input.Id);
-
-                                    bool isValueEmpty = true;
-                                    // Safely get value from DirectInputValues
-                                    if (customBlockProgram1.ProgramStructure.DirectInputValues.TryGetValue(input.Id, out var directValue))
-                                    {
-                                        isValueEmpty = string.IsNullOrEmpty(directValue?.ToString());
-                                    }
-
-                                    bool isInputConnectedToProgramInput = customBlockProgram1.ProgramStructure.InputValues.ContainsKey(input.Id);
-
-                                    bool isInputConnectedToAnotherBlock = false;
-
-                                    // Check if programBlock.Inputs has a value at the same index
-                                    if (programBlock.Inputs != null && index < programBlock.Inputs.Count && programBlock.Inputs[index] != Guid.Empty)
-                                    {
-                                        isInputConnectedToAnotherBlock = true;
-                                    }
-
-                                    // Show the input field if:
-                                    // 1. It's in DirectInputValues and its value is not empty
-                                    // 2. It's not connected to another block
-                                    // 3. It's not connected to a program input
-                                    if ((isInputInDirectInputs && !isValueEmpty) || (!isInputConnectedToAnotherBlock && !isInputConnectedToProgramInput))
-                                    {
-                                        if (input.Name != "Trigger")
-                                        {
-                                            <label class="text-gray-200">@input.Name:</label>
-                                        }
-
-                                        // If the input doesn't exist in DirectInputValues, initialize it
-                                        if (!isInputInDirectInputs)
-                                        {
-                                            customBlockProgram1.ProgramStructure.DirectInputValues[input.Id] = "";
-                                        }
-                                        else
-                                        {
-                                            //Console.WriteLine("Direct input value: " + customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]);
-                                        }
-
-                                        if (input.Name != "Trigger")
-                                        {
-                                            <!-- Styling the text input for dark mode using Tailwind -->
-                                            <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                                                @switch (input.Type)
-                                                {
-                                                    case NodeBaseApi.Version2.Type.Trigger:
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.String:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Text</p>
-                                                            <textarea @onchange="@(eventArgs => HandleInput(eventArgs, input.Id))" value="@customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]"
-                                                                      class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Picture:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Picture</p>
-                                                            <div>
-                                                                <div class="flex items-center justify-center w-full">
-                                                                    <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                                            </svg>
-                                                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">PNG or JPG (MAX. 260x260px)</p>
-                                                                        </div>
-                                                                        <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnSingleFileChanged(e, input.Id))" />
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Number:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Number</p>
-                                                            <input type="number" @oninput="eventArgs => HandleInput(eventArgs, input.Id)" value="@customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]"
-                                                                   class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@input.Name" />
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Boolean:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold w-full">Type: Boolean</p>
-                                                            <div class="mt-2 w-full flex justify-center">
-                                                                <div class="w-72 cursor-pointer flex items-center justify-center">
-                                                                    <label for="@input.Id" class="flex items-center justify-center h-12 w-full">
-                                                                        <input type="checkbox" id="@input.Id" @onchange="eventArgs => HandleInput(eventArgs, input.Id)" checked="@customBlockProgram1.ProgramStructure.DirectInputValues[input.Id]"
-                                                                               class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        break;
-                                                    case NodeBaseApi.Version2.Type.Audio:
-                                                        <div class="mb-2">
-                                                            <p class="font-semibold">Type: Audio</p>
-                                                            <div>
-                                                                <div class="flex items-center justify-center w-full">
-                                                                    <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
-                                                                        <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                                            <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                                                <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                                            </svg>
-                                                                            <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                                            <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
-                                                                        </div>
-                                                                        <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnSingleAudioFileChanged(e, input.Id))" />
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        break;
-                                                    default:
-                                                        <p>Unknown input type</p>
-                                                        break;
-                                                }
+                                                <InputList Id="input.Id" Type="input.Type" Value="localProgram.ProgramStructure.DirectInputValues[input.Id]" IsList="input.IsList" SendbackValue="SetVarValue"></InputList>
                                             </div>
                                         }
                                     }
@@ -630,79 +334,8 @@
                         <label class="w-100">Variable Default Value:</label>
                         <!-- Styling the text input for dark mode using Tailwind -->
                         <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                            @switch (variable.Type)
-                            {
-                                case NodeBaseApi.Version2.Type.String:
-                                    <div class="mb-2">
-                                        <p class="font-semibold">Type: Text</p>
-                                        <textarea @onchange="@(eventArgs => HandleVariableValue(eventArgs, variable.Id))" value="@variable.Value"
-                                                  class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
-                                    </div>
-                                    break;
-                                case NodeBaseApi.Version2.Type.Picture:
-                                    <div class="mb-2">
-                                        <p class="font-semibold">Type: Picture</p>
-                                        <div>
-                                            <div class="flex items-center justify-center w-full">
-                                                <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
-                                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                        </svg>
-                                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p class="text-xs text-gray-500 dark:text-gray-400">PNG or JPG (MAX. 260x260px)</p>
-                                                    </div>
-                                                    <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnSingleFileChangedVariable(e, variable.Id))" />
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    break;
-                                case NodeBaseApi.Version2.Type.Number:
-                                    <div class="mb-2">
-                                        <p class="font-semibold">Type: Number</p>
-                                        <input type="number" @oninput="eventArgs => HandleVariableValue(eventArgs, variable.Id)" value="@variable.Value"
-                                               class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@variable.Name" />
-                                    </div>
-                                    break;
-                                case NodeBaseApi.Version2.Type.Boolean:
-                                    <div class="mb-2">
-                                        <p class="font-semibold w-full">Type: Boolean</p>
-                                        <div class="mt-2 w-full flex justify-center">
-                                            <div class="w-72 cursor-pointer flex items-center justify-center">
-                                                <label for="@variable.Id" class="flex items-center justify-center h-12 w-full">
-                                                    <input type="checkbox" id="@variable.Id" @onchange="eventArgs => HandleVariableValue(eventArgs, variable.Id)" checked="@variable.Value"
-                                                           class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    break;
-                                case NodeBaseApi.Version2.Type.Audio:
-                                    <div class="mb-2">
-                                        <p class="font-semibold">Type: Audio</p>
-                                        <div>
-                                            <div class="flex items-center justify-center w-full">
-                                                <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
-                                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
-                                                        <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
-                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
-                                                        </svg>
-                                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
-                                                        <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
-                                                    </div>
-                                                    <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnSingleAudioFileChangedVariable(e, variable.Id))" />
-                                                </label>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    break;
-                                default:
-                                    <p>Unknown input type</p>
-                                    break;
-                            }
+                            <InputList Id="variable.Id" Type="variable.Type" Value="variable.Value" IsList="variable.IsList" SendbackValue="SetVarValue"></InputList>
                         </div>
-
                     </div>
                 }
             </div>
@@ -1103,92 +736,6 @@
         localProgram.Image = imageBytes;
     }
 
-    //Value logic
-    void HandleInput(ChangeEventArgs e, Guid inputId)
-    {
-        // Convert the value to object to avoid null-related issues
-        object value = e.Value;
-        if (localProgram is CustomProgram customProgram)
-        {
-            // Check the type of value and store it appropriately
-            if (float.TryParse(value?.ToString(), out float floatValue))
-            {
-                customProgram.ProgramStructure.DirectInputValues[inputId] = floatValue;
-            }
-            else if (bool.TryParse(value?.ToString(), out bool boolValue))
-            {
-                customProgram.ProgramStructure.DirectInputValues[inputId] = boolValue;
-            }
-            else
-            {
-                customProgram.ProgramStructure.DirectInputValues[inputId] = value?.ToString();
-            }
-        }
-        else if (localProgram is CustomBlockProgram customBlockProgram)
-        {
-            // Check the type of value and store it appropriately
-            if (float.TryParse(value?.ToString(), out float floatValue))
-            {
-                customBlockProgram.ProgramStructure.DirectInputValues[inputId] = floatValue;
-            }
-            else if (bool.TryParse(value?.ToString(), out bool boolValue))
-            {
-                customBlockProgram.ProgramStructure.DirectInputValues[inputId] = boolValue;
-            }
-            else
-            {
-                customBlockProgram.ProgramStructure.DirectInputValues[inputId] = value?.ToString();
-            }
-        }
-    }
-
-    private async Task OnSingleFileChanged(InputFileChangeEventArgs e, Guid id)
-    {
-        var file = e.File;
-        string[] imageTypes = new[] { "image/jpeg", "image/png" };
-
-        if (file != null && imageTypes.Contains(file.ContentType))
-        {
-            // Resizing the image
-            var resized = await file.RequestImageFileAsync(file.ContentType, 260, 260);
-
-            var buffer = new byte[resized.Size];
-            await using var stream = resized.OpenReadStream((int)resized.Size);
-            await stream.ReadAsync(buffer, 0, (int)resized.Size);
-            if(localProgram is CustomProgram customProgram)
-            {
-                customProgram.ProgramStructure.DirectInputValues[id] = buffer;
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.DirectInputValues[id] = buffer;
-            }
-
-        }
-    }
-
-    private async Task OnSingleAudioFileChanged(InputFileChangeEventArgs e, Guid inputId)
-    {
-        var file = e.File;
-        if (file != null)
-        {
-            using (var ms = new MemoryStream())
-            {
-                await file.OpenReadStream().CopyToAsync(ms);
-                var bytes = ms.ToArray();
-                // Now 'bytes' is a byte array you can use.
-                if (localProgram is CustomProgram customProgram)
-                {
-                    customProgram.ProgramStructure.DirectInputValues[inputId] = bytes;
-                }
-                else if (localProgram is CustomBlockProgram customBlockProgram)
-                {
-                    customBlockProgram.ProgramStructure.DirectInputValues[inputId] = bytes;
-                }
-            }
-        }
-    }
-
     //Whiteboard logic
     private async Task ZoomIn()
     {
@@ -1452,92 +999,19 @@
         }
     }
 
-    //Variable
-    void HandleVariableValue(ChangeEventArgs e, Guid inputId)
+    //Value logic
+    private void SetValue(InputItem inputItem)
     {
-        // Convert the value to object to avoid null-related issues
-        object value = e.Value;
-        if (localProgram is CustomProgram customProgram)
-        {
-            // Check the type of value and store it appropriately
-            if (float.TryParse(value?.ToString(), out float floatValue))
-            {
-                customProgram.ProgramStructure.Variables[inputId].Value = floatValue;
-            }
-            else if (bool.TryParse(value?.ToString(), out bool boolValue))
-            {
-                customProgram.ProgramStructure.Variables[inputId].Value = boolValue;
-            }
-            else
-            {
-                customProgram.ProgramStructure.Variables[inputId].Value = value?.ToString();
-            }
-        }
-        else if (localProgram is CustomBlockProgram customBlockProgram)
-        {
-            // Check the type of value and store it appropriately
-            if (float.TryParse(value?.ToString(), out float floatValue))
-            {
-                customBlockProgram.ProgramStructure.Variables[inputId].Value = floatValue;
-            }
-            else if (bool.TryParse(value?.ToString(), out bool boolValue))
-            {
-                customBlockProgram.ProgramStructure.Variables[inputId].Value = boolValue;
-            }
-            else
-            {
-                customBlockProgram.ProgramStructure.Variables[inputId].Value = value?.ToString();
-            }
-        }
+        localProgram.ProgramStructure.DirectInputValues[inputItem.Id] = inputItem.Data;
     }
-
-    private async Task OnSingleFileChangedVariable(InputFileChangeEventArgs e, Guid id)
+    private void SetVarValue(InputItem inputItem)
     {
-        var file = e.File;
-        string[] imageTypes = new[] { "image/jpeg", "image/png" };
-
-        if (file != null && imageTypes.Contains(file.ContentType))
+        foreach (var value in (List<object>)inputItem.Data)
         {
-            // Resizing the image
-            var resized = await file.RequestImageFileAsync(file.ContentType, 260, 260);
-
-            var buffer = new byte[resized.Size];
-            await using var stream = resized.OpenReadStream((int)resized.Size);
-            await stream.ReadAsync(buffer, 0, (int)resized.Size);
-            if (localProgram is CustomProgram customProgram)
-            {
-                customProgram.ProgramStructure.Variables[id].Value = buffer;
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.Variables[id].Value = buffer;
-            }
-
+            Console.WriteLine(value);
         }
+        localProgram.ProgramStructure.Variables[inputItem.Id].Value = inputItem.Data;
     }
-
-    private async Task OnSingleAudioFileChangedVariable(InputFileChangeEventArgs e, Guid inputId)
-    {
-        var file = e.File;
-        if (file != null)
-        {
-            using (var ms = new MemoryStream())
-            {
-                await file.OpenReadStream().CopyToAsync(ms);
-                var bytes = ms.ToArray();
-                // Now 'bytes' is a byte array you can use.
-                if (localProgram is CustomProgram customProgram)
-                {
-                    customProgram.ProgramStructure.Variables[inputId].Value = bytes;
-                }
-                else if (localProgram is CustomBlockProgram customBlockProgram)
-                {
-                    customBlockProgram.ProgramStructure.Variables[inputId].Value = bytes;
-                }
-            }
-        }
-    }
-
 
     //Navbar logic
     private async Task SaveProgram()

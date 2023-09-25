@@ -20,11 +20,12 @@ namespace NodeBaseApi.Version2
         public bool IsPublic { get; set; }
         public bool SupportsSessions { get; set; }
         public byte[]? Image { get; set; }
+        public ProgramStructure ProgramStructure { get; set; }
     }
 
     public class CustomProgram : ProgramObject
     {
-        public ProgramStructure ProgramStructure { get; set; }
+
         public Guid ApiKey { get; set; }
         public CustomProgram()
         {
@@ -34,7 +35,6 @@ namespace NodeBaseApi.Version2
 
     public class CustomBlockProgram : ProgramObject
     {
-        public ProgramStructure ProgramStructure { get; set; }
         public CustomBlockProgram()
         {
             // Parameterless constructor
@@ -530,6 +530,9 @@ namespace NodeBaseApi.Version2
         public DateTime PublishDate { get; set; }
         public byte[] ImageData { get; set; }
     }
+
+    //.netStuuff
+
 
 
     //Error handling------------------------------------------------
