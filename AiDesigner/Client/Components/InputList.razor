@@ -54,7 +54,7 @@
                                             <div class="w-72 cursor-pointer flex items-center justify-center">
                                                 <label for="@Id" class="flex items-center justify-center h-12 w-full">
                                                     <input type="checkbox" id="@Id" @onchange="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" checked="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
-                                                           class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                           class="w-6 h-6 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                                                 </label>
                                             </div>
                                         </div>
@@ -108,7 +108,7 @@ else
         case NodeBaseApi.Version2.Type.String:
             <div class="mb-2">
                 <p class="font-semibold">Type: Text</p>
-                <textarea @onchange="eventArgs => HandleInput(eventArgs)" value="@Value"
+                <textarea @onchange="eventArgs => HandleInput(eventArgs)" value="@Value" placeholder="@Placeholdervalue"
                 class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
             </div>
             break;
@@ -134,7 +134,7 @@ else
         case NodeBaseApi.Version2.Type.Number:
             <div class="mb-2">
                 <p class="font-semibold">Type: Number</p>
-                <input type="number" @oninput="eventArgs => HandleInput(eventArgs)" value="@Value"
+                <input type="number" @oninput="eventArgs => HandleInput(eventArgs)" value="@Value" placeholder="@Placeholdervalue"
                 class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"/>
             </div>
             break;
@@ -145,7 +145,7 @@ else
                     <div class="w-72 cursor-pointer flex items-center justify-center">
                         <label for="@Id" class="flex items-center justify-center h-12 w-full">
                             <input type="checkbox" id="@Id" @onchange="eventArgs => HandleInput(eventArgs)" checked="@Value"
-                            class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                            class="w-6 h-6 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                         </label>
                     </div>
                 </div>
@@ -188,6 +188,9 @@ else
 
     [Parameter]
     public bool IsList { get; set; }
+
+    [Parameter]
+    public object Placeholdervalue { get; set; }
 
     [Parameter]
     public EventCallback<InputItem> SendbackValue { get; set; }
@@ -338,7 +341,6 @@ else
         }
         var dataList = inputItems.Select(item => item.Data).ToList();
         SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = dataList });
-        Console.WriteLine(dataList);
     }
 
     private async Task OnListFileChanged(CustomEventArgs item)
@@ -357,7 +359,8 @@ else
             var sitem = inputItems.FirstOrDefault(i => i.Id == item.Id);
             var index = inputItems.IndexOf(sitem);
             inputItems[index].Data = buffer;
-            SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = inputItems });
+            var dataList = inputItems.Select(item => item.Data).ToList();
+            SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = dataList });
         }
     }
 
@@ -374,7 +377,8 @@ else
                 var sitem = inputItems.FirstOrDefault(i => i.Id == item.Id);
                 var index = inputItems.IndexOf(sitem);
                 inputItems[index].Data = bytes;
-                SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = inputItems });
+                var dataList = inputItems.Select(item => item.Data).ToList();
+                SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = dataList });
             }
         }
     }
