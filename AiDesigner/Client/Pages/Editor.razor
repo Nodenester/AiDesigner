@@ -137,7 +137,7 @@
                         {
                             <div id="Input" class="node" style="left: @(_localProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(_localProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
                                 <div class="top-part dark:bg-gray-800">
-                                                                        <span style="margin-left: 10px;">Input</span>
+                                    <span style="margin-left: 10px;">Input</span>
                                 </div>
                                 <div class="main-part dark:bg-gray-700">
                                     <div class="left-part">
@@ -205,6 +205,22 @@
                                                             <option value="@Variable.Value.Id">@Variable.Value.Name</option>
                                                         }
                                                     </select>
+                                                </div>
+                                            }
+                                            @if (node.Block.Name == "For Loop")
+                                            {
+                                                <div style="margin-left:-0.6rem;">
+                                                    @if (node.Block.Outputs[1].Type != null)
+                                                    {
+                                                        <select @bind-value="node.Block.Outputs[1].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, e.Value))" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                            <option value="String">String</option>
+                                                            <option value="Picture">Picture</option>
+                                                            <option value="Number">Number</option>
+                                                            <option value="Boolean">Boolean</option>
+                                                            <option value="Audio">Audio</option>
+                                                            <option value="Object">Object</option>
+                                                        </select>
+                                                    }
                                                 </div>
                                             }
                                         </div>
@@ -304,7 +320,7 @@
                                         {
                                             <!-- Styling the text input for dark mode using Tailwind -->
                                             <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                                                <InputList Id="input.Id" Type="input.Type" Value="localProgram.ProgramStructure.DirectInputValues[input.Id]" IsList="input.IsList" SendbackValue="SetVarValue"></InputList>
+                                                <InputList Id="input.Id" Type="input.Type" Value="localProgram.ProgramStructure.DirectInputValues[input.Id]" IsList="input.IsList" SendbackValue="SetValue"></InputList>
                                             </div>
                                         }
                                     }
@@ -588,31 +604,14 @@
 
     public List<string> Errors { get; set; } = new List<string>();
 
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnInitializedAsync()
     {
-        if (firstRender)
+        if (APO != null)
         {
+            Console.WriteLine("first render");
             await JSRuntime.InvokeVoidAsync("registerGlobalKeyPress", DotNetObjectReference.Create(this));
             await JSRuntime.InvokeVoidAsync("initResizablePanels");
-            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
-            if (localProgram is CustomProgram customBlock)
-            {
-                await JSRuntime.InvokeVoidAsync("createInfiniteCanvas", DotNetObjectReference.Create(this), customBlock.ProgramStructure.CameraPos.Item1, customBlock.ProgramStructure.CameraPos.Item2);
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                await JSRuntime.InvokeVoidAsync("createInfiniteCanvas", DotNetObjectReference.Create(this), customBlockProgram.ProgramStructure.CameraPos.Item1, customBlockProgram.ProgramStructure.CameraPos.Item2);
-            }
-
-            if (localProgram is CustomProgram customBlock2)
-            {
-                zoomvalue = customBlock2.ProgramStructure.zoom;
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram2)
-            {
-                zoomvalue = customBlockProgram2.ProgramStructure.zoom;
-            }
-            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", zoomvalue);
+            await JSRuntime.InvokeVoidAsync("createInfiniteCanvas", DotNetObjectReference.Create(this), localProgram.ProgramStructure.CameraPos.Item1, localProgram.ProgramStructure.CameraPos.Item2);
             await JSRuntime.InvokeVoidAsync("initializeContextMenu");
 
             AddToHistory(localProgram);
@@ -620,91 +619,66 @@
         }
     }
 
-    bool HasDrawn = false;
     protected override async Task OnParametersSetAsync()
     {
         if (APO != null)
         {
-            localProgram = APO;
-
-            if (localProgram is CustomProgram  customProgram)
+            if(localProgram != APO)
             {
+                localProgram = APO;
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-                await JSRuntime.InvokeVoidAsync("updateCameraPos", customProgram.ProgramStructure.CameraPos.Item1, customProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
-                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customProgram.ProgramStructure.zoom);
-                zoomvalue = customProgram.ProgramStructure.zoom;
+                await JSRuntime.InvokeVoidAsync("updateCameraPos", localProgram.ProgramStructure.CameraPos.Item1, localProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", localProgram.ProgramStructure.zoom);
+                zoomvalue = localProgram.ProgramStructure.zoom;
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
-            }
-            else if(localProgram is CustomBlockProgram customBlockProgram)
-            {
-                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-                await JSRuntime.InvokeVoidAsync("updateCameraPos", customBlockProgram.ProgramStructure.CameraPos.Item1, customBlockProgram.ProgramStructure.CameraPos.Item2, DotNetObjectReference.Create(this));
-                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", customBlockProgram.ProgramStructure.zoom);
-                zoomvalue = customBlockProgram.ProgramStructure.zoom;
-                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
-            }
 
-            if (localProgram is CustomProgram customProgram3)
-            {
-                await DrawConnections(customProgram3.ProgramStructure);
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram3)
-            {
-                await DrawConnections(customBlockProgram3.ProgramStructure);
+                await DrawConnections(localProgram.ProgramStructure);
             }
         }
         else
         {
 
         }
-
         StateHasChanged();
         await base.OnParametersSetAsync();
     }
 
-    bool hasloaded = false;
-    private async Task DrawConnections(ProgramStructure programStructure, bool allowanyways = false)
+    private async Task DrawConnections(ProgramStructure programStructure)
     {
-        if (hasloaded == false || allowanyways)
+        Console.WriteLine("Drawing blocks: " + programStructure.ProgramBlocks.Count());
+        foreach (var block in programStructure.ProgramBlocks)
         {
-            hasloaded = true;
-            Console.WriteLine(programStructure.ProgramBlocks.Count());
-            foreach (var block in programStructure.ProgramBlocks)
+            // Draw connections for block inputs
+            if (block.Inputs != null)
             {
-                // Draw connections for block inputs
-                if (block.Inputs != null)
+                for (int i = 0; i < block.Inputs.Count; i++)
                 {
-                    for (int i = 0; i < block.Inputs.Count; i++)
+                    var output = block.Inputs[i];
+                    var input = block.Block.Inputs[i];
+
+                    if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
                     {
-                        var output = block.Inputs[i];
-                        var input = block.Block.Inputs[i];
-
-                        if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
-                        {
-                            // Console.WriteLine("---------------------");
-                            // Console.WriteLine($"Node id: {block.Id}");
-                            // Console.WriteLine("-                   -");
-                            // Console.WriteLine($"Index: {i}, Value: {output}");
-                            // Console.WriteLine($"Index: {i}, Value: {input.Id}");
-                            // Console.WriteLine("---------------------");
-
-                            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
-                        }
+                        // Console.WriteLine("---------------------");
+                        // Console.WriteLine($"Node id: {block.Id}");
+                        // Console.WriteLine("-                   -");
+                        // Console.WriteLine($"Index: {i}, Value: {output}");
+                        // Console.WriteLine($"Index: {i}, Value: {input.Id}");
+                        // Console.WriteLine("---------------------");
+                        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
                     }
                 }
             }
+        }
 
-            foreach (var input in programStructure.ProgramEnd)
+        foreach (var input in programStructure.ProgramEnd)
+        {
+            if (programStructure.ProgramEndConnections.TryGetValue(input.Id, out Guid outputId))
             {
-                if (programStructure.ProgramEndConnections.TryGetValue(input.Id, out Guid outputId))
-                {
-                    // Console.WriteLine("---------------------");
-                    // Console.WriteLine($"Input Id: {input.Id}");
-                    // Console.WriteLine($"Connected Output Id: {outputId}");
-                    // Console.WriteLine("---------------------");
-
-                    await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", outputId, input.Id, GetLineColor(input.Type.ToString()));
-                }
+                // Console.WriteLine("---------------------");
+                // Console.WriteLine($"Input Id: {input.Id}");
+                // Console.WriteLine($"Connected Output Id: {outputId}");
+                // Console.WriteLine("---------------------");
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", outputId, input.Id, GetLineColor(input.Type.ToString()));
             }
         }
     }
@@ -743,14 +717,7 @@
         {
             zoomvalue = zoomvalue + 0.1f;
             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", zoomvalue);
-            if (localProgram is CustomProgram customBlock)
-            {
-                customBlock.ProgramStructure.zoom = zoomvalue;
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.zoom = zoomvalue;
-            }
+            localProgram.ProgramStructure.zoom = zoomvalue;
             // Console.WriteLine(zoomvalue);
         }
     }
@@ -761,14 +728,7 @@
         {
             zoomvalue = zoomvalue - 0.1f;
             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addZoom", zoomvalue);
-            if (localProgram is CustomProgram customBlock)
-            {
-                customBlock.ProgramStructure.zoom = zoomvalue;
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.zoom = zoomvalue;
-            }
+            localProgram.ProgramStructure.zoom = zoomvalue;
             // Console.WriteLine(zoomvalue);
         }
     }
@@ -781,64 +741,33 @@
     private async void AddBlockToWhiteboard(Item item)
     {
         // Console.WriteLine($"{item.Name} was clicked");
-        if (localProgram is CustomProgram customProgram)
+        ProgramBlock programBlock = new ProgramBlock();
+
+        // Create a new instance of the block type
+        programBlock.Block = (Block)Activator.CreateInstance(item.block.GetType());
+
+        // Generate new GUIDs for inputs and outputs.
+        foreach (var input in programBlock.Block.Inputs)
         {
-            ProgramBlock programBlock = new ProgramBlock();
-
-            // Create a new instance of the block type
-            programBlock.Block = (Block)Activator.CreateInstance(item.block.GetType());
-
-            // Generate new GUIDs for inputs and outputs.
-            foreach (var input in programBlock.Block.Inputs)
-            {
-                input.Id = Guid.NewGuid();
-            }
-
-            foreach (var output in programBlock.Block.Outputs)
-            {
-                output.Id = Guid.NewGuid();
-            }
-
-            programBlock.Id = Guid.NewGuid();
-            customProgram.ProgramStructure.AddProgramBlock(programBlock);
-
-            //await JSRuntime.InvokeVoidAsync("initResizablePanels");
-            //await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
-            await UpdateNodeLocation(programBlock.Id.ToString(), (int)LastMouseLocation.Item1, (int)LastMouseLocation.Item2);
-
-            await Task.Delay(10); // just temporary   alltså glöm ej bort men fattar ej hur fix
-
-            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addNode", programBlock.Id);
+            input.Id = Guid.NewGuid();
         }
-        else if (localProgram is CustomBlockProgram customBlockProgram)
+
+        foreach (var output in programBlock.Block.Outputs)
         {
-            ProgramBlock programBlock = new ProgramBlock();
-
-            // Create a new instance of the block type
-            programBlock.Block = (Block)Activator.CreateInstance(item.block.GetType());
-
-            // Generate new GUIDs for inputs and outputs.
-            foreach (var input in programBlock.Block.Inputs)
-            {
-                input.Id = Guid.NewGuid();
-            }
-
-            foreach (var output in programBlock.Block.Outputs)
-            {
-                output.Id = Guid.NewGuid();
-            }
-
-            programBlock.Id = Guid.NewGuid();
-            customBlockProgram.ProgramStructure.AddProgramBlock(programBlock);
-
-            //await JSRuntime.InvokeVoidAsync("initResizablePanels");
-            //await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
-            await UpdateNodeLocation(programBlock.Id.ToString(), (int)LastMouseLocation.Item1, (int)LastMouseLocation.Item2);
-
-            await Task.Delay(10); // just temporary   alltså glöm ej bort men fattar ej hur fix
-
-            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addNode", programBlock.Id);
+            output.Id = Guid.NewGuid();
         }
+
+        programBlock.Id = Guid.NewGuid();
+        localProgram.ProgramStructure.AddProgramBlock(programBlock);
+
+        //await JSRuntime.InvokeVoidAsync("initResizablePanels");
+        //await JSRuntime.InvokeVoidAsync("jsPlumbInterop.initJsPlumb", DotNetObjectReference.Create(this), zoomvalue);
+        await UpdateNodeLocation(programBlock.Id.ToString(), (int)LastMouseLocation.Item1, (int)LastMouseLocation.Item2);
+
+        await Task.Delay(10); // just temporary   alltså glöm ej bort men fattar ej hur fix
+
+        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.addNode", programBlock.Id);
+
         StateHasChanged();
     }
 
@@ -978,18 +907,9 @@
                     Console.WriteLine("Exception caught: " + e.Message);
                 }
 
-                if (localProgram is CustomProgram customProgram)
-                {
-                    await customProgram.ProgramStructure.RemoveProgramBlock(programBlock.Id);
-                    SelectedDetail = null;
-                    await DrawConnections(customProgram.ProgramStructure, true);
-                }
-                else if (localProgram is CustomBlockProgram customBlockProgram)
-                {
-                    await customBlockProgram.ProgramStructure.RemoveProgramBlock(programBlock.Id);
-                    SelectedDetail = null;
-                    await DrawConnections(customBlockProgram.ProgramStructure, true);
-                }
+                await localProgram.ProgramStructure.RemoveProgramBlock(programBlock.Id);
+                SelectedDetail = null;
+                await DrawConnections(localProgram.ProgramStructure);
                 StateHasChanged();
             }
         }
@@ -1002,15 +922,73 @@
     //Value logic
     private void SetValue(InputItem inputItem)
     {
-        localProgram.ProgramStructure.DirectInputValues[inputItem.Id] = inputItem.Data;
+        try
+        {
+            // Check if inputItem.Data is a List<object>
+            if (inputItem.Data is List<object> dataList)
+            {
+                // Iterate over the list and print each value
+                foreach (var value in dataList)
+                {
+                    Console.WriteLine(value);
+                }
+                localProgram.ProgramStructure.DirectInputValues[inputItem.Id] = inputItem.Data;
+
+            }
+            else
+            {
+                Console.WriteLine(inputItem.Data);
+                localProgram.ProgramStructure.DirectInputValues[inputItem.Id] = inputItem.Data;
+            }
+        }
+        catch (Exception e)
+        {
+            // Handle the exception appropriately, e.g., log it
+            Console.WriteLine(e.Message);
+        }
     }
+
     private void SetVarValue(InputItem inputItem)
     {
-        foreach (var value in (List<object>)inputItem.Data)
+        try
         {
-            Console.WriteLine(value);
+            // Check if inputItem.Data is a List<object>
+            if (inputItem.Data is List<object> dataList)
+            {
+                // Iterate over the list and print each value
+                foreach (var value in dataList)
+                {
+                    Console.WriteLine(value);
+                }
+                localProgram.ProgramStructure.Variables[inputItem.Id].Value = inputItem.Data;
+
+            }
+            else
+            {
+                Console.WriteLine(inputItem.Data);
+                localProgram.ProgramStructure.Variables[inputItem.Id].Value = inputItem.Data;
+            }
         }
-        localProgram.ProgramStructure.Variables[inputItem.Id].Value = inputItem.Data;
+        catch (Exception e)
+        {
+            // Handle the exception appropriately, e.g., log it
+            Console.WriteLine(e.Message);
+        }
+    }
+
+    private void UpdateType(ProgramBlock node, object value)
+    {
+        string valueStr = value.ToString();
+        if (Enum.IsDefined(typeof(NodeBaseApi.Version2.Type), valueStr))
+        {
+            NodeBaseApi.Version2.Type parsedType = (NodeBaseApi.Version2.Type)Enum.Parse(typeof(NodeBaseApi.Version2.Type), valueStr);
+            node.Block.Outputs[1].Type = parsedType;
+            node.Block.Inputs[1].Type = parsedType;
+        }
+        else
+        {
+            Console.WriteLine($"Invalid value: {valueStr}");
+        }
     }
 
     //Navbar logic
@@ -1135,14 +1113,7 @@
             localProgram = Clone(History[_currentHistoryIndex]);
             APO = localProgram;
             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-            if (localProgram is CustomProgram customProgram)
-            {
-                await DrawConnections(customProgram.ProgramStructure, true);
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                await DrawConnections(customBlockProgram.ProgramStructure, true);
-            }
+            await DrawConnections(localProgram.ProgramStructure);
         }
         //Console.WriteLine("History index: " + _currentHistoryIndex);
 
@@ -1157,14 +1128,7 @@
             localProgram = Clone(History[_currentHistoryIndex]);
             APO = localProgram;
             await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-            if (localProgram is CustomProgram customProgram)
-            {
-                await DrawConnections(customProgram.ProgramStructure, true);
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                await DrawConnections(customBlockProgram.ProgramStructure, true);
-            }
+            await DrawConnections(localProgram.ProgramStructure);
         }
         //Console.WriteLine("History index: " + _currentHistoryIndex);
 
