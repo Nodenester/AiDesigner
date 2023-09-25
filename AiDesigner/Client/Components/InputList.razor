@@ -1,0 +1,381 @@
+﻿@using NodeBaseApi.Version2
+
+@if (IsList)
+{
+    <div class="text-center overflow-y-auto">
+            @foreach (var input in inputItems)
+            {
+                <div class="mb-2">
+                    <button class="w-full h-auto p-2 rounded-lg transition
+                        @(SelectedInput == input ? "dark:bg-gray-500 bg-gray-100" : "dark:bg-gray-600 bg-gray-200") text-black"
+                        @onclick="() => SetSelectedInput(input)">
+                        @if (SelectedInput == input)
+                       {
+                            <div class="mt-0 flex flex-col items-center">
+                            @switch (Type)
+                            {
+                                case NodeBaseApi.Version2.Type.String:
+                                    <div class="mb-0">
+                                        <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
+                                        <textarea @onchange="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" value="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
+                                                  class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
+                                    </div>
+                                    break;
+                                case NodeBaseApi.Version2.Type.Picture:
+                                    <div class="mb-0">
+                                        <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
+                                        <div>
+                                            <div class="flex items-center justify-center w-full">
+                                                <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                                        </svg>
+                                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">PNG or JPG (MAX. 260x260px)</p>
+                                                    </div>
+                                                    <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnListFileChanged(new CustomEventArgs { FileChangeEventArgs = e, Id = Id }))" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    break;
+                                case NodeBaseApi.Version2.Type.Number:
+                                    <div class="mb-0">
+                                        <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
+                                        <input type="number" @oninput="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" value="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
+                                               class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
+                                    </div>
+                                    break;
+                                case NodeBaseApi.Version2.Type.Boolean:
+                                    <div class="mb-0">
+                                        <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
+                                        <div class="mt-2 w-full flex justify-center">
+                                            <div class="w-72 cursor-pointer flex items-center justify-center">
+                                                <label for="@Id" class="flex items-center justify-center h-12 w-full">
+                                                    <input type="checkbox" id="@Id" @onchange="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" checked="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
+                                                           class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    break;
+                                case NodeBaseApi.Version2.Type.Audio:
+                                    <div class="mb-0">
+                                        <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
+                                        <div>
+                                            <div class="flex items-center justify-center w-full">
+                                                <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
+                                                    <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                                        <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                                            <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                                        </svg>
+                                                        <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                                        <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
+                                                    </div>
+                                                    <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnListAudioFileChanged(new CustomEventArgs { FileChangeEventArgs = e, Id = Id }))" />
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    break;
+                                default:
+                                    <p>Unknown input type</p>
+                                    break;
+                            }
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mt-0">
+                                <p class="truncate dark:text-white">Input: @inputItems.IndexOf(input)</p>
+                            </div>
+                        }
+                    </button>
+                </div>
+            }
+        <div class="mb-2">
+            <button class="w-full h-auto p-2 rounded-lg transition bg-gray-600" @onclick="() => AddInput()">
+                <p class="truncate dark:text-white">Add input</p>
+            </button>
+        </div>
+    </div>
+}
+else
+{
+    @switch (Type)
+    {
+        case NodeBaseApi.Version2.Type.String:
+            <div class="mb-2">
+                <p class="font-semibold">Type: Text</p>
+                <textarea @onchange="eventArgs => HandleInput(eventArgs)" value="@Value"
+                class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
+            </div>
+            break;
+        case NodeBaseApi.Version2.Type.Picture:
+            <div class="mb-2">
+                <p class="font-semibold">Type: Picture</p>
+                <div>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">PNG or JPG (MAX. 260x260px)</p>
+                            </div>
+                            <InputFile id="dropzone-file" class="hidden" accept=".png" OnChange="@(async (e) => await OnSingleFileChanged(e))" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+            break;
+        case NodeBaseApi.Version2.Type.Number:
+            <div class="mb-2">
+                <p class="font-semibold">Type: Number</p>
+                <input type="number" @oninput="eventArgs => HandleInput(eventArgs)" value="@Value"
+                class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"/>
+            </div>
+            break;
+        case NodeBaseApi.Version2.Type.Boolean:
+            <div class="mb-2">
+                <p class="font-semibold w-full">Type: Boolean</p>
+                <div class="mt-2 w-full flex justify-center">
+                    <div class="w-72 cursor-pointer flex items-center justify-center">
+                        <label for="@Id" class="flex items-center justify-center h-12 w-full">
+                            <input type="checkbox" id="@Id" @onchange="eventArgs => HandleInput(eventArgs)" checked="@Value"
+                            class="w-4 h-4 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+            break;
+        case NodeBaseApi.Version2.Type.Audio:
+            <div class="mb-2">
+                <p class="font-semibold">Type: Audio</p>
+                <div>
+                    <div class="flex items-center justify-center w-full">
+                        <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-48 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
+                            <div class="flex flex-col items-center justify-center pt-5 pb-6">
+                                <svg class="w-8 h-8 mb-4 text-gray-500 dark:text-gray-400" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 16">
+                                    <path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 13h3a3 3 0 0 0 0-6h-.025A5.56 5.56 0 0 0 16 6.5 5.5 5.5 0 0 0 5.207 5.021C5.137 5.017 5.071 5 5 5a4 4 0 0 0 0 8h2.167M10 15V6m0 0L8 8m2-2 2 2" />
+                                </svg>
+                                <p class="mb-2 text-sm text-gray-500 dark:text-gray-400"><span class="font-semibold">Click to upload</span> or drag and drop</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">MP3, WAV or other audio formats</p>
+                            </div>
+                            <InputFile id="audio-dropzone-file" class="hidden" accept=".mp3,.wav" OnChange="@(async (e) => await OnSingleAudioFileChanged(e))" />
+                        </label>
+                    </div>
+                </div>
+            </div>
+            break;
+        default:
+            <p>Unknown input type</p>
+            break;
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    [Parameter]
+    public NodeBaseApi.Version2.Type Type { get; set; }
+
+    [Parameter]
+    public object Value { get; set; }
+
+    [Parameter]
+    public bool IsList { get; set; }
+
+    [Parameter]
+    public EventCallback<InputItem> SendbackValue { get; set; }
+
+    public class CustomEventArgs
+    {
+        public InputFileChangeEventArgs FileChangeEventArgs { get; set; }
+        public ChangeEventArgs ChangeEventArgs { get; set; }
+        public Guid Id { get; set; }
+
+        public bool IsFileChangeEventArgs => FileChangeEventArgs != null;
+        public bool IsChangeEventArgs => ChangeEventArgs != null;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (IsList)
+        {
+            var objList = (List<object>)Value;
+            if (objList != null)
+            {
+                inputItems = objList.Select(x => new InputItem { Data = x }).ToList();
+                if (inputItems.Count == 0)
+                {
+                    inputItems.Add(new InputItem());
+                }
+                SelectedInput = inputItems.FirstOrDefault();
+            }
+        }
+    }
+    protected override async Task OnParametersSetAsync()
+    {
+        if(IsList)
+        {
+            var objList = inputItems.Select(item => item.Data).ToList();
+            if(objList != null)
+            {
+                inputItems = objList.Select(x => new InputItem { Data = x }).ToList();
+                if(inputItems.Count == 0)
+                {
+                    inputItems.Add(new InputItem()); 
+                }
+                SelectedInput = inputItems.FirstOrDefault();
+            }
+        }
+    }
+
+    public void AddInput()
+    {
+        inputItems.Add(new InputItem());
+    }
+
+    public void SetSelectedInput(InputItem inputItem)
+    {
+        SelectedInput = inputItem;
+    }
+
+    private InputItem SelectedInput { get; set; }
+
+    private List<InputItem> inputItems = new List<InputItem>();
+
+    public class InputItem
+    {
+        public Guid Id { get; set; } = Guid.NewGuid();
+        public object Data { get; set; } = new object();
+    }
+
+    //Handle normal inputs
+    void HandleInput(ChangeEventArgs EventArgs)
+    {
+        // Convert the value to object to avoid null-related issues
+        object value = EventArgs.Value;
+        // Check the type of value and store it appropriately
+        if (float.TryParse(value?.ToString(), out float floatValue))
+        {
+            Value = floatValue;
+        }
+        else if (bool.TryParse(value?.ToString(), out bool boolValue))
+        {
+            Value = boolValue;
+        }
+        else
+        {
+            Value = value?.ToString();
+        }
+        SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = Value });
+    }
+
+    private async Task OnSingleFileChanged(InputFileChangeEventArgs EventArgs)
+    {
+        var file = EventArgs.File;
+        string[] imageTypes = new[] { "image/jpeg", "image/png" };
+
+        if (file != null && imageTypes.Contains(file.ContentType))
+        {
+            // Resizing the image
+            var resized = await file.RequestImageFileAsync(file.ContentType, 260, 260);
+
+            var buffer = new byte[resized.Size];
+            await using var stream = resized.OpenReadStream((int)resized.Size);
+            await stream.ReadAsync(buffer, 0, (int)resized.Size);
+            Value = buffer;
+            SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = Value });
+        }
+    }
+
+    private async Task OnSingleAudioFileChanged(InputFileChangeEventArgs EventArgs)
+    {
+        var file = EventArgs.File;
+        if (file != null)
+        {
+            using (var ms = new MemoryStream())
+            {
+                await file.OpenReadStream().CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                // Now 'bytes' is a byte array you can use.
+                Value = bytes;
+                SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = Value });
+            }
+        }
+    }
+
+    //Handle List inputs
+    void HandleListInput(CustomEventArgs item)
+    {
+        // Convert the value to object to avoid null-related issues
+        object value = item.ChangeEventArgs.Value;
+        // Check the type of value and store it appropriately
+        if (float.TryParse(value?.ToString(), out float floatValue))
+        {
+            var sitem = inputItems.FirstOrDefault(i => i.Id == item.Id);
+            var index = inputItems.IndexOf(sitem);
+            inputItems[index].Data = floatValue;
+        }
+        else if (bool.TryParse(value?.ToString(), out bool boolValue))
+        {
+            var sitem = inputItems.FirstOrDefault(i => i.Id == item.Id);
+            var index = inputItems.IndexOf(sitem);
+            inputItems[index].Data = boolValue;
+        }
+        else
+        {
+            var sitem = inputItems.FirstOrDefault(i => i.Id == item.Id);
+            var index = inputItems.IndexOf(sitem);
+            inputItems[index].Data = value?.ToString();
+            Console.WriteLine(value?.ToString());
+
+        }
+        var dataList = inputItems.Select(item => item.Data).ToList();
+        SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = dataList });
+        Console.WriteLine(dataList);
+    }
+
+    private async Task OnListFileChanged(CustomEventArgs item)
+    {
+        var file = item.FileChangeEventArgs.File;
+        string[] imageTypes = new[] { "image/jpeg", "image/png" };
+
+        if (file != null && imageTypes.Contains(file.ContentType))
+        {
+            // Resizing the image
+            var resized = await file.RequestImageFileAsync(file.ContentType, 260, 260);
+
+            var buffer = new byte[resized.Size];
+            await using var stream = resized.OpenReadStream((int)resized.Size);
+            await stream.ReadAsync(buffer, 0, (int)resized.Size);
+            var sitem = inputItems.FirstOrDefault(i => i.Id == item.Id);
+            var index = inputItems.IndexOf(sitem);
+            inputItems[index].Data = buffer;
+            SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = inputItems });
+        }
+    }
+
+    private async Task OnListAudioFileChanged(CustomEventArgs item)
+    {
+        var file = item.FileChangeEventArgs.File;
+        if (file != null)
+        {
+            using (var ms = new MemoryStream())
+            {
+                await file.OpenReadStream().CopyToAsync(ms);
+                var bytes = ms.ToArray();
+                // Now 'bytes' is a byte array you can use.
+                var sitem = inputItems.FirstOrDefault(i => i.Id == item.Id);
+                var index = inputItems.IndexOf(sitem);
+                inputItems[index].Data = bytes;
+                SendbackValue.InvokeAsync(new InputItem { Id = Id, Data = inputItems });
+            }
+        }
+    }
+}

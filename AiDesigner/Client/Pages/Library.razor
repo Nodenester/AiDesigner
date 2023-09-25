@@ -70,7 +70,7 @@
     {
         if (eap is CustomBlockProgram customBlockProgram)
         {
-            <button class="w-72 h-32 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between" @onmousedown="@(async () => await HandleButtonClick(eap))"
+            <button class="w-72 h-48 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between" @onmousedown="@(async () => await HandleButtonClick(eap))"
             @ondblclick="@(async () => await HandleDButtonClick(customBlockProgram))">
                 <!-- Add Image Here -->
                 @if (customBlockProgram.Image != null)
@@ -79,7 +79,7 @@
                 }
                 else
                 {
-                    <div class="margin-top: 9.7rem;" />
+                    <div style="margin-top: 9.7rem;" />
                 }
                 <hr style="width: 100%; margin-left: auto; margin-right: auto;">
                 <div class="w-full align-middle content-center">
@@ -90,7 +90,7 @@
     }
 </div>
 
-<div style="display: flex; align-items: center; justify-content: space-between;">
+<div style="display: flex; align-items: center; justify-content: space-between; mt-8">
     <h1 style="margin-right: 10px;">Vault</h1>
     <hr style="flex-grow: 1; margin: 0;">
 </div>
