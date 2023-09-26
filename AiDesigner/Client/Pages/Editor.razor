@@ -41,6 +41,14 @@
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="CutBlock">Cut</button>
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="PasteBlock">Paste</button>*@
             <a class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" href="path/to/your/docs">Help</a>
+            <div class="w-full content-end py-1">
+                <input type="number"
+                       class="w-10 p-1 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"
+                       min="1"
+                       max="25"
+                       value="5"
+                @onchange="(ChangeEventArgs e) => SetGridSize(e)" />
+            </div>
         </div>
     </div>
 
@@ -195,12 +203,24 @@
                                     <div class="top-part dark:bg-gray-800">
                                         <div style="display: inline-block; margin-left: 10px;">
                                             <span>@node.Block.Name</span>
-                                            @if (node.Block.Name == "Get Variable" || node.Block.Name == "Set Variable")
+                                            @if (node.Block.Name == "Get Variable")
                                             {
                                                 <div style="margin-left:-0.6rem;">
-                                                    <select @bind="node.VariableId" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                    <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, -1, 0, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="@Guid.Empty"disabled selected hidden>Select Variable</option>
-                                                        @foreach (var Variable in _localProgram.ProgramStructure.Variables)
+                                                        @foreach (var Variable in localProgram.ProgramStructure.Variables)
+                                                        {
+                                                            <option value="@Variable.Value.Id">@Variable.Value.Name</option>
+                                                        }
+                                                    </select>
+                                                </div>
+                                            }
+                                            @if (node.Block.Name == "Set Variable")
+                                            {
+                                                <div style="margin-left:-0.6rem;">
+                                                    <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, 1, -1, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                        <option value="@Guid.Empty" disabled selected hidden>Select Variable</option>
+                                                        @foreach (var Variable in localProgram.ProgramStructure.Variables)
                                                         {
                                                             <option value="@Variable.Value.Id">@Variable.Value.Name</option>
                                                         }
@@ -585,7 +605,6 @@
     private AddOutput apo { get; set; }
     private AddVariable apv { get; set; }
 
-
     public ProgramObject localProgram
     {
         get { return _localProgram; }
@@ -919,6 +938,15 @@
         }
     }
 
+    private async Task SetGridSize(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value.ToString(), out int newSize))
+        {
+            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.setGridSize", newSize);
+            StateHasChanged();
+        }
+    }
+
     //Value logic
     private void SetValue(InputItem inputItem)
     {
@@ -976,14 +1004,34 @@
         }
     }
 
-    private void UpdateType(ProgramBlock node, object value)
+    private void UpdateType(ProgramBlock node, object value, int Sidx = -1, int Eidx = -1, bool IsList = false)
     {
         string valueStr = value.ToString();
         if (Enum.IsDefined(typeof(NodeBaseApi.Version2.Type), valueStr))
         {
             NodeBaseApi.Version2.Type parsedType = (NodeBaseApi.Version2.Type)Enum.Parse(typeof(NodeBaseApi.Version2.Type), valueStr);
-            node.Block.Outputs[1].Type = parsedType;
-            node.Block.Inputs[1].Type = parsedType;
+            if (Sidx != -1 && Eidx != -1)
+            {
+                node.Block.Outputs[Sidx].Type = parsedType;
+                node.Block.Inputs[Eidx].Type = parsedType;
+                node.Block.Inputs[Sidx].IsList = IsList;
+                node.Block.Outputs[Eidx].IsList = IsList;
+            }
+            else if (Sidx == -1 && Eidx != -1)
+            {
+                node.Block.Outputs[Eidx].Type = parsedType;
+                node.Block.Outputs[Eidx].IsList = IsList;
+            }
+            else if (Sidx != -1 && Eidx == -1)
+            {
+                node.Block.Inputs[Sidx].Type = parsedType;
+                node.Block.Inputs[Sidx].IsList = IsList;
+            }
+            else
+            {
+                node.Block.Outputs[1].Type = parsedType;
+                node.Block.Inputs[1].Type = parsedType;
+            }
         }
         else
         {

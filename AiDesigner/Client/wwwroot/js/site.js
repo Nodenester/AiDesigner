@@ -67,25 +67,24 @@ $(document).ready(function () {
 });
 
 var currentZoom = 1.0; // initialize a global variable to keep track of zoom level
+var currentGridSize = 5; // initialize a global variable to keep track of grid size
 
 window.jsPlumbInterop = {
     instance: null, // define instance here
-
     nodes: null,
 
     initJsPlumb: function (refrence, startzoom) {
-        currentZoom = startzoom;
+        currentGridSize = 5;
 
         this.instance = jsPlumb.getInstance({
             DragOptions: { cursor: 'pointer', zIndex: 2000 },
-            PaintStyle: { stroke: '#666' },
+            PaintStyle: { stroke: '#666', zIndex: 9999 }, // Adjust zIndex here
             EndpointHoverStyle: { fill: '#216477' },
             HoverPaintStyle: { stroke: '#216477' },
             EndpointStyle: { width: 1, height: 1, stroke: '#666' },
             Endpoint: "Blank",
             Anchors: ["Right", "Left"]
         });
-
 
         nodes = document.querySelectorAll(".node");
 
@@ -97,7 +96,7 @@ window.jsPlumbInterop = {
 
         this.instance.draggable(nodes, {
             //borde ändra till detta som inställnign typ
-            grid: [5, 5], 
+            grid: [currentGridSize, currentGridSize], 
             start: function (params) {
                 var zoom = currentZoom;
                 var left = parseFloat(params.el.style.left);
@@ -106,6 +105,7 @@ window.jsPlumbInterop = {
                 params.el.style.left = (left * zoom) + 'px';
                 params.el.style.top = (top * zoom) + 'px';
             },
+
             drag: throttle(function (params) {
                 var zoom = currentZoom;
                 var left = parseFloat(params.pos[0]) / zoom;
@@ -246,6 +246,104 @@ window.jsPlumbInterop = {
         }
     },
 
+    connectInputs: function (sourceId, targetId, color) {
+        // Use attribute selectors to select elements by ID, even when the ID starts with a digit
+        var source = document.querySelector('[id="' + sourceId + '"].Connection');
+        var target = document.querySelector('[id="' + targetId + '"].Connection');
+
+        if (source && target) {
+            var connectionLayer = document.getElementById('connection-layer');
+
+            // Get the canvas's offset and zoom level
+            var canvas = document.getElementById("canvas");
+            var canvasRect = canvas.getBoundingClientRect();
+            var offsetX = canvasRect.left;
+            var offsetY = canvasRect.top;
+            var zoom = currentZoom;
+
+            // Adjust the position of the endpoints considering the canvas offset and zoom level
+            var sourceEndpoint = document.createElement('div');
+            sourceEndpoint.id = sourceId + '-endpoint';
+            sourceEndpoint.style.position = 'absolute';
+            sourceEndpoint.style.left = (((source.getBoundingClientRect().left - offsetX) / zoom) + source.offsetWidth / 2) + 'px';
+            sourceEndpoint.style.top = (((source.getBoundingClientRect().top - offsetY) / zoom) + source.offsetHeight / 2) + 'px';
+            sourceEndpoint.style.width = '0px';
+            sourceEndpoint.style.height = '0px';
+            sourceEndpoint.style.background = color;
+            sourceEndpoint.style.borderRadius = '0%';
+            connectionLayer.appendChild(sourceEndpoint);
+
+            var targetEndpoint = document.createElement('div');
+            targetEndpoint.id = targetId + '-endpoint';
+            targetEndpoint.style.position = 'absolute';
+            targetEndpoint.style.left = (((target.getBoundingClientRect().left - offsetX) / zoom) + target.offsetWidth / 2) + 'px';
+            targetEndpoint.style.top = (((target.getBoundingClientRect().top - offsetY) / zoom) + target.offsetHeight / 2) + 'px';
+            targetEndpoint.style.width = '0px';
+            targetEndpoint.style.height = '0px';
+            targetEndpoint.style.background = color;
+            targetEndpoint.style.borderRadius = '0%';
+            connectionLayer.appendChild(targetEndpoint);
+
+            this.instance.addEndpoint(sourceEndpoint.id, { anchor: 'Right' });
+            this.instance.addEndpoint(targetEndpoint.id, { anchor: 'Left' });
+
+            console.log('Source Position and Dimensions:', source.getBoundingClientRect());
+            console.log('Target Position and Dimensions:', target.getBoundingClientRect());
+            console.log(source);
+
+            if (color == "#ff0000") {
+                console.log('Source Endpoint Position:', sourceEndpoint.style.left, sourceEndpoint.style.top);
+                console.log('Target Endpoint Position:', targetEndpoint.style.left, targetEndpoint.style.top);
+            }
+
+            var sourceTop = (source.getBoundingClientRect().top - offsetY) / zoom;
+            var targetTop = (target.getBoundingClientRect().top - offsetY) / zoom;
+
+            var connectorType = ["Bezier", { curviness: 100 }];
+
+            if (Math.abs(sourceTop - targetTop) < 5) { // 5 is a threshold you can adjust
+                connectorType = "Straight";
+                console.log("connector straight");
+            }
+
+            this.instance.connect({
+                source: sourceEndpoint.id,
+                target: targetEndpoint.id,
+                paintStyle: { stroke: color, strokeWidth: 5 },
+                connector: connectorType
+            });
+        } else {
+            console.error('Unable to connect', sourceId, 'to', targetId);
+            if (!source) console.error('Source does not exist');
+            if (!target) console.error('Target does not exist');
+        }
+    },
+
+    setGridSize: function (gridSize) {
+        currentGridSize = gridSize;
+        this.instance.repaintEverything();
+    },
+
+    addZoom: function (zoomValue) {
+        currentZoom = zoomValue;
+
+        var canvas = document.getElementById("canvas");
+        var transformOrigin = [0, 0];
+        var el = canvas;
+
+        var p = ["webkit", "moz", "ms", "o"],
+            s = "scale(" + zoomValue + ")",
+            oString = (transformOrigin[0] * 100) + "% " + (transformOrigin[1] * 100) + "%";
+
+        for (var i = 0; i < p.length; i++) {
+            el.style[p[i] + "Transform"] = s;
+            el.style[p[i] + "TransformOrigin"] = oString;
+        }
+
+        el.style["transform"] = s;
+        el.style["transformOrigin"] = oString;
+    },
+
     addNode: function (nodeId) {
         var newNode = document.getElementById(nodeId);
 
@@ -253,7 +351,7 @@ window.jsPlumbInterop = {
         if (newNode) {
             // Make the new node draggable
             this.instance.draggable(newNode, {
-                grid: [5, 5],
+                grid: [this.currentGridSize, this.currentGridSize],
                 start: function (params) {
                     var zoom = currentZoom;
                     var left = parseFloat(params.el.style.left);
@@ -359,100 +457,6 @@ window.jsPlumbInterop = {
             console.error('Node does not exist with id:' + nodeId);
         }
     },
-
-    connectInputs: function (sourceId, targetId, color) {
-        // Use attribute selectors to select elements by ID, even when the ID starts with a digit
-        var source = document.querySelector('[id="' + sourceId + '"].Connection');
-        var target = document.querySelector('[id="' + targetId + '"].Connection');
-
-        if (source && target) {
-            var connectionLayer = document.getElementById('connection-layer');
-
-            // Get the canvas's offset and zoom level
-            var canvas = document.getElementById("canvas");
-            var canvasRect = canvas.getBoundingClientRect();
-            var offsetX = canvasRect.left;
-            var offsetY = canvasRect.top;
-            var zoom = currentZoom;
-
-            // Adjust the position of the endpoints considering the canvas offset and zoom level
-            var sourceEndpoint = document.createElement('div');
-            sourceEndpoint.id = sourceId + '-endpoint';
-            sourceEndpoint.style.position = 'absolute';
-            sourceEndpoint.style.left = (((source.getBoundingClientRect().left - offsetX) / zoom) + source.offsetWidth / 2) + 'px';
-            sourceEndpoint.style.top = (((source.getBoundingClientRect().top - offsetY) / zoom) + source.offsetHeight / 2) + 'px';
-            sourceEndpoint.style.width = '0px';
-            sourceEndpoint.style.height = '0px';
-            sourceEndpoint.style.background = color;
-            sourceEndpoint.style.borderRadius = '0%';
-            connectionLayer.appendChild(sourceEndpoint);
-
-            var targetEndpoint = document.createElement('div');
-            targetEndpoint.id = targetId + '-endpoint';
-            targetEndpoint.style.position = 'absolute';
-            targetEndpoint.style.left = (((target.getBoundingClientRect().left - offsetX) / zoom) + target.offsetWidth / 2) + 'px';
-            targetEndpoint.style.top = (((target.getBoundingClientRect().top - offsetY) / zoom) + target.offsetHeight / 2) + 'px';
-            targetEndpoint.style.width = '0px';
-            targetEndpoint.style.height = '0px';
-            targetEndpoint.style.background = color;
-            targetEndpoint.style.borderRadius = '0%';
-            connectionLayer.appendChild(targetEndpoint);
-
-            this.instance.addEndpoint(sourceEndpoint.id, { anchor: 'Right' });
-            this.instance.addEndpoint(targetEndpoint.id, { anchor: 'Left' });
-
-            console.log('Source Position and Dimensions:', source.getBoundingClientRect());
-            console.log('Target Position and Dimensions:', target.getBoundingClientRect());
-            console.log(source);
-
-            if (color == "#ff0000") {
-                console.log('Source Endpoint Position:', sourceEndpoint.style.left, sourceEndpoint.style.top);
-                console.log('Target Endpoint Position:', targetEndpoint.style.left, targetEndpoint.style.top);
-            }
-
-            var sourceTop = (source.getBoundingClientRect().top - offsetY) / zoom;
-            var targetTop = (target.getBoundingClientRect().top - offsetY) / zoom;
-
-            var connectorType = ["Bezier", { curviness: 100 }];
-
-            if (Math.abs(sourceTop - targetTop) < 5) { // 5 is a threshold you can adjust
-                connectorType = "Straight";
-                console.log("connector straight");
-            }
-
-            this.instance.connect({
-                source: sourceEndpoint.id,
-                target: targetEndpoint.id,
-                paintStyle: { stroke: color, strokeWidth: 5 },
-                connector: connectorType
-            });
-        } else {
-            console.error('Unable to connect', sourceId, 'to', targetId);
-            if (!source) console.error('Source does not exist');
-            if (!target) console.error('Target does not exist');
-        }
-    },
-
-    addZoom: function (zoomValue) {
-        currentZoom = zoomValue;
-
-        var canvas = document.getElementById("canvas");
-        var transformOrigin = [0, 0];
-        var el = canvas;
-
-        var p = ["webkit", "moz", "ms", "o"],
-            s = "scale(" + zoomValue + ")",
-            oString = (transformOrigin[0] * 100) + "% " + (transformOrigin[1] * 100) + "%";
-
-        for (var i = 0; i < p.length; i++) {
-            el.style[p[i] + "Transform"] = s;
-            el.style[p[i] + "TransformOrigin"] = oString;
-        }
-
-        el.style["transform"] = s;
-        el.style["transformOrigin"] = oString;
-    },
-    // Other jsPlumb related functions...
 };
 
 function throttle(func, limit) {
