@@ -1,18 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
+
 
 namespace AiDesigner.Shared.Data
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Net.Http;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Newtonsoft.Json;
-
     public class ApiService
     {
         private readonly HttpClient _httpClient;
@@ -26,7 +21,7 @@ namespace AiDesigner.Shared.Data
         public async Task<List<object>> ExecuteProgramAsync(Guid programKey, Dictionary<Guid, object> inputValues, string apiKey, Guid? sessionId = null, bool isTest = false)
         {
             // Create request payload
-            var requestContent = new StringContent(JsonConvert.SerializeObject(inputValues), Encoding.UTF8, "application/json");
+            StringContent requestContent = new StringContent(JsonConvert.SerializeObject(inputValues), Encoding.UTF8, "application/json");
 
             // Construct URL with query parameters
             var url = $"api/Program/execute?programKey={programKey}&apiKey={apiKey}";

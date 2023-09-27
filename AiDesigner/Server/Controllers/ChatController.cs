@@ -118,5 +118,23 @@ namespace NodeBaseApi.Controllers
             }
         }
 
+        //Token stuff
+        // POST api/Chat/GetCreateWallet
+        [HttpPost("Wallet/GetCreateWallet")]
+        public async Task<ActionResult> GetCreateWallet([FromBody] Guid userId)
+        {
+            try
+            {
+                var wallet = await _dbConnection.EnsureWalletAndRetrieveTokensAsync(userId);
+                return Ok(wallet);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                Console.WriteLine(ex);
+                // Return a 500 status code
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
     }
 }
