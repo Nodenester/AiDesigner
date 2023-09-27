@@ -681,6 +681,30 @@ namespace AiDesigner.Server.Data
             await connection.ExecuteAsync(query, parameters);
         }
 
+        //Token handeling
+        public async Task<int> EnsureWalletAndRetrieveTokensAsync(Guid userId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    IF NOT EXISTS (SELECT 1 FROM Ludde.TokenWallet WHERE UserId = @UserId)
+                    BEGIN
+                        INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens)
+                        OUTPUT inserted.Tokens
+                        VALUES (NEWID(), @UserId, 0);
+                    END
+                    ELSE
+                    BEGIN
+                        SELECT Tokens
+                        FROM Ludde.TokenWallet
+                        WHERE UserId = @UserId;
+                    END
+                ";
+                return await connection.ExecuteScalarAsync<int>(query, new { UserId = userId });
+            }
+        }
+
+
     }
 }
  

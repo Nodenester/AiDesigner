@@ -65,7 +65,7 @@
                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-5.082 4.892-0.387 0.389-1.039 0.389-1.427 0-0.387-0.39-4.675-4.474-5.082-4.892-0.409-0.418-0.436-1.17 0-1.615z" /></svg>
                 </div>
             </div>
-                <textarea class="form-control mt-2 w-full w-full p-2 border-0 rounded dark:bg-gray-600 dark:text-white outline-none focus:outline-none focus:ring-0" style="outline: none;" rows="10" readonly>@CodeSnippet</textarea>
+                <textarea class="block mt-2 w-full h-4/5 p-2 border-0 rounded dark:!bg-gray-600 dark:text-white outline-none focus:outline-none focus:ring-0" style="outline: none; white-space: pre;" rows="10" readonly>@CodeSnippet</textarea>
         </div>
         }
     </div>
@@ -88,13 +88,128 @@
             switch (SelectedLanguage)
             {
                 case "csharp":
-                    code = $"// C# Code for {(SelectedProgram?.Name ?? "Untitled")}\n// ...";
+                    code = $"// C# Code for {(SelectedProgram?.Name ?? "Untitled")}\n " +
+    @"
+//Put this at the top of your file
+using System;
+using System.Net.Http;
+using System.Text;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+using Newtonsoft.Json;
+
+//The function for calling the api
+public async Task<List<object>> ExecuteProgram(Guid programKey, Guid apiKey, Dictionary<Guid, object> inputValues, Guid sessionId)
+{
+    using (var client = new HttpClient())
+    {
+        client.BaseAddress = new Uri(""http://apiurl""); // replace with the actual API URL
+        var content = new StringContent(JsonConvert.SerializeObject(inputValues), Encoding.UTF8, ""application/json"");
+        try
+        {
+                var response = await client.PostAsync($""api/Program/execute?programKey={{programKey}}&apiKey={{apiKey}}&sessionId={{sessionId}}"", content);
+                var responseString = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<List<object>>(responseString);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine( $""Request failed: {ex.Message}"");
+            return null;
+        }
+    }
+}
+"
+    + @"
+//To use the function
+Guid programKey = Guid.Parse(""{{programKey}}"");
+Guid apiKey = Guid.Parse(""{{apiKey}}"");
+Guid sessionId = Guid.Parse(""{{sessionId}}""); //optional
+Dictionary<Guid, object> inputValues = new Dictionary<Guid, object>();
+";
+                    if (SelectedProgram?.ProgramStructure?.ProgramStart != null)
+                {
+                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                    {
+                        if (input.Type.ToString() != "Trigger")
+                        {
+                            code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //value is {input.Type}\n";
+                        }
+
+                    }
+                }
+code += @"
+var result = await ExecuteProgram(programKey, apiKey, inputValues, sessionId);
+";
+
                     break;
                 case "python":
-                    code = $"# Python Code for {(SelectedProgram?.Name ?? "Untitled")}\n# ...";
+                    code = $"# Python Code for {(SelectedProgram?.Name ?? "Untitled")}\n";
+                    code += @"
+import requests
+import json
+
+def execute_program(program_key, api_key, input_values, session_id):
+    url = 'http://apiurl/api/Program/execute'
+    params = {
+        'programKey': program_key,
+        'apiKey': api_key,
+        'sessionId': session_id,
+    }
+    response = requests.post(url, json=input_values, params=params)
+
+    if response.status_code == 200:
+        return json.loads(response.text)
+    else:
+        print(f'Request failed with status code {response.status_code}')
+        return None
+
+program_key = 'your_program_key'
+api_key = 'your_api_key'
+session_id = 'your_session_id'  # optional
+input_values = {}
+";
+                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                    {
+                        if (input.Type.ToString() != "Trigger")
+                        {
+                            code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
+                        }
+                    }
+                    code += @"
+result = execute_program(program_key, api_key, input_values, session_id)
+";
                     break;
                 case "javascript":
-                    code = $"// JavaScript Code for {(SelectedProgram?.Name ?? "Untitled")}\n// ...";
+                    code = $"// JavaScript Code for {(SelectedProgram?.Name ?? "Untitled")}\n";
+                    code += @"
+const axios = require('axios');
+
+async function executeProgram(programKey, apiKey, inputValues, sessionId) {
+    const url = `http://apiurl/api/Program/execute?programKey=${programKey}&apiKey=${apiKey}&sessionId=${sessionId}`;
+    try {
+        const response = await axios.post(url, inputValues);
+        return response.data;
+    } catch (error) {
+        console.error(`Request failed: ${error}`);
+        return null;
+    }
+}
+
+const programKey = 'your_program_key';
+const apiKey = 'your_api_key';
+const sessionId = 'your_session_id';  // optional
+const inputValues = {};
+";
+                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                    {
+                        if (input.Type.ToString() != "Trigger")
+                        {
+                            code += $"inputValues['{input.Id}'] = value;  // value is {input.Type}\n";
+                        }
+                    }
+                    code += @"
+const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
+";
                     break;
                 default:
                     code = "";

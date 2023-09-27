@@ -151,6 +151,9 @@
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
 
+    [CascadingParameter(Name = "Settokens")]
+    protected EventCallback<int> SetTokens { get; set; }
+
     public CustomProgram selectedProgram { get; set; }
 
     public List<CustomProgram> customPrograms { get; set; }
@@ -168,8 +171,6 @@
             ObjectCreationHandling = ObjectCreationHandling.Replace
         };
 
-    ApiService apiService = new ApiService("https://localhost:44313/");
-
     List<object> ProgramOutput { get; set; } = new List<object>();
 
     protected override async Task OnInitializedAsync()
@@ -177,18 +178,80 @@
 
     }
 
+    ApiService apiService = new ApiService("https://localhost:44313/");
+
     private async Task ExecuteProgram()
     {
         var nonNullInputValues = selectedProgram.ProgramStructure.InputValues
             .Where(kvp => kvp.Value != null)
             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
-        foreach (var input in nonNullInputValues)
+        if (CascAuth != null)
         {
-            Console.WriteLine(input.Value);
-        }
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                //ProgramOutput = await apiService.ExecuteProgramAsync(selectedProgram.ApiKey, nonNullInputValues, userId.ToString(), null, true);
+                var url = $"Execute?programKey={selectedProgram.ApiKey}&apiKey={userId}";
 
-        ProgramOutput = await apiService.ExecuteProgramAsync(selectedProgram.ApiKey, nonNullInputValues, "56a2d82a-5595-4a8f-b1fd-9a1482e02d20", null, true);
+                if (true)
+                {
+                    url += $"&isTest=true";
+                }
+
+                try
+                {
+                    var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        ProgramOutput = await response.Content.ReadFromJsonAsync<List<object>>();
+                    }
+                    else
+                    {
+                        Console.Error.WriteLine($"Error: {response.StatusCode}");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.Error.WriteLine($"Exception: {ex.Message}");
+                }
+                await GetTokens();
+            }
+        }
+        StateHasChanged();
+    }
+
+    private async Task GetTokens()
+    {
+        var user = CascAuth.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    var response = await Http.PostAsJsonAsync<Guid>("Chat/Wallet/GetCreateWallet", userId);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await SetTokens.InvokeAsync(await response.Content.ReadFromJsonAsync<int>());
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    // Handle or log the HTTP request exception here...
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+                catch (JsonException ex)
+                {
+                    // Handle or log the deserialization exception here...
+                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                }
+            }
+        }
     }
 
     protected override async Task OnParametersSetAsync()

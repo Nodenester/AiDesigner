@@ -1,9 +1,11 @@
 ﻿@using AiDesigner.Client.Components
 @using AiDesigner.Shared.Data;
+@using Newtonsoft.Json;
 @using NodeBaseApi.Version2;
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @using static AiDesigner.Client.Components.InputList;
+@inject HttpClient Http
 
 <button @onclick="Open" class="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded" type="button">
     Execute Program
@@ -131,8 +133,14 @@
     [Parameter]
     public ProgramObject AP { get; set; }
 
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    [CascadingParameter(Name = "Settokens")]
+    protected EventCallback<int> SetTokens { get; set; }
+
     List<object> ProgramOutput { get; set; } = new List<object>();
-    ApiService apiService = new ApiService("https://localhost:44313/");
+    //ApiService apiService = new ApiService("https://localhost:44313/");
 
     protected override async Task OnParametersSetAsync()
     {
@@ -183,12 +191,80 @@
             var nonNullInputValues = customProgram.ProgramStructure.InputValues
                 .Where(kvp => kvp.Value != null)
                 .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+            //ProgramOutput = await apiService.ExecuteProgramAsync(customProgram.ApiKey, nonNullInputValues, "56a2d82a-5595-4a8f-b1fd-9a1482e02d20", null, true);
 
-            ProgramOutput = await apiService.ExecuteProgramAsync(customProgram.ApiKey, nonNullInputValues, "56a2d82a-5595-4a8f-b1fd-9a1482e02d20", null, true);
+            if (CascAuth != null)
+            {
+                var user = CascAuth.User;
+                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                if (Guid.TryParse(userIdClaim, out Guid userId))
+                {
+                    var url = "";
+                    if(AP is CustomProgram customProgram2)
+                    {
+                        url = $"Execute?programKey={customProgram2.ApiKey}&apiKey={userId}";
+                    }
+
+                    if (true)
+                    {
+                        url += $"&isTest=true";
+                    }
+
+                    try
+                    {
+                        var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            ProgramOutput = await response.Content.ReadFromJsonAsync<List<object>>();
+                        }
+                        else
+                        {
+                            Console.Error.WriteLine($"Error: {response.StatusCode}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.Error.WriteLine($"Exception: {ex.Message}");
+                    }
+                    await GetTokens();
+                }
+            }
         }
         else if (AP is CustomBlockProgram customBlockProgram)
         {
 
+        }
+    }
+
+    private async Task GetTokens()
+    {
+        var user = CascAuth.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    var response = await Http.PostAsJsonAsync<Guid>("Chat/Wallet/GetCreateWallet", userId);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await SetTokens.InvokeAsync(await response.Content.ReadFromJsonAsync<int>());
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    // Handle or log the HTTP request exception here...
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+                catch (JsonException ex)
+                {
+                    // Handle or log the deserialization exception here...
+                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                }
+            }
         }
     }
 }
