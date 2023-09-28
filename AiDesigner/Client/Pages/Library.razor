@@ -148,6 +148,18 @@
                     <div class="self-start" style="margin-left: 0.2rem;">
                         <h3 class="dark:text-white text-xl">@article.Name</h3>
                     </div>
+                    @if(article.ApiKey == "xxx")
+                    {
+                        <div class="self-start" style="margin-left: 0.2rem;">
+                            <p class="dark:text-white text-lg">CustomBlock</p>
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="self-start" style="margin-left: 0.2rem;">
+                            <p class="dark:text-white text-lg">Program</p>
+                        </div>
+                    }
 
                     <!-- Clone Button -->
                     <div class="self-end">
