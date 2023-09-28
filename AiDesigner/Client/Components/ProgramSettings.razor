@@ -65,7 +65,10 @@
                     <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M4.516 7.548c0.436-0.446 1.043-0.481 1.576 0l3.908 3.747 3.908-3.747c0.533-0.481 1.141-0.446 1.574 0 0.436 0.445 0.408 1.197 0 1.615-0.406 0.418-4.695 4.502-5.082 4.892-0.387 0.389-1.039 0.389-1.427 0-0.387-0.39-4.675-4.474-5.082-4.892-0.409-0.418-0.436-1.17 0-1.615z" /></svg>
                 </div>
             </div>
-                <textarea class="block mt-2 w-full h-4/5 p-2 border-0 rounded dark:!bg-gray-600 dark:text-white outline-none focus:outline-none focus:ring-0" style="outline: none; white-space: pre;" rows="10" readonly>@CodeSnippet</textarea>
+            @if(CodeSnippet != null)
+                {
+                    <textarea class="block mt-2 w-full h-4/5 p-2 border-0 rounded dark:!bg-gray-600 dark:text-white outline-none" style="outline: none; white-space: pre;" rows="10" readonly>@CodeSnippet</textarea>
+                }
         </div>
         }
     </div>

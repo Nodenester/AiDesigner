@@ -138,10 +138,10 @@ namespace NodeBaseApi.Controllers
         }
 
         // DELETE api/programs/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteProgram(Guid id)
+        [HttpDelete("{userId}/{id}")]
+        public async Task<IActionResult> DeleteProgram(Guid userId, Guid id)
         {
-            await _dbConnection.DeleteProgramAsync(id);
+            await _dbConnection.DeleteProgramAsync(userId, id);
             return NoContent();
         }
 

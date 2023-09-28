@@ -74,8 +74,6 @@ window.jsPlumbInterop = {
     nodes: null,
 
     initJsPlumb: function (refrence, startzoom) {
-        currentGridSize = 5;
-
         this.instance = jsPlumb.getInstance({
             DragOptions: { cursor: 'pointer', zIndex: 2000 },
             PaintStyle: { stroke: '#666', zIndex: 9999 }, // Adjust zIndex here
@@ -83,7 +81,7 @@ window.jsPlumbInterop = {
             HoverPaintStyle: { stroke: '#216477' },
             EndpointStyle: { width: 1, height: 1, stroke: '#666' },
             Endpoint: "Blank",
-            Anchors: ["Right", "Left"]
+            Anchors: ["Right", "Left"],
         });
 
         nodes = document.querySelectorAll(".node");
@@ -319,9 +317,10 @@ window.jsPlumbInterop = {
         }
     },
 
-    setGridSize: function (gridSize) {
-        currentGridSize = gridSize;
-        this.instance.repaintEverything();
+    setGridSize: function (refrence, gridSize, startzoom) {
+        currentGridSize = gridSize;  // Update the grid size
+        this.instance.reset();  // Reset the current jsPlumb instance
+        this.initJsPlumb(refrence, startzoom); 
     },
 
     addZoom: function (zoomValue) {
