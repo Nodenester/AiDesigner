@@ -221,16 +221,16 @@ namespace AiDesigner.Server.Data
                 await connection.ExecuteAsync(query, new { UserId = userId, ProgramId = programId });
             }
         }
-        public async Task DeleteProgramAsync(Guid id)
+        public async Task DeleteProgramAsync(Guid userId, Guid Id)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
                 DELETE FROM Ludde.programs
-                WHERE Id = @Id;
+                WHERE Id = @Id AND Author = @userId;
             ";
 
-                await connection.ExecuteAsync(query, new { Id = id });
+                await connection.ExecuteAsync(query, new { userId, Id });
             }
         }
         public async Task<IEnumerable<ProgramObject>> SearchPublicProgramsAsync(string searchTerm)
@@ -321,9 +321,9 @@ namespace AiDesigner.Server.Data
             ProgramObject programObject = await LoadProgramAsync(id);
             return programObject as CustomBlockProgram;
         }
-        public async Task DeleteCustomBlockAsync(Guid id)
+        public async Task DeleteCustomBlockAsync(Guid userId, Guid id)
         {
-            await DeleteProgramAsync(id);
+            await DeleteProgramAsync(userId, id);
         }
 
         //Workshop stuff

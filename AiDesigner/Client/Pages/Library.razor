@@ -36,18 +36,32 @@
     {
         if (eap is CustomProgram customProgram)
         {
-            <button class="w-72 h-48 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between" @onmousedown="@(async () => await HandleButtonClick(eap))"
+            <button class="w-72 h-48 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between relative custom-button"
+            @onmousedown="@(async () => await HandleButtonClick(eap))"
             @ondblclick="@(async () => await HandleDButtonClick(customProgram))">
-                <!-- Add Image Here -->
+
+                <!-- X Button - Initially Hidden, Shown on Hover -->
+                <button @onclick="(() => RemoveProject(customProgram.Id))"
+                        class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white close-button">
+                    X
+                </button>
+
+                <!-- Image -->
                 @if (customProgram.Image != null)
                 {
-                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(customProgram.Image)}")" alt="@customProgram.Name" style="width: 100%; height: 50%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
+                    <div class="w-full h-4/5">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(customProgram.Image)}")" alt="@customProgram.Name" style="width: 100%; height: 100%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
+                    </div>
                 }
                 else
                 {
                     <div style="margin-top: 9.7rem;" />
                 }
+
+                <!-- Divider -->
                 <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+
+                <!-- Program Name -->
                 <div class="w-full align-middle content-center">
                     <h1 class="dark:text-white mb-2 text-xl m-auto">@customProgram.Name</h1>
                 </div>
@@ -70,18 +84,32 @@
     {
         if (eap is CustomBlockProgram customBlockProgram)
         {
-            <button class="w-72 h-48 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between" @onmousedown="@(async () => await HandleButtonClick(eap))"
+            <button class="w-72 h-48 p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-between relative custom-button"
+            @onmousedown="@(async () => await HandleButtonClick(eap))"
             @ondblclick="@(async () => await HandleDButtonClick(customBlockProgram))">
-                <!-- Add Image Here -->
+
+                <!-- X Button - Initially Hidden, Shown on Hover -->
+                <button @onclick="(() => RemoveProject(customBlockProgram.Id))"
+                        class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white close-button">
+                    X
+                </button>
+
+                <!-- Image -->
                 @if (customBlockProgram.Image != null)
                 {
-                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(customBlockProgram.Image)}")" alt="@customBlockProgram.Name" style="width: 100%; height: 50%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
+                    <div class="w-full h-4/5">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(customBlockProgram.Image)}")" alt="@customBlockProgram.Name" style="width: 100%; height: 100%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
+                    </div>
                 }
                 else
                 {
                     <div style="margin-top: 9.7rem;" />
                 }
+
+                <!-- Divider -->
                 <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+
+                <!-- Program Name -->
                 <div class="w-full align-middle content-center">
                     <h1 class="dark:text-white mb-2 text-xl m-auto">@customBlockProgram.Name</h1>
                 </div>
@@ -100,9 +128,10 @@
     {
         @foreach (var article in workshopArticles)
         {
-            <div class="relative h-40 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center" style="width: 17rem;">
+            <div class="relative h-40 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center custom-button" style="width: 17rem;">
                 <!-- Remove Button -->
-                <button @onclick="(() => RemoveArticle(article.Id))" class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white">
+                <button @onclick="(() => RemoveArticle(article.Id.ToString()))"
+                        class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white close-button">
                     X
                 </button>
 
@@ -132,6 +161,16 @@
     }
 </div>
 
+<style>
+    .custom-button:hover .close-button {
+        opacity: 1;
+    }
+
+    .close-button {
+        opacity: 0;
+        transition: opacity 0.3s ease-in-out;
+    }
+</style>
 
 @*Lägg till project som man fått från market och blocks*@
 
@@ -164,46 +203,6 @@
         await UpdateVault();
     }
 
-    public async Task UpdateVault()
-    {
-        if (CascAuth?.User != null && workshopArticles == null && HasLoaded == false)
-        {
-            HasLoaded = true;
-            var user = CascAuth.User;
-
-            if (user.Identity.IsAuthenticated)
-            {
-                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-                if (Guid.TryParse(userIdClaim, out Guid userId))
-                {
-                    try
-                    {
-                        var response = await Http.GetAsync($"Workshop/get-articles-connected-to-user/{userId}");
-                        if (response.IsSuccessStatusCode)
-                        {
-                            // Deserialize the response to the expected data model.
-                            workshopArticles = (await response.Content.ReadFromJsonAsync<IEnumerable<WorkshopArticle>>()).ToList();
-                        }
-                        else
-                        {
-                            Console.WriteLine($"The call failed with status code {response.StatusCode}");
-                            HasLoaded = false;
-                        }
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        Console.WriteLine($"Request exception: {ex.Message}");
-                        HasLoaded = false;
-                    }
-                }
-            }
-            else
-            {
-                HasLoaded = false;
-            }
-        }
-    }
-
     bool isSingleClick = true;
     private async Task HandleButtonClick(ProgramObject eap)
     {
@@ -228,6 +227,7 @@
         await NewAps.InvokeAsync(eap);
     }
 
+    //Projects
     private void CreateProgram()
     {
         EAPs.Add(NewProgram);
@@ -315,7 +315,79 @@
         }
     }
 
+    private async Task RemoveProject(Guid id)
+    {
+        try
+        {
+            isSingleClick = false;
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                var response = await Http.DeleteAsync($"Programs/{userId}/{id}");
+                Console.WriteLine("program id: " + id);
+                if (response.IsSuccessStatusCode)
+                {
+                    Console.WriteLine("Program removed successfully");
+                    EAPs.RemoveAll(Program => Program.Id == id);
+                    StateHasChanged();
+                }
+                else
+                {
+                    // Log or display the error
+                    Console.WriteLine($"Failed to remove article connection. Status code: {response.StatusCode}");
+                }
+            }
+        }
+        catch (HttpRequestException ex)
+        {
+            // Log or display the error
+            Console.WriteLine($"Request error: {ex.Message}");
+        }
+
+    }
+
     //Vault
+    public async Task UpdateVault()
+    {
+        if (CascAuth?.User != null && workshopArticles == null && HasLoaded == false)
+        {
+            HasLoaded = true;
+            var user = CascAuth.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                if (Guid.TryParse(userIdClaim, out Guid userId))
+                {
+                    try
+                    {
+                        var response = await Http.GetAsync($"Workshop/get-articles-connected-to-user/{userId}");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Deserialize the response to the expected data model.
+                            workshopArticles = (await response.Content.ReadFromJsonAsync<IEnumerable<WorkshopArticle>>()).ToList();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"The call failed with status code {response.StatusCode}");
+                            HasLoaded = false;
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Request exception: {ex.Message}");
+                        HasLoaded = false;
+                    }
+                }
+            }
+            else
+            {
+                HasLoaded = false;
+            }
+        }
+    }
+
     private async Task RemoveArticle(string id)
     {
         try
@@ -326,7 +398,7 @@
             {
                 var response = await Http.DeleteAsync($"Workshop/remove-user-article/{userId}/{id}");
 
-                Console.WriteLine("Article id: " + id + ", User id: " + userId);
+                Console.WriteLine("Article id: " + id);
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -347,7 +419,6 @@
             Console.WriteLine($"Request error: {ex.Message}");
         }
     }
-
 
     private async Task CloneArticle(string id)
     {

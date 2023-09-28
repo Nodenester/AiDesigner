@@ -112,10 +112,10 @@ namespace NodeBaseApi.Controllers
         }
 
         // DELETE api/customblocks/{id}
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomBlock(Guid id)
+        [HttpDelete("{userId}/{id}")]
+        public async Task<IActionResult> DeleteCustomBlock(Guid userId, Guid id)
         {
-            await _dbConnection.DeleteCustomBlockAsync(id);
+            await _dbConnection.DeleteCustomBlockAsync(userId, id);
             return NoContent();
         }
 
