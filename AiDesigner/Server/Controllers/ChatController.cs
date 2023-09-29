@@ -136,5 +136,24 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+
+        //Call stuff
+        // POST api/Chat/Call/GetCreateCall
+        [HttpGet("Call/GetCalls/{Key}")]
+        public async Task<ActionResult<IEnumerable<Call>>> GetCalls([FromBody] string Key)
+        {
+            try
+            {
+                var calls = await _dbConnection.GetApiCallsAsync(Key);
+                return Ok(calls);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                Console.WriteLine(ex);
+                // Return a 500 status code
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
     }
 }

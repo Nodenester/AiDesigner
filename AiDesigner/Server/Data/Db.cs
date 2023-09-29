@@ -747,6 +747,14 @@ namespace AiDesigner.Server.Data
                 return await connection.ExecuteScalarAsync<int>(query, new { UserId = userId });
             }
         }
+
+        //Api Calls handeling
+        public async Task<IEnumerable<Call>> GetApiCallsAsync(string Key)
+        {
+            string query = @"SELECT * FROM Ludde.ApiCall WHERE [Api/UserId] = @Key";
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<Call>(query, new {Key});
+        }
     }
 }
  
