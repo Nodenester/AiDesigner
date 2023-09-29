@@ -113,6 +113,17 @@ namespace AiDesigner.Server.Controllers
             return Ok(article);
         }
 
+        [HttpGet("article/program/{id}")]
+        public async Task<IActionResult> GetArticleByProgramId(Guid id)
+        {
+            var article = await _dbConnection.GetArticleByProgramIdAsync(id);
+            if (article == null)
+            {
+                return NotFound();
+            }
+            return Ok(article);
+        }
+
         [HttpGet("author/{authorId}/articles")]
         public async Task<IActionResult> GetArticlesByAuthor(string authorId)
         {
@@ -127,7 +138,7 @@ namespace AiDesigner.Server.Controllers
             return Ok();
         }
 
-        [HttpDelete("article/{id}")]
+        [HttpDelete("article-images/{articleId}")]
         public async Task<IActionResult> DeleteArticle(Guid id)
         {
             await _dbConnection.DeleteArticleAsync(id);
@@ -168,6 +179,13 @@ namespace AiDesigner.Server.Controllers
         public async Task<IActionResult> GetArticleImages(string articleId)
         {
             var articleImages = await _dbConnection.GetArticleImagesAsync(articleId);
+            return Ok(articleImages);
+        }
+
+        [HttpDelete("article-images/{articleId}")]
+        public async Task<IActionResult> DeleteArticleImages(string articleId)
+        {
+            var articleImages = await _dbConnection.DeleteArticleImagesAsync(articleId);
             return Ok(articleImages);
         }
 

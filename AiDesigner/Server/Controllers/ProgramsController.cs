@@ -87,6 +87,8 @@ namespace NodeBaseApi.Controllers
 
             var program = JsonConvert.DeserializeObject<CustomProgram>(body.GetRawText(), settings);
 
+            program.LastOpened = DateTime.Now;
+
             if (id != program.Id)
             {
                 return BadRequest();

@@ -244,6 +244,8 @@
 
     public EventCallback<int> setTokens => EventCallback.Factory.Create<int>(this, SetTokens);
 
+    public EventCallback<ProgramObject> setAp => EventCallback.Factory.Create<ProgramObject>(this, SetAP);
+
     public void SetTokens(int tokens)
     {
         CurrentTokens = tokens;

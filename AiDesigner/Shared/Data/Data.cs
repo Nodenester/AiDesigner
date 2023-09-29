@@ -21,6 +21,7 @@ namespace NodeBaseApi.Version2
         public bool SupportsSessions { get; set; }
         public byte[]? Image { get; set; }
         public ProgramStructure ProgramStructure { get; set; }
+        public DateTime? LastOpened { get; set; }
     }
 
     public class CustomProgram : ProgramObject
@@ -182,7 +183,7 @@ namespace NodeBaseApi.Version2
             // Check that the output and input are compatible.
             if ((output.Type != input.Type || output.IsList != input.IsList) && (output.Type != Type.Object && input.Type != Type.Object))
             {
-                //throw new InvalidConnectionException($"Incompatible types or list property between output '{output.Name}' and input '{input.Name}'.");
+                return false;
             }
 
             if (inputProgramBlock != null)
@@ -347,7 +348,7 @@ namespace NodeBaseApi.Version2
             // Check for required inputs without values
             foreach (var input in ProgramBlocks.SelectMany(block => block.Block.Inputs))
             {
-                if (input.IsRequired && !InputValues.ContainsKey(input.Id))
+                if (input.IsRequired && !InputValues.ContainsKey(input.Id) && input.Type.ToString() != "Trigger")
                 {
                     errors.Add($"Required input '{input.Name}' is missing a value.");
                     //throw new MissingRequiredInputException($"Required input '{input.Name}' is missing a value.");
@@ -357,7 +358,7 @@ namespace NodeBaseApi.Version2
             // Check for disconnected inputs
             foreach (var input in ProgramBlocks.SelectMany(block => block.Block.Inputs))
             {
-                if (!InputValues.ContainsKey(input.Id))
+                if (!InputValues.ContainsKey(input.Id) && input.Type.ToString() != "Trigger")
                 {
                     errors.Add($"Input '{input.Name}' is not connected.");
                     //throw new DisconnectedInputException($"Input '{input.Name}' is not connected.");

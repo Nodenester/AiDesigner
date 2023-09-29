@@ -32,7 +32,7 @@
 </CascadingValue>
 
 <div class="flex flex-wrap gap-4 mt-8">
-    @foreach (var eap in EAPs)
+    @foreach (var eap in EAPs.OrderByDescending(e => e.LastOpened))
     {
         if (eap is CustomProgram customProgram)
         {
@@ -80,7 +80,7 @@
 </CascadingValue>
 
 <div class="flex flex-wrap gap-4 mt-8">
-    @foreach (var eap in EAPs)
+    @foreach (var eap in EAPs.OrderByDescending(e => e.LastOpened))
     {
         if (eap is CustomBlockProgram customBlockProgram)
         {

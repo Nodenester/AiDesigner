@@ -7,6 +7,7 @@ using AiDesigner.Shared.Blocks;
 using AiDesigner.Shared.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGeneration.Design;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NodeBaseApi.Version2;
@@ -82,6 +83,8 @@ namespace NodeBaseApi.Controllers
             };
 
             var customBlock = JsonConvert.DeserializeObject<CustomBlockProgram>(body.GetRawText(), settings);
+
+            customBlock.LastOpened = DateTime.Now;
 
             if (id != customBlock.Id)
             {

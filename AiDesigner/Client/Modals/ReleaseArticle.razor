@@ -92,6 +92,39 @@
     private byte[] singleFileContent;
     private List<byte[]> multipleFileContents = new List<byte[]>();
 
+    bool doesExist = false;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (programObject != null)
+        {
+            workshopArticle = new WorkshopArticle();
+            try
+            {
+                string requestUri = $"Workshop/article/program/{programObject.Id}";
+
+                // Make the HTTP GET request
+                HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
+
+                // Check if the request is successful
+                if (httpResponse.IsSuccessStatusCode)
+                {
+                    // Deserialize the response content to List<ArticleImages>
+                    workshopArticle = await httpResponse.Content.ReadFromJsonAsync<WorkshopArticle>();
+                    doesExist = true;
+                }
+                else
+                {
+                    Console.WriteLine($"Failed to fetch article images. Status code: {httpResponse.StatusCode}");
+                }
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine($"Failed to fetch article: {e.Message}");
+            }
+        }
+    }
+
     public void Open()
     {
         IsModalOpen = true;
@@ -108,23 +141,26 @@
     {
         try
         {
-            workshopArticle.Id = Guid.NewGuid().ToString();
-            workshopArticle.ProgramId = programObject.Id.ToString();
-            workshopArticle.AuthorId = programObject.Author;
-            workshopArticle.AuthorName = programObject.AuthorName;
+            if (!doesExist)
+            {
+                workshopArticle.Id = Guid.NewGuid().ToString();
+                workshopArticle.ProgramId = programObject.Id.ToString();
+                workshopArticle.AuthorId = programObject.Author;
+                workshopArticle.AuthorName = programObject.AuthorName;
+                if (programObject is CustomProgram customProgram)
+                {
+                    workshopArticle.Type = "Program";
+                    workshopArticle.ApiKey = customProgram.ApiKey.ToString();
+                }
+                else if (programObject is CustomBlockProgram customBlockProgram)
+                {
+                    workshopArticle.Type = "CustomBlock";
+                    workshopArticle.ApiKey = "xxx";
+                }
+                workshopArticle.Downloads = 0;
+                workshopArticle.Rating = 0;
+            }
 
-            if (programObject is CustomProgram customProgram)
-            {
-                workshopArticle.Type = "Program";
-                workshopArticle.ApiKey = customProgram.ApiKey.ToString();
-            }
-            else if (programObject is CustomBlockProgram customBlockProgram)
-            {
-                workshopArticle.Type = "CustomBlock";
-                workshopArticle.ApiKey = "xxx";
-            }
-            workshopArticle.Downloads = 0;
-            workshopArticle.Rating = 0;
             workshopArticle.ArticleImages = new List<ArticleImages>();
 
             if(false)
@@ -149,7 +185,31 @@
                 Console.WriteLine("------------------------------------------------------------");
             }
 
-            var response = await Http.PostAsJsonAsync("Workshop/save-article", workshopArticle);
+            HttpResponseMessage response = new HttpResponseMessage();
+
+            if (doesExist)
+            {
+                // Make the HTTP PUT request
+                response = await Http.PutAsJsonAsync("Workshop/update-article", workshopArticle);
+                if (multipleFileContents.Count() > 0)
+                {
+                    string requestUri = $"Workshop/article-images/{workshopArticle.Id}";
+                    var responseMessage = await Http.DeleteAsync(requestUri);
+                    if (responseMessage.IsSuccessStatusCode)
+                    {
+                        Console.WriteLine($"Deleted article images with Id: {workshopArticle.Id}");
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Failed to delete article images with Id: {workshopArticle.Id}");
+                    }
+                }
+            }
+            else
+            {
+                // Make the HTTP POST request
+                response = await Http.PostAsJsonAsync("Workshop/save-article", workshopArticle);
+            }
 
             if (!response.IsSuccessStatusCode)
             {
@@ -227,7 +287,6 @@
             workshopArticle.ProgramImage = singleFileContent;
         }
     }
-
 
     private async Task OnMultipleFilesChanged(InputFileChangeEventArgs e)
     {
