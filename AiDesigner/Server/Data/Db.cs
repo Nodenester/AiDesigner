@@ -46,8 +46,8 @@ namespace AiDesigner.Server.Data
                     string programDataJson = JsonConvert.SerializeObject(programObject, _jsonSerializerSettings);
 
                     var query = @"
-                        INSERT INTO Ludde.programs (Id, Name, Description, Author, AuthorName, ApiKey, IsCustomBlock, IsPublic, ProgramData, SupportsSessions, Image)
-                        VALUES (@Id, @Name, @Description, @Author, @AuthorName, @ApiKey, @IsCustomBlock, @IsPublic, @ProgramData, @SupportsSessions, @Image);
+                        INSERT INTO Ludde.programs (Id, Name, Description, Author, AuthorName, ApiKey, IsCustomBlock, IsPublic, ProgramData, SupportsSessions, Image, LastOpened )
+                        VALUES (@Id, @Name, @Description, @Author, @AuthorName, @ApiKey, @IsCustomBlock, @IsPublic, @ProgramData, @SupportsSessions, @Image, @LastOpened);
                     ";
 
                     var parameters = new DynamicParameters();
@@ -79,7 +79,7 @@ namespace AiDesigner.Server.Data
                     {
                         parameters.Add("Image", new byte[10]);
                     }
-
+                    parameters.Add("LastOpened", new DateTime());
                     await connection.ExecuteAsync(query, parameters);
                 }
             }
@@ -226,9 +226,22 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                DELETE FROM Ludde.programs
-                WHERE Id = @Id AND Author = @userId;
-            ";
+                    DELETE FROM Ludde.user_program_connections
+                    WHERE ProgramId = @Id;
+
+                    DELETE FROM Ludde.programs
+                    WHERE Id = @Id AND Author = @userId;
+
+                    DELETE FROM Ludde.Workshop_Article
+                    WHERE ProgramId = @Id;
+
+                    DELETE FROM Ludde.User_Article
+                    WHERE ArticleId IN (
+                        SELECT Id
+                        FROM Ludde.Workshop_Article
+                        WHERE ProgramId = @Id
+                    );
+                ";
 
                 await connection.ExecuteAsync(query, new { userId, Id });
             }
@@ -268,7 +281,7 @@ namespace AiDesigner.Server.Data
 
                 var query = @"
                     UPDATE Ludde.programs
-                    SET Name = @Name, Description = @Description, Author = @Author, AuthorName = @AuthorName, ApiKey = @ApiKey, IsCustomBlock = @IsCustomBlock, IsPublic = @IsPublic, ProgramData = @ProgramData, Image = @Image, SupportsSessions = @SupportsSessions
+                    SET Name = @Name, Description = @Description, Author = @Author, AuthorName = @AuthorName, ApiKey = @ApiKey, IsCustomBlock = @IsCustomBlock, IsPublic = @IsPublic, ProgramData = @ProgramData, Image = @Image, SupportsSessions = @SupportsSessions, LastOpened = GETDATE()
                     WHERE Id = @Id;
                 ";
 
@@ -354,7 +367,6 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.ExecuteScalarAsync<int>(query.ToString(), parameters);
         }
-
         public async Task<IEnumerable<WorkshopArticle>> SearchArticlesAsync(int start, int end, string searchTerm = null, string searchClass = null, string type = null)
         {
             StringBuilder query = new StringBuilder(@"
@@ -469,7 +481,6 @@ namespace AiDesigner.Server.Data
             await connection.ExecuteAsync(query, article);
             return article.Id;
         }
-
         public async Task<WorkshopArticle> GetArticleByIdAsync(Guid id)
         {
             const string query = @"
@@ -482,7 +493,18 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryFirstOrDefaultAsync<WorkshopArticle>(query, new { Id = id });
         }
-
+        public async Task<WorkshopArticle> GetArticleByProgramIdAsync(Guid programId)
+        {
+            const string query = @"
+                SELECT a.*, AVG(u.Rating) as AverageRating
+                FROM Ludde.Workshop_Article a
+                LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                WHERE a.ProgramId = @ProgramId
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads;
+            ";
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            return await connection.QueryFirstOrDefaultAsync<WorkshopArticle>(query, new { ProgramId = programId });
+        }
         public async Task<IEnumerable<WorkshopArticle>> GetArticlesByAuthorAsync(string authorId)
         {
             const string query = @"
@@ -495,7 +517,6 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<WorkshopArticle>(query, new { AuthorId = authorId });
         }
-
         public async Task UpdateArticleAsync(WorkshopArticle article)
         {
             var query = @"
@@ -507,14 +528,12 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, article);
         }
-
         public async Task DeleteArticleAsync(Guid id)
         {
             const string query = "DELETE FROM Ludde.Workshop_Article WHERE Id = @Id;";
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, new { Id = id });
         }
-
         public async Task<IEnumerable<WorkshopArticle>> GetArticlesConnectedToUserAsync(string userId)
         {
             const string query = @"
@@ -529,7 +548,6 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<WorkshopArticle>(query, new { UserId = userId });
         }
-
 
         //Article image handeling
         public async Task<string> InsertArticleImageAsync(ArticleImages articleImages)
@@ -567,7 +585,37 @@ namespace AiDesigner.Server.Data
                 return "An error occurred";
             }
         }
+        public async Task<string> DeleteArticleImagesAsync(string articleId)
+        {
+            if (string.IsNullOrEmpty(articleId))
+            {
+                return "Invalid Parameters";
+            }
 
+            const string query = @"DELETE FROM Ludde.Article_Images WHERE ArticleId = @ArticleId;";
+
+            try
+            {
+                using SqlConnection connection = new SqlConnection(_connectionString);
+                await connection.OpenAsync();
+
+                var parameters = new
+                {
+                    ArticleId = articleId
+                };
+
+                int rowsAffected = await connection.ExecuteAsync(query, parameters);
+
+                return rowsAffected > 0 ? "Successfully Deleted" : "No Images Found";
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // For example: _logger.LogError(ex, "An error occurred while deleting the article images.");
+
+                return "An error occurred";
+            }
+        }
         public async Task<IEnumerable<ArticleImages>> GetArticleImagesAsync(string articleId)
         {
             var query = @"
@@ -578,7 +626,6 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<ArticleImages>(query, new { ArticleId = articleId });
         }
-
         public async Task ConnectArticleToUserAsync(UserArticle userArticle)
         {
             var query = @"
@@ -592,7 +639,6 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, new { UserId = userArticle.UserId, ArticleId = userArticle.ArticleId, IsCreator = userArticle.IsCreator, Rating = userArticle.Rating, Review = userArticle.Review, IsFavorite = userArticle.IsFavorite });
         }
-
         public async Task UpdateUserArticleAsync(UserArticle userArticle)
         {
             var query = @"
@@ -603,7 +649,6 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, userArticle);
         }
-
         public async Task<string> RemoveUserArticleAsync(string userId, string articleId)
         {
             var query = @"
@@ -658,13 +703,12 @@ namespace AiDesigner.Server.Data
         //News article handeling
         public async Task<IEnumerable<NewsArticle>> GetLatestArticlesAsync()
         {
-            string query = @"SELECT TOP 10 * FROM Ludde.News_Article 
+            string query = @"SELECT TOP 4 * FROM Ludde.News_Article 
                      ORDER BY PublishDate DESC";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<NewsArticle>(query);
         }
-
         public async Task CreateArticleAsync(string id, string title, string content, byte[] imageData)
         {
             string query = @"INSERT INTO Ludde.News_Article (Id, Title, Content, PublishDate, ImageData)
@@ -703,8 +747,6 @@ namespace AiDesigner.Server.Data
                 return await connection.ExecuteScalarAsync<int>(query, new { UserId = userId });
             }
         }
-
-
     }
 }
  
