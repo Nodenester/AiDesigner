@@ -17,8 +17,16 @@
                                 case NodeBaseApi.Version2.Type.String:
                                     <div class="mb-0 w-full">
                                         <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
-                                        <textarea @onchange="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" value="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
-                                                  class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
+                                        @if (@inputItems.FirstOrDefault(i => i.Id == input.Id).Data.ToString() == "System.Object")
+                                        {
+                                            <textarea @onchange="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" value=""
+                                                      class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
+                                        }
+                                        else
+                                        {
+                                            <textarea @onchange="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" value="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
+                                                      class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
+                                        }
                                     </div>
                                     break;
                                 case NodeBaseApi.Version2.Type.Picture:
