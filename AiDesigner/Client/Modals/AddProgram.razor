@@ -1,4 +1,5 @@
 ﻿@using AiDesigner.Shared.Data;
+@using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2;
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
@@ -84,6 +85,7 @@
         NewProgram.ApiKey = Guid.NewGuid();
         NewProgram.Author = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
         NewProgram.AuthorName = user.Identity.Name;
+        NewProgram.LastOpened = DateTime.Now;
         if (NewProgram.ProgramStructure == null)
         {
             NewProgram.ProgramStructure = new ProgramStructure();
@@ -91,9 +93,13 @@
 
         var settings = new JsonSerializerSettings
             {
-                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                 TypeNameHandling = TypeNameHandling.Auto,
                 Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                ContractResolver = new DefaultContractResolver
+                {
+                    NamingStrategy = new CamelCaseNamingStrategy()
+                },
+                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                 ObjectCreationHandling = ObjectCreationHandling.Replace
             };
 
@@ -110,7 +116,7 @@
         }
         else
         {
-            // Handle errors
+            Console.WriteLine(response.StatusCode);
         }
 
         await CreateNew.InvokeAsync();

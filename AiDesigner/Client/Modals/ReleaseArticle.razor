@@ -96,6 +96,11 @@
 
     protected override async Task OnParametersSetAsync()
     {
+
+    }
+
+    public async Task Open()
+    {
         if (programObject != null)
         {
             workshopArticle = new WorkshopArticle();
@@ -118,15 +123,11 @@
                     Console.WriteLine($"Failed to fetch article images. Status code: {httpResponse.StatusCode}");
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine($"Failed to fetch article: {e.Message}");
             }
         }
-    }
-
-    public void Open()
-    {
         IsModalOpen = true;
         StateHasChanged();
     }

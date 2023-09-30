@@ -47,7 +47,7 @@
                 <div class="mt-4 flex justify-center">
                     <AiDesigner.Client.Modals.ExacuteProgram AP="localProgram"></AiDesigner.Client.Modals.ExacuteProgram>
                     <ReleaseArticle programObject="SelectedProgram" />
-                    <button @onclick="SaveSettingsBlock" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
+                    <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
                 </div>
             }
         </div>
@@ -249,13 +249,6 @@ const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
         // Update SelectedProgram with localProgram and notify the parent component
         await UpdateSelectedProgram(Clone(localProgram));
     }
-
-    private async Task SaveSettingsBlock()
-    {
-        // Update SelectedProgram with localProgram and notify the parent component
-        await UpdateSelectedProgram(Clone(localProgram));
-    }
-
    
     // Clone method
     private ProgramObject Clone(ProgramObject source)

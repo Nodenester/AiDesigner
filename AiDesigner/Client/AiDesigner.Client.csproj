@@ -7,6 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazorise.Charts" Version="1.3.1" />
     <PackageReference Include="Dapper" Version="2.0.123" />
     <PackageReference Include="jsplumb.TypeScript.DefinitelyTyped" Version="0.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.3" />

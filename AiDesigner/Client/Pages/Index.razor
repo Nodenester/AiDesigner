@@ -5,6 +5,7 @@
 @inject HttpClient Http;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject NavigationManager NavigationManager
+@using Blazorise.Charts
 @attribute [Authorize]
 
 <PageTitle>Home</PageTitle>
@@ -13,7 +14,9 @@
 <div class="flex justify-between h-full">
     <!-- bottom part-->
     <div class="self-end dark:bg-gray-700 rounded-lg">
-        <!-- bottom part -->
+        <!-- top part -->
+@*         <AiDesigner.Client.Components.MultiLineChart/>
+ *@        <!-- bottom part -->
         <div class="flex flex-col items-start align-baseline">
             <div class="flex flex-nowrap gap-3 m-3">
                 @if(EAPs.Count() != 0)
@@ -42,6 +45,20 @@
                                 <h1 class="dark:text-white mb-2 text-xl m-auto">@eap.Name</h1>
                             </div>
                         </button>
+                    }
+                    @for (var i = 0; i < (3- EAPs.Count()); i++)
+                    {
+                        <div class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-start">
+                            <!-- Add Image Here -->
+                            <div class="w-full h-4/5">
+                                <div class="w-full h-full bg-gray-600"></div>
+                            </div>
+                            <br />
+                            <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.6rem;">
+                            <div class="w-full flex items-center justify-center">
+                                <div class="h-8 w-28 bg-gray-700 mt-1"></div>
+                            </div>
+                        </div>
                     }
                 }
                 else

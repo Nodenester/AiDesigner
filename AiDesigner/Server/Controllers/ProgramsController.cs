@@ -41,7 +41,15 @@ namespace NodeBaseApi.Controllers
             };
 
             // Deserialize the JsonElement body into a CustomProgram object
-            var program = JsonConvert.DeserializeObject<CustomProgram>(body.GetRawText(), settings);
+            CustomProgram? program = new CustomProgram();
+            try
+            {
+                program = JsonConvert.DeserializeObject<CustomProgram>(body.GetRawText(), settings);
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
             if (program == null)
             {
