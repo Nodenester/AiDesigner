@@ -40,12 +40,12 @@
         justify-content: center;
         align-items: center;
         height: 85vh;
-        background-color: #2b2b2b;
+        background-color: #353535;
     }
 
     /* Adjust the styling of the registration panel */
     .registerPanel {
-        background-color: #353535;
+        background-color: #2b2b2b;
         padding: 20px;
         border-radius: 8px;
     }
@@ -66,7 +66,7 @@
         }
 
     .form-control {
-        background-color: #2b2b2b;
+        background-color: #353535 !important;
         color: #eaeaea;
         border: none;
         border-radius: 4px;
@@ -75,7 +75,7 @@
     }
 
         .form-control:focus {
-            background-color: #2b2b2b;
+            background-color: #353535 !important;
             box-shadow: none;
             color: #eaeaea;
             border: none !important;
@@ -83,7 +83,7 @@
         }
 
         .form-control:disabled {
-            background-color: #2b2b2b;
+            background-color: #353535 !important;
             opacity: 0.7;
             border: none !important;
             /*          Gives a slight faded effect to indicate it's disabled color: #eaeaea; */
@@ -91,6 +91,32 @@
 
     .form-label {
         color: #eaeaea;
+    }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+        border: 0px solid #e8e8e8;
+        -webkit-text-fill-color: #fff;
+        -webkit-box-shadow: 0 0 0px 1000px #404040 inset;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* For Mozilla Firefox */
+    input:-moz-autofill,
+    input:-moz-autofill:focus,
+    textarea:-moz-autofill,
+    textarea:-moz-autofill:focus {
+        border: 0px solid #e8e8e8;
+        -moz-text-fill-color: #fff;
+        -moz-box-shadow: 0 0 0px 1000px #404040 inset;
+        transition: background-color 5000s ease-in-out 0s;
     }
 </style>
 

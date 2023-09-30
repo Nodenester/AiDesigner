@@ -41,12 +41,12 @@
         justify-content: center;
         align-items: center;
         height: 85vh; /* This will take the full height of the viewport */
-        background-color: #2b2b2b; /* Dark background for the whole container */
+        background-color: #353535; /* Dark background for the whole container */
     }
 
     /* Adjust the styling of the login panel */
     .loginPanel {
-        background-color: #353535; /* Darker background for the login panel */
+        background-color: #2b2b2b; /* Darker background for the login panel */
         padding: 20px;
         border-radius: 8px;
     }
@@ -72,7 +72,7 @@
         }
 
     .form-control {
-        background-color: #2b2b2b;
+        background-color: #353535 !important;
         color: #eaeaea;
         border: none;
         border-radius: 4px;
@@ -81,7 +81,7 @@
     }
 
         .form-control:focus {
-            background-color: #2b2b2b;
+            background-color: #353535 !important;
             box-shadow: none;
             color: #eaeaea;
             border: none !important;
@@ -89,7 +89,7 @@
         }
 
         .form-control:disabled {
-            background-color: #2b2b2b;
+            background-color: #353535 !important;
             opacity: 0.7;
             border: none !important;
             /*          Gives a slight faded effect to indicate it's disabled color: #eaeaea; */
@@ -97,6 +97,56 @@
 
     .form-label {
         color: #eaeaea;
+    }
+
+    .form-check-input {
+        width: 1.5rem;
+        height: 1.5rem;
+        appearance: none;
+        outline: none;
+        border: 1px solid #ccc; /* You can change this color to match your design */
+        border-radius: 4px; /* Optional: for rounded corners */
+    }
+
+        .form-check-input:checked {
+            background-color: #2ea44f;
+            border-color: #2ea44f; /* Optional: to ensure border color matches background */
+        }
+
+        /* For better cross-browser compatibility */
+        .form-check-input:focus {
+            outline: none;
+        }
+
+        /* For better appearance on Webkit browsers like Chrome/Safari */
+        .form-check-input::-webkit-checkbox {
+            appearance: none;
+        }
+
+    input:-webkit-autofill,
+    input:-webkit-autofill:hover,
+    input:-webkit-autofill:focus,
+    textarea:-webkit-autofill,
+    textarea:-webkit-autofill:hover,
+    textarea:-webkit-autofill:focus,
+    select:-webkit-autofill,
+    select:-webkit-autofill:hover,
+    select:-webkit-autofill:focus {
+        border: 0px solid #e8e8e8;
+        -webkit-text-fill-color: #fff;
+        -webkit-box-shadow: 0 0 0px 1000px #404040 inset;
+        transition: background-color 5000s ease-in-out 0s;
+    }
+
+    /* For Mozilla Firefox */
+    input:-moz-autofill,
+    input:-moz-autofill:focus,
+    textarea:-moz-autofill,
+    textarea:-moz-autofill:focus {
+        border: 0px solid #e8e8e8;
+        -moz-text-fill-color: #fff;
+        -moz-box-shadow: 0 0 0px 1000px #404040 inset;
+        transition: background-color 5000s ease-in-out 0s;
     }
 </style>
 
