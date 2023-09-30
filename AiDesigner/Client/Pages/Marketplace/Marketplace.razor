@@ -1,4 +1,4 @@
-﻿@page "/marketplace"
+﻿@page "/marketplace/"
 @using AiDesigner.Client.Pages.Marketplace;
 @using AiDesigner.Client.Components;
 @using Microsoft.AspNetCore.Authorization;
@@ -84,6 +84,9 @@ else
     [CascadingParameter(Name = "EAPs")]
     public List<WorkshopArticle> EAPs { get; set; }
 
+    [CascadingParameter(Name = "passingArticle")]
+    public WorkshopArticle passingArticle { get; set; }
+
     private Stack<string> PreviousOptions = new Stack<string>();
 
     public List<WorkshopArticle> VaultedArticles { get; set; } = new List<WorkshopArticle>();
@@ -167,7 +170,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        await RefreshData();
+        if (passingArticle != null)
+        {
+            SetSelectedArticle(passingArticle);
+        }
+        else
+        {
+            await RefreshData();
+        }
     }
 
     private void SetSelectedArticle(WorkshopArticle article)

@@ -103,9 +103,13 @@
                         </div>
                     }
                     <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
-                        <CascadingValue Value=@setTokens Name="Settokens">
-                            <CascadingValue Value=@NewAps Name="NewAps">
-                                @Body
+                        <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                            <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                <CascadingValue Value=@setTokens Name="Settokens">
+                                    <CascadingValue Value=@NewAps Name="NewAps">
+                                        @Body
+                                    </CascadingValue>
+                                </CascadingValue>
                             </CascadingValue>
                         </CascadingValue>
                         @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation")
@@ -233,6 +237,7 @@
     public List<ProgramObject> EAPs = new List<ProgramObject>();
     public ProgramObject AP = null;
     private string _currentUri;
+    public WorkshopArticle passingArticle;
 
     public int CurrentTokens { get; set; } = 0;
 
@@ -245,6 +250,8 @@
     public EventCallback<int> setTokens => EventCallback.Factory.Create<int>(this, SetTokens);
 
     public EventCallback<ProgramObject> setAp => EventCallback.Factory.Create<ProgramObject>(this, SetAP);
+
+    public EventCallback<WorkshopArticle> setPassingArticle => EventCallback.Factory.Create<WorkshopArticle>(this, SetPassingArticle);
 
     public void SetTokens(int tokens)
     {
@@ -262,6 +269,11 @@
         {
             SetAP(ap);
         }
+    }
+
+    public void SetPassingArticle(WorkshopArticle article)
+    {
+        passingArticle = article;
     }
 
     //Make this update when loggin in and other stuff and make it api     this might work

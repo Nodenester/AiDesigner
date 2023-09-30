@@ -7,7 +7,7 @@
 <div class="flex justify-center items-center">
     <div style="width: 83%;" class="content-center">
         <div class="flex flex-wrap gap-4 mt-8 ml-0">
-            @if (Articles != null)
+            @if (Articles != null && Articles.Count > 0)
             {
                 @foreach (var article in Articles)
                 {
