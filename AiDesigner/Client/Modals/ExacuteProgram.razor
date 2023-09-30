@@ -164,7 +164,6 @@
                         : null;
                 }
             }
-            ProgramOutput = new List<object>();
         }
     }
 
@@ -214,6 +213,7 @@
                     try
                     {
                         var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
+                        Console.WriteLine(response.Content.ReadAsStringAsync());
 
                         if (response.IsSuccessStatusCode)
                         {
