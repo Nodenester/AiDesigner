@@ -79,8 +79,15 @@ namespace AiDesigner.Server.Data
                     {
                         parameters.Add("Image", new byte[10]);
                     }
-                    parameters.Add("LastOpened", new DateTime());
-                    await connection.ExecuteAsync(query, parameters);
+                    parameters.Add("LastOpened", programObject.LastOpened);
+                    try
+                    {
+                        await connection.ExecuteAsync(query, parameters);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
                 }
             }
             catch (Exception ex)

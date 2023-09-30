@@ -10,19 +10,19 @@
                         @(SelectedInput == input ? "dark:bg-gray-500 bg-gray-100" : "dark:bg-gray-600 bg-gray-200") text-black"
                         @onclick="() => SetSelectedInput(input)">
                         @if (SelectedInput == input)
-                       {
+                        {
                             <div class="mt-0 flex flex-col items-center">
                             @switch (Type)
                             {
                                 case NodeBaseApi.Version2.Type.String:
-                                    <div class="mb-0">
+                                    <div class="mb-0 w-full">
                                         <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
                                         <textarea @onchange="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" value="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
                                                   class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
                                     </div>
                                     break;
                                 case NodeBaseApi.Version2.Type.Picture:
-                                    <div class="mb-0">
+                                    <div class="mb-0  w-full">
                                         <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
                                         <div>
                                             <div class="flex items-center justify-center w-full">
@@ -41,14 +41,14 @@
                                     </div>
                                     break;
                                 case NodeBaseApi.Version2.Type.Number:
-                                    <div class="mb-0">
+                                    <div class="mb-0  w-full">
                                         <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
                                         <input type="number" @oninput="eventArgs => HandleListInput(new CustomEventArgs { ChangeEventArgs = eventArgs, Id = input.Id })" value="@inputItems.FirstOrDefault(i => i.Id == input.Id).Data"
                                                class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
                                     </div>
                                     break;
                                 case NodeBaseApi.Version2.Type.Boolean:
-                                    <div class="mb-0">
+                                    <div class="mb-0  w-full">
                                         <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
                                         <div class="mt-2 w-full flex justify-center">
                                             <div class="w-72 cursor-pointer flex items-center justify-center">
@@ -61,7 +61,7 @@
                                     </div>
                                     break;
                                 case NodeBaseApi.Version2.Type.Audio:
-                                    <div class="mb-0">
+                                    <div class="mb-0  w-full">
                                         <p class="font-semibold text-white">Input: @inputItems.IndexOf(input)</p>
                                         <div>
                                             <div class="flex items-center justify-center w-full">

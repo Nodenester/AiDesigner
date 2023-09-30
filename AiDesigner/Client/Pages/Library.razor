@@ -438,7 +438,6 @@
         if (response.IsSuccessStatusCode)
         {
             var responseContent = await response.Content.ReadAsStringAsync();
-            Console.WriteLine(responseContent);
             var settings = new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
@@ -459,7 +458,6 @@
                 {
                     ap.Open();
                     NewProgram = userProgram;
-                    Console.WriteLine("CustomProgram cloned successfully");
                 }
                 else
                 {
@@ -473,7 +471,6 @@
                 {
                     acb.Open();
                     NewBlockProgram = userBlockProgram;
-                    Console.WriteLine("CustomProgram cloned successfully");
                 }
                 else
                 {
@@ -484,8 +481,6 @@
             if (true)
             {
                 string jsonuserProgram = JsonConvert.SerializeObject(NewProgram, settings);
-                Console.WriteLine("---------------------------------------");
-                Console.WriteLine("UserProgram: " + jsonuserProgram);
             }
         }
         else
