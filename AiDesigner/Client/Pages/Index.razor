@@ -82,7 +82,7 @@
                 {
                     @foreach (var article in Articles)
                     {
-                        <button class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-center">
+                        <button @onclick="() => OpenWorkshopArticle(article)" class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-center">
                             <!-- Add Image Here -->
                             <div class="w-full h-4/5 flex items-center justify-center">
                                 <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="height: 100%; object-fit: cover; flex-grow: 1;" class="rounded-t overflow-hidden" loading="lazy" />
@@ -166,6 +166,9 @@
     [CascadingParameter(Name = "EAPs")]
     public List<ProgramObject> EAPs { get; set; }
 
+    [CascadingParameter(Name = "SetPassingArticle")]
+    protected EventCallback<WorkshopArticle> SetPassingArticle { get; set; }
+
 
     [CascadingParameter(Name = "NewAps")]
     protected EventCallback<ProgramObject> NewAps { get; set; }
@@ -216,6 +219,12 @@
     private void OpenProject(ProgramObject programObject)
     {
         NewAps.InvokeAsync(programObject);
+    }
+
+    private void OpenWorkshopArticle(WorkshopArticle article)
+    {
+        SetPassingArticle.InvokeAsync(article);
+        NavigationManager.NavigateTo($"/marketplace");
     }
 
     //Api / db
