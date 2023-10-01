@@ -1,0 +1,239 @@
+﻿@using System.Globalization
+@using AiDesigner.Client.Modals;
+@using NodeBaseApi.Version2;
+@using Radzen.Blazor
+@using AiDesigner.Client.Components
+@using AiDesigner.Shared.Data
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject HttpClient Http;
+
+<AddApiKey @ref="addApiKey" />
+
+<div class="container dark:bg-gray-600 w-full">
+    <div class="" style="margin-inline: -0.7rem;">
+        <RadzenCard class="w-full mb-4 dark:bg-gray-700 rounded-lg" Style="display: flex; align-items: start; gap: 0rem" >
+            <Dropdown @ref="dropdown" Selected="@SelectedApi" width="w-48">
+                <button @onclick="@(() => SelectOption("All"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
+                <button @onclick="@(() => SelectOption("Account"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "Account" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Account</button>
+                @foreach (var apiKey in apiKeys)
+                {
+                    <button @onclick="@(() => SelectOption(apiKey.Name))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == apiKey.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@apiKey.Name</button>
+                }
+                <button @onclick="AddApiKey" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create ApiKey</button>
+            </Dropdown>
+            <RadzenCheckBox @bind-Value="@showDataLabels" Name="dataLabels" class="w-6 h-6 bg-green-600"></RadzenCheckBox><RadzenLabel Text="Show Data Labels" For="dataLabels" />
+        </RadzenCard>
+        <RadzenChart Style="height: 32.125rem !important;" class="dark:bg-gray-700 rounded-lg">
+            <RadzenLineSeries Smooth="@smooth" Data="@revenue2019" CategoryProperty="Date" Title="2019" LineType="LineType.Dashed" ValueProperty="Revenue">
+                <RadzenMarkers MarkerType="MarkerType.Square" />
+                <RadzenSeriesDataLabels Visible="@showDataLabels" />
+            </RadzenLineSeries>
+            <RadzenLineSeries Smooth="@smooth" Data="@revenue2020" CategoryProperty="Date" Title="2020" ValueProperty="Revenue">
+                <RadzenMarkers MarkerType="MarkerType.Circle" />
+                <RadzenSeriesDataLabels Visible="@showDataLabels" />
+            </RadzenLineSeries>
+            <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
+            <RadzenValueAxis Formatter="@FormatAsUSD">
+                <RadzenGridLines Visible="true" />
+                <RadzenAxisTitle Text="Revenue in USD" />
+            </RadzenValueAxis>
+        </RadzenChart>
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    private AddApiKey addApiKey { get; set; }
+
+    bool smooth = false;
+    bool showDataLabels = false;
+
+    private string SelectedApi { get; set; } = "Account";
+    private Dropdown dropdown;
+    private List<ApiKey> apiKeys = new List<ApiKey>();
+
+    class DataItem
+    {
+        public string Date { get; set; }
+        public double Revenue { get; set; }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (CascAuth != null)
+        {
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                var response = await Http.GetAsync($"Chat/ApiKey/GetByUserId/{userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    try
+                    {
+                        apiKeys = await response.Content.ReadFromJsonAsync<List<ApiKey>>();
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                    }
+                }
+            }
+        }
+    }
+
+    private void SelectOption(string option)
+    {
+        dropdown.ToggleDropdown();
+        SelectedApi = option;
+        // This method is triggered when an item is clicked
+    }
+
+    private void AddApiKey()
+    {
+        addApiKey.Open();
+    }
+
+    string FormatAsUSD(object value)
+    {
+        return ((double)value).ToString("C0", CultureInfo.CreateSpecificCulture("en-US"));
+    }
+
+    string FormatAsMonth(object value)
+    {
+        if (value != null)
+        {
+            return Convert.ToDateTime(value).ToString("MMM");
+        }
+
+        return string.Empty;
+    }
+
+    DataItem[] revenue2019 = new DataItem[] {
+        new DataItem
+        {
+            Date = ("2019-01-01"),
+            Revenue = 234000
+        },
+        new DataItem
+        {
+            Date = ("2019-02-01"),
+            Revenue = 269000
+        },
+        new DataItem
+        {
+            Date = ("2019-03-01"),
+            Revenue = 233000
+        },
+        new DataItem
+        {
+            Date = ("2019-04-01"),
+            Revenue = 244000
+        },
+        new DataItem
+        {
+            Date = ("2019-05-01"),
+            Revenue = 214000
+        },
+        new DataItem
+        {
+            Date = ("2019-06-01"),
+            Revenue = 253000
+        },
+        new DataItem
+        {
+            Date = ("2019-07-01"),
+            Revenue = 274000
+        },
+        new DataItem
+        {
+            Date = ("2019-08-01"),
+            Revenue = 284000
+        },
+        new DataItem
+        {
+            Date = ("2019-09-01"),
+            Revenue = 273000
+        },
+        new DataItem
+        {
+            Date = ("2019-10-01"),
+            Revenue = 282000
+        },
+        new DataItem
+        {
+            Date = ("2019-11-01"),
+            Revenue = 289000
+        },
+        new DataItem
+        {
+            Date = ("2019-12-01"),
+            Revenue = 294000
+        }
+    };
+
+    DataItem[] revenue2020 = new DataItem[] {
+        new DataItem
+        {
+            Date = ("2019-01-01"),
+            Revenue = 334000
+        },
+        new DataItem
+        {
+            Date = ("2019-02-01"),
+            Revenue = 369000
+        },
+        new DataItem
+        {
+            Date = ("2019-03-01"),
+            Revenue = 333000
+        },
+        new DataItem
+        {
+            Date = ("2019-04-01"),
+            Revenue = 344000
+        },
+        new DataItem
+        {
+            Date = ("2019-05-01"),
+            Revenue = 314000
+        },
+        new DataItem
+        {
+            Date = ("2019-06-01"),
+            Revenue = 353000
+        },
+        new DataItem
+        {
+            Date = ("2019-07-01"),
+            Revenue = 374000
+        },
+        new DataItem
+        {
+            Date = ("2019-08-01"),
+            Revenue = 384000
+        },
+        new DataItem
+        {
+            Date = ("2019-09-01"),
+            Revenue = 373000
+        },
+        new DataItem
+        {
+            Date = ("2019-10-01"),
+            Revenue = 382000
+        },
+        new DataItem
+        {
+            Date = ("2019-11-01"),
+            Revenue = 389000
+        },
+        new DataItem
+        {
+            Date = ("2019-12-01"),
+            Revenue = 394000
+        }
+    };
+}

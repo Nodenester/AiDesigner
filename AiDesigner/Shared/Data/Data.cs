@@ -532,6 +532,15 @@ namespace NodeBaseApi.Version2
         public byte[] ImageData { get; set; }
     }
 
+    //ApiKey
+    public class ApiKey
+    {
+        public string apiKey { get; set; }
+        public string UserId { get; set; }
+        public DateTime Created { get; set; }
+        public string Name { get; set; }
+    }
+
     //.netStuuff
 
 

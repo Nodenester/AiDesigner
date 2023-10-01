@@ -155,5 +155,60 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+
+        //ApiKeyStuff
+        // POST api/Chat/ApiKey/Create
+        [HttpPost("ApiKey/Create")]
+        public async Task<ActionResult> Create([FromBody] ApiKey request)
+        {
+            try
+            {
+                var affectedRows = await _dbConnection.AddApiKeyAsync(request.apiKey, request.UserId, DateTime.UtcNow, request.Name);
+                if (affectedRows > 0)
+                    return Ok("API Key created successfully.");
+                else
+                    return BadRequest("Failed to create API key.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+        // GET api/Chat/ApiKey/GetByUserId/{userId}
+        [HttpGet("ApiKey/GetByUserId/{userId}")]
+        public async Task<ActionResult<IEnumerable<ApiKey>>> GetByUserId(Guid userId)
+        {
+            try
+            {
+                var apiKeys = await _dbConnection.GetApiKeysByUserIdAsync(userId);
+                return Ok(apiKeys);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+        // DELETE api/Chat/ApiKey/Delete
+        [HttpDelete("ApiKey/Delete")]
+        public async Task<ActionResult> Delete([FromBody] ApiKey request)
+        {
+            try
+            {
+                var affectedRows = await _dbConnection.DeleteApiKeyAsync(request.apiKey, request.UserId);
+                if (affectedRows > 0)
+                    return Ok("API Key deleted successfully.");
+                else
+                    return BadRequest("Failed to delete API key.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
     }
 }

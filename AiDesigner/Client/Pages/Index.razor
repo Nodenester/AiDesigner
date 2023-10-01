@@ -4,20 +4,20 @@
 @using NodeBaseApi.Version2;
 @inject HttpClient Http;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
-@inject NavigationManager NavigationManager
-@using Blazorise.Charts
+@inject NavigationManager NavigationManager;
 @attribute [Authorize]
 
 <PageTitle>Home</PageTitle>
 @* <AiDesigner.Client.Modals.AddNews></AiDesigner.Client.Modals.AddNews>  *@
 
 <div class="flex justify-between h-full">
-    <!-- bottom part-->
-    <div class="self-end dark:bg-gray-700 rounded-lg">
+    <div class="self-end dark:bg-gray-600 rounded-lg h-full flex flex-col">
         <!-- top part -->
-@*         <AiDesigner.Client.Components.MultiLineChart/>
- *@        <!-- bottom part -->
-        <div class="flex flex-col items-start align-baseline">
+        <div class="flex-grow dark:bg-gray-600 rounded-lg w-full">
+            <AiDesigner.Client.Components.CallChart ></AiDesigner.Client.Components.CallChart>
+        </div>
+      <!-- bottom part -->
+        <div class="flex flex-col items-start align-baseline mb-0 dark:bg-gray-700 rounded-lg">
             <div class="flex flex-nowrap gap-3 m-3">
                 @if(EAPs.Count() != 0)
                 {

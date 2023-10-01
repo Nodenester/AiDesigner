@@ -1,0 +1,33 @@
+﻿<div class="relative dark:bg-gray-800 rounded-md">
+    <button @onclick="ToggleDropdown" class="flex justify-between items-center bg-gray-300 dark:bg-gray-600 px-2 py-2 rounded-md @width">
+        <span class="text-left">@Selected</span>
+        <span class="dropdown-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </span>
+    </button>
+    <div class="absolute mt-0 rounded-lg shadow-lg bg-white dark:bg-gray-700 z-50" style="display:@(isDropdownOpen ? "block" : "none")">
+        <div class="py-1 dark:bg-gray-700 rounded-md @width">
+            @ChildContent
+        </div>
+    </div>
+</div>
+
+@code {
+    private bool isDropdownOpen;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
+
+    [Parameter]
+    public string Selected { get; set; }
+
+    [Parameter]
+    public string width { get; set; } = "w-64";
+
+    public void ToggleDropdown()
+    {
+        isDropdownOpen = !isDropdownOpen;
+    }
+}
