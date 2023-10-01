@@ -758,10 +758,66 @@ namespace AiDesigner.Server.Data
         //Api Calls handeling
         public async Task<IEnumerable<Call>> GetApiCallsAsync(string Key)
         {
-            string query = @"SELECT * FROM nestor.ApiCall WHERE [Api/UserId] = @Key";
+            string query = @"SELECT * FROM nestor.Call WHERE [Api/UserId] = @Key";
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<Call>(query, new {Key});
         }
+
+        //ApiKey handeling
+        // Create
+        public async Task<int> AddApiKeyAsync(string apiKey, string userId, DateTime created, string name)
+        {
+            var query = @"
+                INSERT INTO nestor.ApiKeys (ApiKey, UserId, Created, Name)
+                VALUES (@ApiKey, @UserId, @Created, @Name);
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+
+            try
+            {
+                return await connection.ExecuteAsync(query, new { ApiKey = apiKey, UserId = userId, Created = created, Name = name });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return 0;
+            }
+        }
+
+        // Read
+        public async Task<IEnumerable<ApiKey>> GetApiKeysByUserIdAsync(Guid userId)
+        {
+            var query = @"
+                SELECT * FROM nestor.ApiKeys
+                WHERE UserId = @UserId;
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+
+            try
+            {
+                return await connection.QueryAsync<ApiKey>(query, new { UserId = userId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        // Delete
+        public async Task<int> DeleteApiKeyAsync(string apiKey, string userId)
+        {
+            var query = @"
+                DELETE FROM nestor.ApiKeys
+                WHERE ApiKey = @ApiKey AND UserId = @UserId;
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            return await connection.ExecuteAsync(query, new { ApiKey = apiKey, UserId = userId });
+        }
     }
 }
+
  
