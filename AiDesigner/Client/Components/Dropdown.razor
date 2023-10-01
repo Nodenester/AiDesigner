@@ -26,8 +26,15 @@
     [Parameter]
     public string width { get; set; } = "w-64";
 
+    [Parameter]
+    public EventCallback Opened { get; set; }
+
     public void ToggleDropdown()
     {
         isDropdownOpen = !isDropdownOpen;
+        if (isDropdownOpen)
+        {
+            Opened.InvokeAsync();
+        }
     }
 }

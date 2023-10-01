@@ -156,6 +156,22 @@ namespace NodeBaseApi.Controllers
             }
         }
 
+        // GET api/Chat/ApiKey/GetByUserId/{userId}
+        [HttpGet("Call/GetByUserId/{userId}")]
+        public async Task<ActionResult<IEnumerable<Call>>> GetLatest100Calls(string userId)
+        {
+            try
+            {
+                var apiKeys = await _dbConnection.GetLatest100CallsByUserIdAsync(userId);
+                return Ok(apiKeys);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
         //ApiKeyStuff
         // POST api/Chat/ApiKey/Create
         [HttpPost("ApiKey/Create")]

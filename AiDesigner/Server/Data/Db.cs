@@ -760,7 +760,7 @@ namespace AiDesigner.Server.Data
         {
             string query = @"SELECT * FROM nestor.Call WHERE [Api/UserId] = @Key";
             await using SqlConnection connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<Call>(query, new {Key});
+            return await connection.QueryAsync<Call>(query, new { Key });
         }
 
         //ApiKey handeling
@@ -816,6 +816,48 @@ namespace AiDesigner.Server.Data
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.ExecuteAsync(query, new { ApiKey = apiKey, UserId = userId });
+        }
+
+        public async Task<IEnumerable<Call>> GetLatest100CallsByUserIdAsync(string userId)
+        {
+            var query = @"
+                WITH UserCalls AS (
+                    SELECT
+                        c.ProgramId,
+                        c.[Api/UserId] AS ApiUserId,                        
+                        c.IsTest,
+                        c.StartTime,
+                        c.EndTime,
+                        c.Cost,
+                        ROW_NUMBER() OVER (ORDER BY c.StartTime DESC) as RowNum
+                    FROM
+                        nestor.Calls c
+                    JOIN
+                        nestor.ApiKeys ak
+                    ON
+                        c.[Api/UserId] = ak.UserId
+                    WHERE
+                        ak.UserId = @UserId
+                )
+                SELECT
+                    *
+                FROM
+                    UserCalls
+                WHERE
+                    RowNum <= 200;
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+
+            try
+            {
+                return await connection.QueryAsync<Call>(query, new { UserId = userId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
         }
     }
 }

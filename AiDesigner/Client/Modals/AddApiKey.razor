@@ -39,6 +39,9 @@
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
 
+    [CascadingParameter(Name = "addApiKey")]
+    protected EventCallback<ApiKey> addApiKey { get; set; }
+
     private bool IsModalOpen { get; set; }
     private ApiKey apiKey = new ApiKey();
     public void Open()
@@ -72,6 +75,7 @@
                 var response = await Http.PostAsJsonAsync("Chat/ApiKey/Create", apiKey);
                 if (response.IsSuccessStatusCode)
                 {
+                    await addApiKey.InvokeAsync(apiKey);
                     Close();
                 }
                 else
