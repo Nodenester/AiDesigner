@@ -4,6 +4,8 @@
 @using Radzen.Blazor
 @using AiDesigner.Client.Components
 @using AiDesigner.Shared.Data
+@using Newtonsoft
+@using Newtonsoft.Json
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http;
 
@@ -11,31 +13,53 @@
 
 <div class="container dark:bg-gray-600 w-full">
     <div class="" style="margin-inline: -0.7rem;">
-        <RadzenCard class="w-full mb-4 dark:bg-gray-700 rounded-lg" Style="display: flex; align-items: start; gap: 0rem" >
-            <Dropdown @ref="dropdown" Selected="@SelectedApi" width="w-48">
-                <button @onclick="@(() => SelectOption("All"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
-                <button @onclick="@(() => SelectOption("Account"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "Account" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Account</button>
-                @foreach (var apiKey in apiKeys)
-                {
-                    <button @onclick="@(() => SelectOption(apiKey.Name))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == apiKey.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@apiKey.Name</button>
-                }
-                <button @onclick="AddApiKey" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create ApiKey</button>
-            </Dropdown>
-            <RadzenCheckBox @bind-Value="@showDataLabels" Name="dataLabels" class="w-6 h-6 bg-green-600"></RadzenCheckBox><RadzenLabel Text="Show Data Labels" For="dataLabels" />
-        </RadzenCard>
+        <div style="display: flex; justify-content: space-between;">
+            <RadzenCard class="w-full mb-4 dark:bg-gray-700 rounded-lg rz-shadow-0" Style="display: flex; align-items: center; gap: 0.5rem;">
+                <div style="display: flex; gap: 0.5rem;" class="w-1/2">
+                    <Dropdown @ref="dropdown" Selected="@SelectedApi" width="w-48">
+                        <button @onclick="@(() => SelectOption("All"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
+                        <button @onclick="@(() => SelectOption("Account"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "Account" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Account</button>
+                        @foreach (var apiKey in ApiKeys)
+                        {
+                            <button @onclick="@(() => SelectOption(apiKey.Name))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == apiKey.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@apiKey.Name</button>
+                        }
+                        <button @onclick="AddApiKey" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create ApiKey</button>
+                    </Dropdown>
+                    <Dropdown @ref="programdropdown" Selected="@SelectedProgram" width="w-48">
+                        <button @onclick="@(() => SelectProgram("All"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
+                        @foreach (var eap in Programs)
+                        {
+                            <button @onclick="@(() => SelectProgram(eap.Name))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == eap.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@eap.Name</button>
+                        }
+                    </Dropdown>
+                </div>
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end;" class="w-1/2">
+                    <div class="mt-0 flex items-center">
+                        <input type="checkbox" @bind="showDataLabels" id="IsPublic" class="w-6 h-6 accent-green-600 rounded" />
+                        <label for="IsPublic" class="ml-2 text-sm text-gray-700 dark:text-white">Show Labels</label>
+                    </div>
+                    <Dropdown @ref="timeDropdown" Selected="@SelectedTime" width="w-24">
+                        <button @onclick="@(() => SelectTime("Year"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Year" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Year</button>
+                        <button @onclick="@(() => SelectTime("Month"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Month" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Month</button>
+                        <button @onclick="@(() => SelectTime("Week"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Week" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Week</button>
+                        <button @onclick="@(() => SelectTime("Day"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Day" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Day</button>
+                    </Dropdown>
+                </div>
+            </RadzenCard>
+        </div>
+
         <RadzenChart Style="height: 32.125rem !important;" class="dark:bg-gray-700 rounded-lg">
-            <RadzenLineSeries Smooth="@smooth" Data="@revenue2019" CategoryProperty="Date" Title="2019" LineType="LineType.Dashed" ValueProperty="Revenue">
-                <RadzenMarkers MarkerType="MarkerType.Square" />
+            <RadzenColumnSeries Data="@ShowCalls.ToArray()" CategoryProperty="Date" Title="Call Count" ValueProperty="CallCount">
                 <RadzenSeriesDataLabels Visible="@showDataLabels" />
-            </RadzenLineSeries>
-            <RadzenLineSeries Smooth="@smooth" Data="@revenue2020" CategoryProperty="Date" Title="2020" ValueProperty="Revenue">
+            </RadzenColumnSeries>
+            <RadzenLineSeries Smooth="@smooth" Data="@ShowCalls.ToArray()" CategoryProperty="Date" Title="Tokens" ValueProperty="Revenue">
                 <RadzenMarkers MarkerType="MarkerType.Circle" />
                 <RadzenSeriesDataLabels Visible="@showDataLabels" />
             </RadzenLineSeries>
             <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
-            <RadzenValueAxis Formatter="@FormatAsUSD">
+            <RadzenValueAxis Formatter="@FormatAsTokens">
                 <RadzenGridLines Visible="true" />
-                <RadzenAxisTitle Text="Revenue in USD" />
+                <RadzenAxisTitle Text="Tokens used" />
             </RadzenValueAxis>
         </RadzenChart>
     </div>
@@ -45,42 +69,59 @@
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
 
+    [CascadingParameter(Name = "ApiKeys")]
+    public List<ApiKey> ApiKeys { get; set; }
+
+    [CascadingParameter(Name = "EAPs")]
+    public List<ProgramObject> EAPs { get; set; }
+
     private AddApiKey addApiKey { get; set; }
+    private List<Call> Calls { get; set; }
+    private List<Call> currentCalls { get; set; }
+
+    List<DataItem> ShowCalls = new List<DataItem>();
 
     bool smooth = false;
     bool showDataLabels = false;
 
     private string SelectedApi { get; set; } = "Account";
     private Dropdown dropdown;
-    private List<ApiKey> apiKeys = new List<ApiKey>();
+
+    private string SelectedTime { get; set; } = "Month";  // Default to Month
+    private Dropdown timeDropdown;
+
+    private string SelectedProgram { get; set; } = "All";  // Default to All
+    private Dropdown programdropdown;
+    private List<CustomProgram> Programs { get; set; } = new List<CustomProgram>();
+
+    private void SelectTime(string time)
+    {
+        timeDropdown.ToggleDropdown();
+        SelectedTime = time;
+        SetCurrentCalls();  // Update data based on the selected time
+    }
 
     class DataItem
     {
         public string Date { get; set; }
         public double Revenue { get; set; }
+        public double CallCount { get; set; }  // New property for call counts
     }
 
     protected override async Task OnInitializedAsync()
     {
-        if (CascAuth != null)
+        while (CascAuth == null || !CascAuth.User.Identity.IsAuthenticated || EAPs == null || EAPs.Count() == 0)
         {
-            var user = CascAuth.User;
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            if (Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                var response = await Http.GetAsync($"Chat/ApiKey/GetByUserId/{userId}");
-                if (response.IsSuccessStatusCode)
-                {
-                    try
-                    {
-                        apiKeys = await response.Content.ReadFromJsonAsync<List<ApiKey>>();
-                    }
-                    catch (Exception ex)
-                    {
-                        Console.WriteLine(ex.Message);
-                    }
-                }
-            }
+            await Task.Delay(200);
+        }
+        await GetCalls();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            StateHasChanged();
         }
     }
 
@@ -88,7 +129,15 @@
     {
         dropdown.ToggleDropdown();
         SelectedApi = option;
+        SetCurrentCalls();
         // This method is triggered when an item is clicked
+    }
+
+    private void SelectProgram(string program)
+    {
+        programdropdown.ToggleDropdown();
+        SelectedProgram = program;
+        SetCurrentCalls();
     }
 
     private void AddApiKey()
@@ -96,144 +145,202 @@
         addApiKey.Open();
     }
 
-    string FormatAsUSD(object value)
+    private async Task GetCalls()
     {
-        return ((double)value).ToString("C0", CultureInfo.CreateSpecificCulture("en-US"));
+        Console.WriteLine("Getting calls");
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            Console.WriteLine($"User ID: {userId}");
+            var response = await Http.GetAsync($"Chat/Call/GetByUserId/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                var allCalls = JsonConvert.DeserializeObject<List<Call>>(responseBody);
+
+                // Remove duplicates
+                Calls = allCalls
+                    .GroupBy(call => call.StartTime)
+                    .Select(group => group.First())
+                    .ToList();
+
+                Console.WriteLine(Calls.Count());
+                Console.WriteLine(EAPs.Count());
+
+                Programs = EAPs
+                    .OfType<CustomProgram>()
+                    .Where(customProgram => Calls.Any(call => call.ProgramId == customProgram.Id.ToString()))
+                    .ToList();
+
+                StateHasChanged();
+                SetCurrentCalls();
+            }
+            else
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(errorBody);  // Log the error response body to see what's being returned
+            }
+        }
+    }
+
+    private void SetCurrentCalls()
+    {
+        if (Calls == null)
+        {
+            Console.WriteLine("Calls is null");
+            return;
+        }
+        string selectedProgramId = null;
+        if (SelectedProgram != "All")
+        {
+            selectedProgramId = Programs.FirstOrDefault(Program => Program.Name == SelectedProgram)?.Id.ToString();
+        }
+
+        if (SelectedApi == "All")
+        {
+            currentCalls = selectedProgramId != null ?
+                Calls.Where(call => call.ProgramId == selectedProgramId).ToList() :
+                Calls;
+        }
+        else if (SelectedApi == "Account")
+        {
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                currentCalls = selectedProgramId != null ?
+                    Calls.Where(call => call.ApiUserId == userId.ToString() && call.ProgramId == selectedProgramId).ToList() :
+                    Calls.Where(call => call.ApiUserId == userId.ToString()).ToList();
+            }
+        }
+        else
+        {
+            currentCalls = selectedProgramId != null ?
+                Calls.Where(call =>
+                    ApiKeys.Any(apiKey => apiKey.apiKey == call.ApiUserId && apiKey.Name == SelectedApi) &&
+                    call.ProgramId == selectedProgramId
+                ).ToList() :
+                Calls.Where(call =>
+                    ApiKeys.Any(apiKey => apiKey.apiKey == call.ApiUserId && apiKey.Name == SelectedApi)
+                ).ToList();
+        }
+
+        // Logging the count of currentCalls to console
+        Console.WriteLine(currentCalls.Count());
+        GroupData();
+    }
+
+    private void GroupData()
+    {
+        ShowCalls.Clear();
+        var groupedData = new List<DataItem>();
+
+        switch (SelectedTime)
+        {
+            case "Year":
+                var thisYearCalls = currentCalls.Where(call => call.EndTime.Value.Year == DateTime.Now.Year).ToList();
+                groupedData = thisYearCalls
+                    .GroupBy(call => call.EndTime.Value.ToString("yyyy-MM"))
+                    .Select(group => new DataItem
+                        {
+                            Date = group.Key,
+                            Revenue = group.Sum(call => Double.Parse(call.Cost)),
+                            CallCount = (group.Count() * 5) + 0.6942
+                        })
+                    .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM", CultureInfo.InvariantCulture))
+                    .ToList();
+                break;
+
+            case "Month":
+                var thisMonthCalls = currentCalls.Where(call => call.EndTime.Value.Year == DateTime.Now.Year && call.EndTime.Value.Month == DateTime.Now.Month).ToList();
+                groupedData = thisMonthCalls
+                    .GroupBy(call => call.EndTime.Value.ToString("yyyy-MM-dd"))
+                    .Select(group => new DataItem
+                        {
+                            Date = group.Key,
+                            Revenue = group.Sum(call => Double.Parse(call.Cost)),
+                            CallCount = (group.Count() * 5) + 0.6942
+                        })
+                    .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture))
+                    .ToList();
+                break;
+
+            case "Week":
+                DateTime startOfWeek = StartOfWeek(DateTime.Now, DayOfWeek.Monday);  // Assumes weeks start on Monday
+                DateTime endOfWeek = startOfWeek.AddDays(6);
+                var thisWeekCalls = currentCalls.Where(call => call.EndTime.Value >= startOfWeek && call.EndTime.Value <= endOfWeek).ToList();
+                groupedData = thisWeekCalls
+                    .GroupBy(call => call.EndTime.Value.ToString("yyyy-MM-dd"))
+                    .Select(group => new DataItem
+                        {
+                            Date = group.Key,
+                            Revenue = group.Sum(call => Double.Parse(call.Cost)),
+                            CallCount = (group.Count() * 5) + 0.6942
+                        })
+                    .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture))
+                    .ToList();
+                break;
+
+            case "Day":
+                var todayCalls = currentCalls.Where(call => call.EndTime.Value.Date == DateTime.Today.Date).ToList();
+                groupedData = todayCalls
+                    .GroupBy(call => call.EndTime.Value.ToString("HH"))
+                    .Select(group => new DataItem
+                        {
+                            Date = group.Key,
+                            Revenue = group.Sum(call => Double.Parse(call.Cost)),
+                            CallCount = (group.Count() * 5) + 0.6942
+                        })
+                    .OrderBy(dataItem => Int32.Parse(dataItem.Date))
+                    .ToList();
+                break;
+        }
+
+        ShowCalls.AddRange(groupedData);
+    }
+
+    private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
+    {
+        int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+        return dt.AddDays(-1 * diff).Date;
+    }
+
+    string FormatAsTokens(object value)
+    {
+        double numberValue = Convert.ToDouble(value);
+        if (numberValue.ToString().Contains(".6942"))
+        {
+            return $"{(numberValue - 0.6942) / 5}";
+        }
+        else
+        {
+            return $"{numberValue}";
+        }
+
+        return $"{numberValue / 5} type {value.GetType()}";
     }
 
     string FormatAsMonth(object value)
     {
         if (value != null)
         {
-            return Convert.ToDateTime(value).ToString("MMM");
+            switch (SelectedTime)
+            {
+                case "Year":
+                    return DateTime.ParseExact(value.ToString(), "yyyy-MM", CultureInfo.InvariantCulture).ToString("MMM");
+                case "Month":
+                    return DateTime.ParseExact(value.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd");
+                case "Week":
+                    return DateTime.ParseExact(value.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd MMM");
+                case "Day":
+                    return value.ToString() + ":00";
+                default:
+                    return value.ToString();
+            }
         }
 
         return string.Empty;
     }
-
-    DataItem[] revenue2019 = new DataItem[] {
-        new DataItem
-        {
-            Date = ("2019-01-01"),
-            Revenue = 234000
-        },
-        new DataItem
-        {
-            Date = ("2019-02-01"),
-            Revenue = 269000
-        },
-        new DataItem
-        {
-            Date = ("2019-03-01"),
-            Revenue = 233000
-        },
-        new DataItem
-        {
-            Date = ("2019-04-01"),
-            Revenue = 244000
-        },
-        new DataItem
-        {
-            Date = ("2019-05-01"),
-            Revenue = 214000
-        },
-        new DataItem
-        {
-            Date = ("2019-06-01"),
-            Revenue = 253000
-        },
-        new DataItem
-        {
-            Date = ("2019-07-01"),
-            Revenue = 274000
-        },
-        new DataItem
-        {
-            Date = ("2019-08-01"),
-            Revenue = 284000
-        },
-        new DataItem
-        {
-            Date = ("2019-09-01"),
-            Revenue = 273000
-        },
-        new DataItem
-        {
-            Date = ("2019-10-01"),
-            Revenue = 282000
-        },
-        new DataItem
-        {
-            Date = ("2019-11-01"),
-            Revenue = 289000
-        },
-        new DataItem
-        {
-            Date = ("2019-12-01"),
-            Revenue = 294000
-        }
-    };
-
-    DataItem[] revenue2020 = new DataItem[] {
-        new DataItem
-        {
-            Date = ("2019-01-01"),
-            Revenue = 334000
-        },
-        new DataItem
-        {
-            Date = ("2019-02-01"),
-            Revenue = 369000
-        },
-        new DataItem
-        {
-            Date = ("2019-03-01"),
-            Revenue = 333000
-        },
-        new DataItem
-        {
-            Date = ("2019-04-01"),
-            Revenue = 344000
-        },
-        new DataItem
-        {
-            Date = ("2019-05-01"),
-            Revenue = 314000
-        },
-        new DataItem
-        {
-            Date = ("2019-06-01"),
-            Revenue = 353000
-        },
-        new DataItem
-        {
-            Date = ("2019-07-01"),
-            Revenue = 374000
-        },
-        new DataItem
-        {
-            Date = ("2019-08-01"),
-            Revenue = 384000
-        },
-        new DataItem
-        {
-            Date = ("2019-09-01"),
-            Revenue = 373000
-        },
-        new DataItem
-        {
-            Date = ("2019-10-01"),
-            Revenue = 382000
-        },
-        new DataItem
-        {
-            Date = ("2019-11-01"),
-            Revenue = 389000
-        },
-        new DataItem
-        {
-            Date = ("2019-12-01"),
-            Revenue = 394000
-        }
-    };
 }

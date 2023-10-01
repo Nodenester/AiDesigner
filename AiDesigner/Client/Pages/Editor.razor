@@ -1211,14 +1211,7 @@
         // Clone newOutput using Newtonsoft.Json
         var clonedOutput = JsonConvert.DeserializeObject<Output>(JsonConvert.SerializeObject(newOutput));
 
-        if (localProgram is CustomProgram customProgram)
-        {
-            customProgram.ProgramStructure.AddProgramInput(clonedOutput);
-        }
-        else if (localProgram is CustomBlockProgram customBlockProgram)
-        {
-            customBlockProgram.ProgramStructure.AddProgramInput(clonedOutput);
-        }
+        localProgram.ProgramStructure.AddProgramInput(clonedOutput);
     }
 
     private void AddProgramOutput(Input newInput)
@@ -1226,14 +1219,7 @@
         // Clone newOutput using Newtonsoft.Json
         var clonedInput = JsonConvert.DeserializeObject<Input>(JsonConvert.SerializeObject(newInput));
 
-        if (localProgram is CustomProgram customProgram)
-        {
-            customProgram.ProgramStructure.AddProgramOutput(clonedInput);
-        }
-        else if (localProgram is CustomBlockProgram customBlockProgram)
-        {
-            customBlockProgram.ProgramStructure.AddProgramOutput(clonedInput);
-        }
+        localProgram.ProgramStructure.AddProgramOutput(clonedInput);
     }
 
     private void AddProgramVariable(Variable newVariable)
@@ -1255,25 +1241,11 @@
     {
         if(nodeId == "Input") 
         {
-            if (localProgram is CustomProgram customProgram)
-            {
-                customProgram.ProgramStructure.ProgramStartLocation = new Tuple<int, int>(newX, newY);
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.ProgramStartLocation = new Tuple<int, int>(newX, newY);
-            }
+            localProgram.ProgramStructure.ProgramStartLocation = new Tuple<int, int>(newX, newY);
         }
         else if(nodeId == "Output")
         {
-            if (localProgram is CustomProgram customProgram)
-            {
-                customProgram.ProgramStructure.ProgramEndLocation = new Tuple<int, int>(newX, newY);
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.ProgramEndLocation = new Tuple<int, int>(newX, newY);
-            }
+            localProgram.ProgramStructure.ProgramEndLocation = new Tuple<int, int>(newX, newY);
         }
         else
         {
@@ -1312,14 +1284,7 @@
         //Console.WriteLine($"UpdateCameraPosition called with {newX}, {newY}");
         try
         {
-            if (localProgram is CustomProgram customBlock)
-            {
-                customBlock.ProgramStructure.CameraPos = new Tuple<double, double>(newX, newY);
-            }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
-            {
-                customBlockProgram.ProgramStructure.CameraPos = new Tuple<double, double>(newX, newY);
-            }
+            localProgram.ProgramStructure.CameraPos = new Tuple<double, double>(newX, newY);
 
             StateHasChanged();
         }
