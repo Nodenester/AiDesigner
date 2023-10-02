@@ -215,7 +215,7 @@ else
             else
             {
                 // Log the error for debugging and review
-                Console.WriteLine($"Failed to get total count. StatusCode: {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
+                //Console.WriteLine($"Failed to get total count. StatusCode: {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
             }
         }
         catch (HttpRequestException e)
@@ -238,7 +238,7 @@ else
         try
         {
             var response = await Http.GetAsync($"Workshop/search?searchTerm={SearchQuery}&searchClass={SelectedOption}&type={ProgramType}&start={(CurrentPage - 1) * ItemsPerPage}&end={CurrentPage * ItemsPerPage}");
-            Console.WriteLine("get workshop--------------------------------------------");
+            // Console.WriteLine("get workshop--------------------------------------------");
 
             if (response.IsSuccessStatusCode)
             {
@@ -248,7 +248,7 @@ else
             else
             {
                 // Log the error for debugging and review
-                Console.WriteLine($"Failed to get filtered articles. StatusCode: {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
+                //Console.WriteLine($"Failed to get filtered articles. StatusCode: {response.StatusCode}, Content: {await response.Content.ReadAsStringAsync()}");
             }
         }
         catch (HttpRequestException e)

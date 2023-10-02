@@ -15,24 +15,6 @@
     <div class="" style="margin-inline: -0.7rem;">
         <div style="display: flex; justify-content: space-between;">
             <RadzenCard class="w-full mb-4 dark:bg-gray-700 rounded-lg rz-shadow-0" Style="display: flex; align-items: center; gap: 0.5rem;">
-                <div style="display: flex; gap: 0.5rem;" class="w-1/2">
-                    <Dropdown @ref="dropdown" Selected="@SelectedApi" width="w-48">
-                        <button @onclick="@(() => SelectOption("All"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
-                        <button @onclick="@(() => SelectOption("Account"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "Account" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Account</button>
-                        @foreach (var apiKey in ApiKeys)
-                        {
-                            <button @onclick="@(() => SelectOption(apiKey.Name))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == apiKey.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@apiKey.Name</button>
-                        }
-                        <button @onclick="AddApiKey" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create ApiKey</button>
-                    </Dropdown>
-                    <Dropdown @ref="programdropdown" Selected="@SelectedProgram" width="w-48">
-                        <button @onclick="@(() => SelectProgram("All"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
-                        @foreach (var eap in Programs)
-                        {
-                            <button @onclick="@(() => SelectProgram(eap.Name))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == eap.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@eap.Name</button>
-                        }
-                    </Dropdown>
-                </div>
                 <div style="display: flex; gap: 0.5rem; justify-content: flex-end;" class="w-1/2">
                     <div class="mt-0 flex items-center">
                         <input type="checkbox" @bind="showDataLabels" id="IsPublic" class="w-6 h-6 accent-green-600 rounded" />
@@ -84,21 +66,14 @@
     bool smooth = false;
     bool showDataLabels = false;
 
-    private string SelectedApi { get; set; } = "Account";
-    private Dropdown dropdown;
-
     private string SelectedTime { get; set; } = "Day";  // Default to Month
     private Dropdown timeDropdown;
-
-    private string SelectedProgram { get; set; } = "All";  // Default to All
-    private Dropdown programdropdown;
-    private List<CustomProgram> Programs { get; set; } = new List<CustomProgram>();
 
     private void SelectTime(string time)
     {
         timeDropdown.ToggleDropdown();
         SelectedTime = time;
-        SetCurrentCalls();  // Update data based on the selected time
+        GroupData();  // Update data based on the selected time
     }
 
     class DataItem
@@ -125,117 +100,41 @@
         }
     }
 
-    private void SelectOption(string option)
-    {
-        dropdown.ToggleDropdown();
-        SelectedApi = option;
-        SetCurrentCalls();
-        // This method is triggered when an item is clicked
-    }
-
-    private void SelectProgram(string program)
-    {
-        programdropdown.ToggleDropdown();
-        SelectedProgram = program;
-        SetCurrentCalls();
-    }
-
-    private void AddApiKey()
-    {
-        addApiKey.Open();
-    }
-
     private async Task GetCalls()
     {
-        var user = CascAuth.User;
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out Guid userId))
+        var response = await Http.GetAsync($"Chat/Call/GetLatest/{1000}");
+        if (response.IsSuccessStatusCode)
         {
-            var response = await Http.GetAsync($"Chat/Call/GetByUserId/{userId}");
-            if (response.IsSuccessStatusCode)
+            var responseBody = await response.Content.ReadAsStringAsync();
+
+            var allCalls = JsonConvert.DeserializeObject<List<Call>>(responseBody);
+
+            allCalls.ForEach(call =>
             {
-                var responseBody = await response.Content.ReadAsStringAsync();
-
-                var allCalls = JsonConvert.DeserializeObject<List<Call>>(responseBody);
-
-                allCalls.ForEach(call =>
+                if (call.StartTime.HasValue)
                 {
-                    if (call.StartTime.HasValue)
-                    {
-                        call.StartTime = call.StartTime.Value.ToLocalTime();
-                    }
-                    if (call.EndTime.HasValue)
-                    {
-                        call.EndTime = call.EndTime.Value.ToLocalTime();
-                    }
-                });
+                    call.StartTime = call.StartTime.Value.ToLocalTime();
+                }
+                if (call.EndTime.HasValue)
+                {
+                    call.EndTime = call.EndTime.Value.ToLocalTime();
+                }
+            });
 
-                Calls = allCalls
-                    .GroupBy(call => call.StartTime)
-                    .Select(group => group.First())
-                    .ToList();
+            Calls = allCalls
+                .GroupBy(call => call.StartTime)
+                .Select(group => group.First())
+                .ToList();
 
-                Programs = EAPs
-                    .OfType<CustomProgram>()
-                    .Where(customProgram => Calls.Any(call => call.ProgramId == customProgram.Id.ToString()))
-                    .ToList();
+            currentCalls = Calls;
 
-                StateHasChanged();
-                SetCurrentCalls();
-            }
-            else
-            {
-                var errorBody = await response.Content.ReadAsStringAsync();
-                Console.WriteLine(errorBody);  // Log the error response body to see what's being returned
-            }
-        }
-    }
-
-    private void SetCurrentCalls()
-    {
-        if (Calls == null)
-        {
-            Console.WriteLine("Calls is null");
-            return;
-        }
-        string selectedProgramId = null;
-        if (SelectedProgram != "All")
-        {
-            selectedProgramId = Programs.FirstOrDefault(Program => Program.Name == SelectedProgram)?.Id.ToString();
-        }
-
-        if (SelectedApi == "All")
-        {
-            currentCalls = selectedProgramId != null ?
-                Calls.Where(call => call.ProgramId == selectedProgramId).ToList() :
-                Calls;
-        }
-        else if (SelectedApi == "Account")
-        {
-            var user = CascAuth.User;
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            if (Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                currentCalls = selectedProgramId != null ?
-                    Calls.Where(call => call.ApiUserId == userId.ToString() && call.ProgramId == selectedProgramId).ToList() :
-                    Calls.Where(call => call.ApiUserId == userId.ToString()).ToList();
-            }
+            StateHasChanged();
+            GroupData();
         }
         else
         {
-            currentCalls = selectedProgramId != null ?
-                Calls.Where(call =>
-                    ApiKeys.Any(apiKey => apiKey.apiKey == call.ApiUserId && apiKey.Name == SelectedApi) &&
-                    call.ProgramId == selectedProgramId
-                ).ToList() :
-                Calls.Where(call =>
-                    ApiKeys.Any(apiKey => apiKey.apiKey == call.ApiUserId && apiKey.Name == SelectedApi)
-                ).ToList();
+            Console.WriteLine("Failed to get calls");
         }
-
-        // Logging the count of currentCalls to console
-        Console.WriteLine(currentCalls.Count());
-        GroupData();
     }
 
     private void GroupData()

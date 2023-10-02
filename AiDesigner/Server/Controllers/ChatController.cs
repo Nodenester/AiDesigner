@@ -156,7 +156,7 @@ namespace NodeBaseApi.Controllers
             }
         }
 
-        // GET api/Chat/ApiKey/GetByUserId/{userId}
+        // GET api/Chat/Call/GetByUserId/{userId}
         [HttpGet("Call/GetByUserId/{userId}")]
         public async Task<ActionResult<IEnumerable<Call>>> GetLatest100Calls(string userId)
         {
@@ -171,6 +171,22 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+        // GET api/Chat/Call/Getlatest/{numCalls}
+        [HttpGet("Call/Getlatest/{numCalls}")]
+        public async Task<ActionResult<IEnumerable<Call>>> GetLatest100Calls(int numCalls)
+        {
+            try
+            {
+                var apiKeys = await _dbConnection.GetLatestCallsAsync(numCalls);
+                return Ok(apiKeys);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
 
         //ApiKeyStuff
         // POST api/Chat/ApiKey/Create
