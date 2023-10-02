@@ -1042,7 +1042,7 @@
     //Navbar logic
     private async Task SaveProgram()
     {
-        Take();
+        await Take();
         APO = localProgram;
         if(localProgram is CustomProgram customProgram)
         {
@@ -1290,7 +1290,7 @@
         }
         catch (Exception ex)
         {
-            //Console.WriteLine(ex);
+            Console.WriteLine(ex);
         }
         //Console.WriteLine("UpdateCameraPosition execution finished");
 
@@ -1340,7 +1340,7 @@
             }
             catch (Exception ex)
             {
-                //Console.WriteLine("An error occurred while sending the request: " + ex.ToString());
+                Console.WriteLine("An error occurred while sending the request: " + ex.ToString());
             }
 
             if (response == null || !response.IsSuccessStatusCode)
