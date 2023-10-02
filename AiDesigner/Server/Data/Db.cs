@@ -350,7 +350,7 @@ namespace AiDesigner.Server.Data
         //Search Articles
         public async Task<int> GetArticleCountForSearchAsync(string searchTerm = null, string searchClass = null, string type = null)
         {
-            StringBuilder query = new StringBuilder(@"SELECT COUNT(*) FROM Ludde.Workshop_Article a WHERE 1=1");
+            StringBuilder query = new StringBuilder(@"SELECT COUNT(*) FROM Ludde.Workshop_Article a WHERE 1=1 AND Status = 'Accepted'");
 
             var parameters = new DynamicParameters();
             if (!string.IsNullOrEmpty(searchTerm) && searchTerm != "")
@@ -377,10 +377,10 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> SearchArticlesAsync(int start, int end, string searchTerm = null, string searchClass = null, string type = null)
         {
             StringBuilder query = new StringBuilder(@"
-                SELECT a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
-                FROM Ludde.Workshop_Article a
-                LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-                WHERE 1=1"
+        SELECT a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
+        FROM Ludde.Workshop_Article a
+        LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+        WHERE 1=1 AND Status = 'Accepted'"
             );
 
             var parameters = new DynamicParameters();
@@ -403,7 +403,7 @@ namespace AiDesigner.Server.Data
             }
 
             query.Append(@"
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
                 ORDER BY a.Created DESC
                 OFFSET @Start ROWS
                 FETCH NEXT (@End - @Start) ROWS ONLY;"
@@ -413,8 +413,15 @@ namespace AiDesigner.Server.Data
             parameters.Add("End", end);
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
-
-            var result = await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters);
+            var result = new List<WorkshopArticle>();  // Fixed initialization
+            try
+            {
+                result = (await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters)).ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
             return result;
         }
@@ -476,13 +483,66 @@ namespace AiDesigner.Server.Data
             return await connection.QueryAsync<WorkshopArticle>(query, new { Start = start, End = end });
         }
 
+        //Get article for admin
+        public async Task<IEnumerable<WorkshopArticle>> GetPendingArticlesAsync()
+        {
+            var queryArticles = @"
+                SELECT * 
+                FROM Ludde.Workshop_Article
+                WHERE Status = 'Pending'
+                ORDER BY Created ASC;
+            ";
+
+            var queryImages = @"
+                SELECT * 
+                FROM Article_Images
+                WHERE ArticleId IN @ArticleIds;
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+
+            // First, retrieve the pending articles
+            var pendingArticles = (await connection.QueryAsync<WorkshopArticle>(queryArticles)).ToList();
+
+            // If there are any pending articles, retrieve the associated images
+            if (pendingArticles.Any())
+            {
+                var articleIds = pendingArticles.Select(a => a.Id);
+
+                List<ArticleImages>  imageLists = new List<ArticleImages>();
+                try
+                {
+                    imageLists = (await connection.QueryAsync<ArticleImages>(queryImages, new { ArticleIds = articleIds })).ToList();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
+
+                // Group the images by article ID
+                var imageGroups = imageLists.GroupBy(img => img.ArticleId);
+
+                // Assign the images to the corresponding articles
+                foreach (var group in imageGroups)
+                {
+                    var article = pendingArticles.Find(a => a.Id == group.Key);
+                    if (article != null)
+                    {
+                        article.ArticleImages = group.ToList();
+                    }
+                }
+            }
+
+            return pendingArticles;
+        }
+
         //Article handeling
         public async Task<string> SaveArticleAsync(WorkshopArticle article)
         {
             var query = @"
-            INSERT INTO Ludde.Workshop_Article (Id, Name, Description, SearchClass, AuthorId, AuthorName, ProgramId, ApiKey, ProgramImage, Type, Created, Downloads)
-            VALUES (@Id, @Name, @Description, @SearchClass, @AuthorId, @AuthorName, @ProgramId, @ApiKey, @ProgramImage, @Type, @Created, @Downloads);
-        ";
+                INSERT INTO Ludde.Workshop_Article (Id, Name, Description, SearchClass, AuthorId, AuthorName, ProgramId, ApiKey, ProgramImage, Type, Created, Downloads, Status)
+                VALUES (@Id, @Name, @Description, @SearchClass, @AuthorId, @AuthorName, @ProgramId, @ApiKey, @ProgramImage, @Type, @Created, @Downloads, 'Pending');
+            ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, article);
@@ -495,7 +555,7 @@ namespace AiDesigner.Server.Data
                 FROM Ludde.Workshop_Article a
                 LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
                 WHERE a.Id = @Id
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads;
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status;
             ";
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryFirstOrDefaultAsync<WorkshopArticle>(query, new { Id = id });
@@ -507,7 +567,7 @@ namespace AiDesigner.Server.Data
                 FROM Ludde.Workshop_Article a
                 LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
                 WHERE a.ProgramId = @ProgramId
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads;
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status;
             ";
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryFirstOrDefaultAsync<WorkshopArticle>(query, new { ProgramId = programId });
@@ -519,7 +579,7 @@ namespace AiDesigner.Server.Data
                 FROM Ludde.Workshop_Article a
                 LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
                 WHERE a.AuthorId = @AuthorId
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads;
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status;
             ";
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<WorkshopArticle>(query, new { AuthorId = authorId });
@@ -528,13 +588,31 @@ namespace AiDesigner.Server.Data
         {
             var query = @"
                 UPDATE Ludde.Workshop_Article 
-                SET Name = @Name, Description = @Description, SearchClass = @SearchClass, AuthorId = @AuthorId, AuthorName = @AuthorName, ProgramId = @ProgramId, ApiKey = @ApiKey, ProgramImage = @ProgramImage, Type = @Type, Created = @Created, Downloads = @Downloads
+                SET Name = @Name, Description = @Description, SearchClass = @SearchClass, AuthorId = @AuthorId, AuthorName = @AuthorName, ProgramId = @ProgramId, ApiKey = @ApiKey, ProgramImage = @ProgramImage, Type = @Type, Created = @Created, Downloads = @Downloads, Status = 'Pending'
                 WHERE Id = @Id;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, article);
         }
+        public async Task UpdateArticleStatusAsync(string articleId, string status)
+        {
+            var query = @"
+                UPDATE Ludde.Workshop_Article
+                SET Status = @Status
+                WHERE Id = @Id;
+            ";
+
+            var parameters = new
+            {
+                Id = articleId,
+                Status = status
+            };
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            await connection.ExecuteAsync(query, parameters);
+        }
+
         public async Task DeleteArticleAsync(Guid id)
         {
             const string query = "DELETE FROM Ludde.Workshop_Article WHERE Id = @Id;";
@@ -764,7 +842,6 @@ namespace AiDesigner.Server.Data
         }
 
         //ApiKey handeling
-        // Create
         public async Task<int> AddApiKeyAsync(string apiKey, string userId, DateTime created, string name)
         {
             var query = @"
@@ -784,8 +861,6 @@ namespace AiDesigner.Server.Data
                 return 0;
             }
         }
-
-        // Read
         public async Task<IEnumerable<ApiKey>> GetApiKeysByUserIdAsync(Guid userId)
         {
             var query = @"
@@ -805,8 +880,6 @@ namespace AiDesigner.Server.Data
                 return null;
             }
         }
-
-        // Delete
         public async Task<int> DeleteApiKeyAsync(string apiKey, string userId)
         {
             var query = @"
@@ -818,6 +891,7 @@ namespace AiDesigner.Server.Data
             return await connection.ExecuteAsync(query, new { ApiKey = apiKey, UserId = userId });
         }
 
+        //Call handeling
         public async Task<IEnumerable<Call>> GetLatest100CallsByUserIdAsync(string userId)
         {
             var query = @"
@@ -859,6 +933,42 @@ namespace AiDesigner.Server.Data
                 return null;
             }
         }
+        public async Task<IEnumerable<Call>> GetLatestCallsAsync(int numCalls)
+        {
+            var query = @"
+                WITH RankedCalls AS (
+                    SELECT
+                        c.ProgramId,
+                        c.[Api/UserId] AS ApiUserId,
+                        c.IsTest,
+                        c.StartTime,
+                        c.EndTime,
+                        c.Cost,
+                        ROW_NUMBER() OVER (ORDER BY c.StartTime DESC) as RowNum
+                    FROM
+                        Ludde.Calls c
+                )
+                SELECT
+                    *
+                FROM
+                    RankedCalls
+                WHERE
+                    RowNum <= @NumCalls;
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+
+            try
+            {
+                return await connection.QueryAsync<Call>(query, new { NumCalls = numCalls });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
     }
 }
 

@@ -10,8 +10,6 @@
     <!-- Left section: Single image display -->
         <div class="w-3/5 flex flex-col items-center gap-4 flex-shrink-0 flex-grow-0 ml-5">
             @if (SelectedArticle != null)
-            {
-                @if (SelectedArticle != null)
                 {
                     @if (SelectedArticle.ArticleImages != null && SelectedArticle.ArticleImages.Any() && SelectedImageIndex >= 0 && SelectedImageIndex < SelectedArticle.ArticleImages.Count)
                     {
@@ -60,7 +58,6 @@
                         }
                     }
                 }
-            }
         </div>
 
         <!-- Right section: Article details -->

@@ -1,33 +1,114 @@
 ﻿@page "/Admin-Page"
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
+@using NodeBaseApi.Version2;
+@using System.Text;
+@inject HttpClient Http;
 @attribute [Authorize(Roles = "Administrator")]
 
-<div class="flex flex-col bg-gray-100 dark:bg-gray-600 mb-0" style="height: 79%;">
+<div class="flex flex-col bg-gray-100 dark:bg-gray-600 mb-0 h-full" style="">
     <!-- Header or Navbar could go here -->
     <div class="flex-grow flex flex-row">
         <!-- Column 1 -->
-        <div class="p-4 border-r border-gray-300 dark:border-gray-700 bg-gray-700 rounded-lg">
+        <div class="p-4 bg-gray-100 bg-gray-700 rounded-lg">
             <AiDesigner.Client.Modals.AddNews/>
         </div>
         <!-- Column 2 -->
-        <div class="flex-grow p-4 border-r border-gray-300 dark:border-gray-700">
-            <!-- Column 2 content goes here -->
+        <div class="flex-grow p-4 max-w-screen-xl">
+            <AiDesigner.Client.Components.AdminChart/>
         </div>
         <!-- Column 3 -->
-        <div class="flex-grow p-4">
-            <!-- Column 3 content goes here -->
+        <div class="p-0 pl-2 grid grid-cols-1 gap-0">
+            @if (Articles != null)
+            {
+                var article = Articles.FirstOrDefault();
+                if (article != null)
+                {
+                    <div class="p-2 border-0 dark:bg-gray-700 rounded-lg w-96">
+                        <div class="bg-gray-100 dark:bg-gray-600 p-2 rounded-t-lg">
+                            <p class="font-bold text-lg">@article.Name</p>
+                            <p class="text-gray-700 dark:text-gray-300">@article.Description</p>
+                        </div>
+                        @if (article.ArticleImages != null && article.ArticleImages.Any())
+                        {
+                            <!-- Display the main image (assuming the first image is the main image) -->
+                            <div class="p-2">
+                                <img src="data:image/png;base64,@Convert.ToBase64String(article.ProgramImage)" alt="@article.ProgramImage." class="rounded-lg w-full h-auto" />
+                            </div>
+
+                            <!-- Display the rest of the images in a grid -->
+                            <div class="grid grid-cols-2 gap-2 p-2">
+                                @foreach (var image in article.ArticleImages)
+                                {
+                                    <img src="data:image/png;base64,@Convert.ToBase64String(image.ImageData)" alt="@image.Description" class="rounded-lg object-cover square-image" />
+                                }
+                            </div>
+                        }
+                        <div class="p-2 flex justify-between">
+                            <button @onclick="() => AcceptArticle(article.Id)" class="bg-green-500 text-white p-2 rounded-lg w-40">Accept</button>
+                            <button @onclick="() => DeclineArticle(article.Id)" class="bg-red-500 text-white p-2 rounded-lg w-40">Decline</button>
+                        </div>
+                    </div>
+                }
+            }
         </div>
     </div>
     <!-- Footer could go here -->
 </div>
 
+<style>
+    .square-image {
+        width: 200px; /* or whatever size you prefer */
+        height: 200px;
+    }
+</style>
+
 @code {
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState authState { get; set; }
 
+    private List<WorkshopArticle> Articles { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
+        while (authState == null || !authState.User.Identity.IsAuthenticated)
+        {
+            await Task.Delay(200);
+        }
+        await GetArticles();
+    }
 
+    public async Task GetArticles()
+    {
+        var user = authState.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            var response = await Http.GetAsync($"Workshop/articles/pending");
+            if (response.IsSuccessStatusCode)
+            {
+                Articles = await response.Content.ReadFromJsonAsync<List<WorkshopArticle>>();
+            }
+        }
+    }
+
+    private async Task AcceptArticle(string articleId)
+    {
+        var response = await Http.PatchAsync($"Workshop/article/{articleId}/status", new StringContent("\"Accepted\"", Encoding.UTF8, "application/json"));
+        if (response.IsSuccessStatusCode)
+        {
+            // Refresh the list of articles
+            await OnInitializedAsync();
+        }
+    }
+
+    private async Task DeclineArticle(string articleId)
+    {
+        var response = await Http.PatchAsync($"Workshop/article/{articleId}/status", new StringContent("\"Declined\"", Encoding.UTF8, "application/json"));
+        if (response.IsSuccessStatusCode)
+        {
+            // Refresh the list of articles
+            await OnInitializedAsync();
+        }
     }
 }

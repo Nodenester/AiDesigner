@@ -496,6 +496,7 @@ namespace NodeBaseApi.Version2
         public DateTime Created { get; set; } = DateTime.Now;
         public int Downloads { get; set; } = 0;
         public int Rating { get; set; } = 0;
+        public string Status { get; set; } = "Pending";
 
         // Navigation property for the relationship
         public List<ArticleImages> ArticleImages { get; set; }

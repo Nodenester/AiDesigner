@@ -145,6 +145,44 @@ namespace AiDesigner.Server.Controllers
             return Ok();
         }
 
+        [HttpPatch("article/{id}/status")]
+        public async Task<IActionResult> UpdateArticleStatus(Guid id, [FromBody] string status)
+        {
+            if (string.IsNullOrEmpty(status))
+            {
+                return BadRequest(new { Message = "Invalid status value" });
+            }
+
+            try
+            {
+                await _dbConnection.UpdateArticleStatusAsync(id.ToString(), status);
+                return Ok(new { Message = "Article status updated successfully" });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // For example: _logger.LogError(ex, "An error occurred while updating the article status.");
+                return StatusCode(500, new { Message = "An error occurred while processing your request" });
+            }
+        }
+
+        [HttpGet("articles/pending")]
+        public async Task<IActionResult> GetPendingArticles()
+        {
+            try
+            {
+                var pendingArticles = await _dbConnection.GetPendingArticlesAsync();
+                return Ok(pendingArticles);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // For example: _logger.LogError(ex, "An error occurred while fetching pending articles.");
+                return StatusCode(500, new { Message = "An error occurred while processing your request" });
+            }
+        }
+
+
         //Article image handling
         [HttpPost("add-article-image")]
         public async Task<IActionResult> InsertArticleImage([FromBody] ArticleImages articleImage)
