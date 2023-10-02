@@ -247,7 +247,7 @@
                         {
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
-                            CallCount = (group.Count() * 5) + 0.6942
+                            CallCount = (group.Count() * 10) + 0.6942
                         })
                     .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM", CultureInfo.InvariantCulture))
                     .ToList();
@@ -261,7 +261,7 @@
                         {
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
-                            CallCount = (group.Count() * 5) + 0.6942
+                            CallCount = (group.Count() * 10) + 0.6942
                         })
                     .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture))
                     .ToList();
@@ -277,7 +277,7 @@
                         {
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
-                            CallCount = (group.Count() * 5) + 0.6942
+                            CallCount = (group.Count() * 10) + 0.6942
                         })
                     .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture))
                     .ToList();
@@ -291,7 +291,7 @@
                         {
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
-                            CallCount = (group.Count() * 5) + 0.6942
+                            CallCount = (group.Count() * 10) + 0.6942
                         })
                     .OrderBy(dataItem => Int32.Parse(dataItem.Date))
                     .ToList();
@@ -312,14 +312,12 @@
         double numberValue = Convert.ToDouble(value);
         if (numberValue.ToString().Contains(".6942"))
         {
-            return $"{(numberValue - 0.6942) / 5}";
+            return $"{(numberValue - 0.6942) / 10}";
         }
         else
         {
             return $"{numberValue}";
         }
-
-        return $"{numberValue / 5} type {value.GetType()}";
     }
 
     string FormatAsMonth(object value)
