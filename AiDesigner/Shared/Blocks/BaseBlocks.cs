@@ -163,17 +163,7 @@ namespace AiDesigner.Shared.Blocks
             Name = "Custom Block";
             Description = "A block that contains a sub-program";
             Inputs = new List<Input>();
-            Outputs = new List<Output>
-        {
-            new Output
-            {
-                Id = Guid.NewGuid(),
-                Name = "Output",
-                Description = "The output of the block",
-                Type = Type.String,
-                IsList = false
-            }
-        };
+            Outputs = new List<Output>();
         }
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
