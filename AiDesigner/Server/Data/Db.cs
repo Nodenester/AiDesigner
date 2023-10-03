@@ -627,7 +627,7 @@ namespace AiDesigner.Server.Data
                 INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
                 LEFT JOIN Ludde.User_Article ua ON a.Id = ua.ArticleId
                 WHERE u.UserId = @UserId
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, u.IsCreator, u.Rating, u.Review, u.IsFavorite;
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status, u.IsCreator, u.Rating, u.Review, u.IsFavorite;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);

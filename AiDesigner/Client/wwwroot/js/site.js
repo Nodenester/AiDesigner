@@ -350,7 +350,7 @@ window.jsPlumbInterop = {
         if (newNode) {
             // Make the new node draggable
             this.instance.draggable(newNode, {
-                grid: [this.currentGridSize, this.currentGridSize],
+                grid: [currentGridSize, currentGridSize],
                 start: function (params) {
                     var zoom = currentZoom;
                     var left = parseFloat(params.el.style.left);

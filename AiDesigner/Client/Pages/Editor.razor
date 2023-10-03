@@ -243,6 +243,22 @@
                                                     }
                                                 </div>
                                             }
+                                            @if(node.Block.Name == "Custom Block")
+                                            {
+                                                <div style="margin-left:-0.6rem;">
+                                                    @if (node != null)
+                                                    {
+                                                        <select @onchange="((ChangeEventArgs e) => SelectCustomBlock(node, e.Value.ToString()))"
+                                                                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                            <option disabled selected hidden>Select block</option>
+                                                            @foreach (var CustomBlock in EAPs.Where(eap => eap is CustomBlockProgram))
+                                                            {
+                                                                <option value="@CustomBlock.Id">@CustomBlock.Name</option>
+                                                            }
+                                                        </select>
+                                                    }
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                     <div class="main-part dark:bg-gray-700">
@@ -589,6 +605,9 @@
     [CascadingParameter(Name = "AP")]
     public ProgramObject APO { get; set; }
 
+    [CascadingParameter(Name = "EAPs")]
+    public List<ProgramObject> EAPs { get; set; }
+
     private int _currentHistoryIndex = -1;
     private const int MaxHistoryLength = 30; // Adjust this value as per your needs
     private ProgramObject _localProgram;
@@ -754,7 +773,10 @@
 
     private async Task ShowContextMenu(MouseEventArgs e)
     {
-        await JSRuntime.InvokeVoidAsync("showContextMenu", DotNetObjectReference.Create(this), e.ClientX, e.ClientY);
+        if(APO != null)
+        {
+            await JSRuntime.InvokeVoidAsync("showContextMenu", DotNetObjectReference.Create(this), e.ClientX, e.ClientY);
+        }
     }
 
     private async void AddBlockToWhiteboard(Item item)
@@ -840,6 +862,16 @@
     {
         SelectedDetail = variable;
         //Console.WriteLine(variable.Name);
+    }
+
+    public void SelectCustomBlock(ProgramBlock programBlock, string customBlockId)
+    {
+        var customBlockProgram = EAPs.OfType<CustomBlockProgram>().FirstOrDefault(eap => eap.Id.ToString() == customBlockId);
+        if (customBlockProgram != null)
+        {
+            programBlock.Block.Inputs = customBlockProgram.ProgramStructure.ProgramStart.Select(output => ConvertOutputToInput(output)).ToList();
+            programBlock.Block.Outputs = customBlockProgram.ProgramStructure.ProgramEnd.Select(input => ConvertInputToOutput(input)).ToList();
+        }
     }
 
     string GetShape(string type, bool isList)
@@ -1234,6 +1266,31 @@
         {
             customBlockProgram.ProgramStructure.Variables.Add(newVariable.Id, newVariable);
         }
+    }
+
+    public Input ConvertOutputToInput(Output output)
+    {
+        return new Input
+            {
+                Id = output.Id,
+                Name = output.Name,
+                Description = output.Description,
+                Type = output.Type,
+                IsList = output.IsList,
+                IsRequired = false  // Assuming IsRequired = false as default, adjust as necessary
+            };
+    }
+
+    public Output ConvertInputToOutput(Input input)
+    {
+        return new Output
+            {
+                Id = input.Id,
+                Name = input.Name,
+                Description = input.Description,
+                Type = input.Type,
+                IsList = input.IsList
+            };
     }
 
     [JSInvokable]
