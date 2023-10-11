@@ -57,10 +57,20 @@
                 <RadzenSeriesDataLabels Visible="@showDataLabels" />
             </RadzenLineSeries>
             <RadzenCategoryAxis Padding="20" Formatter="@FormatAsMonth" />
-            <RadzenValueAxis Formatter="@FormatAsTokens">
-                <RadzenGridLines Visible="true" />
-                <RadzenAxisTitle Text="Tokens used" />
-            </RadzenValueAxis>
+            @if (@ShowCalls.ToArray().All(dataItem => dataItem.Revenue == 0 || dataItem.Revenue == 0.6942))
+            {
+                <RadzenValueAxis Formatter="@FormatAsTokens" Min="0" Step="100" Max="500">
+                    <RadzenGridLines Visible="true" />
+                    <RadzenAxisTitle Text="Tokens used" />
+                </RadzenValueAxis>
+            }
+            else
+            {
+                <RadzenValueAxis Formatter="@FormatAsTokens">
+                    <RadzenGridLines Visible="true" />
+                    <RadzenAxisTitle Text="Tokens used" />
+                </RadzenValueAxis>
+            }
         </RadzenChart>
     </div>
 </div>
@@ -363,6 +373,7 @@
         }
 
         ShowCalls.AddRange(groupedData);
+        StateHasChanged();
     }
 
     private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
