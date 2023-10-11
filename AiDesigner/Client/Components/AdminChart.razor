@@ -146,6 +146,14 @@
         {
             case "Year":
                 var thisYearCalls = currentCalls.Where(call => call.EndTime.Value.Year == DateTime.Now.Year).ToList();
+
+                var monthPlaceholders = Enumerable.Range(1, 12).Select(m => new DataItem
+                    {
+                        Date = $"{DateTime.Now.Year}-{m:00}",
+                        Revenue = 0,
+                        CallCount = 0.6942
+                    }).ToList();
+
                 groupedData = thisYearCalls
                     .GroupBy(call => call.EndTime.Value.ToString("yyyy-MM"))
                     .Select(group => new DataItem
@@ -153,13 +161,28 @@
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
                             CallCount = (group.Count() * 10) + 0.6942
-                        })
-                    .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM", CultureInfo.InvariantCulture))
-                    .ToList();
+                        }).ToList();
+
+                // Merging with placeholders
+                groupedData = monthPlaceholders.Select(placeholder =>
+                {
+                    var actualData = groupedData.FirstOrDefault(g => g.Date == placeholder.Date);
+                    return actualData ?? placeholder;
+                }).OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM", CultureInfo.InvariantCulture)).ToList();
+
                 break;
 
             case "Month":
                 var thisMonthCalls = currentCalls.Where(call => call.EndTime.Value.Year == DateTime.Now.Year && call.EndTime.Value.Month == DateTime.Now.Month).ToList();
+                var daysInCurrentMonth = DateTime.DaysInMonth(DateTime.Now.Year, DateTime.Now.Month);
+
+                var dayPlaceholders = Enumerable.Range(1, daysInCurrentMonth).Select(d => new DataItem
+                    {
+                        Date = $"{DateTime.Now.Year}-{DateTime.Now.Month:00}-{d:00}",
+                        Revenue = 0,
+                        CallCount = 0.6942
+                    }).ToList();
+
                 groupedData = thisMonthCalls
                     .GroupBy(call => call.EndTime.Value.ToString("yyyy-MM-dd"))
                     .Select(group => new DataItem
@@ -167,15 +190,30 @@
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
                             CallCount = (group.Count() * 10) + 0.6942
-                        })
-                    .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture))
-                    .ToList();
+                        }).ToList();
+
+                // Merging with placeholders
+                groupedData = dayPlaceholders.Select(placeholder =>
+                {
+                    var actualData = groupedData.FirstOrDefault(g => g.Date == placeholder.Date);
+                    return actualData ?? placeholder;
+                }).OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture)).ToList();
+
                 break;
 
             case "Week":
-                DateTime startOfWeek = StartOfWeek(DateTime.Now, DayOfWeek.Monday);  // Assumes weeks start on Monday
+                DateTime startOfWeek = StartOfWeek(DateTime.Now, DayOfWeek.Monday);
                 DateTime endOfWeek = startOfWeek.AddDays(6);
+
+                var weekPlaceholders = Enumerable.Range(0, 7).Select(d => new DataItem
+                    {
+                        Date = startOfWeek.AddDays(d).ToString("yyyy-MM-dd"),
+                        Revenue = 0,
+                        CallCount = 0.6942
+                    }).ToList();
+
                 var thisWeekCalls = currentCalls.Where(call => call.EndTime.Value >= startOfWeek && call.EndTime.Value <= endOfWeek).ToList();
+
                 groupedData = thisWeekCalls
                     .GroupBy(call => call.EndTime.Value.ToString("yyyy-MM-dd"))
                     .Select(group => new DataItem
@@ -183,13 +221,27 @@
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
                             CallCount = (group.Count() * 10) + 0.6942
-                        })
-                    .OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture))
-                    .ToList();
+                        }).ToList();
+
+                // Merging with placeholders
+                groupedData = weekPlaceholders.Select(placeholder =>
+                {
+                    var actualData = groupedData.FirstOrDefault(g => g.Date == placeholder.Date);
+                    return actualData ?? placeholder;
+                }).OrderBy(dataItem => DateTime.ParseExact(dataItem.Date, "yyyy-MM-dd", CultureInfo.InvariantCulture)).ToList();
+
                 break;
 
             case "Day":
                 var todayCalls = currentCalls.Where(call => call.EndTime.Value.Date == DateTime.Today.Date).ToList();
+
+                var hourPlaceholders = Enumerable.Range(0, 24).Select(h => new DataItem
+                    {
+                        Date = h.ToString("00"),
+                        Revenue = 0,
+                        CallCount = 0.6942
+                    }).ToList();
+
                 groupedData = todayCalls
                     .GroupBy(call => call.EndTime.Value.ToString("HH"))
                     .Select(group => new DataItem
@@ -197,9 +249,15 @@
                             Date = group.Key,
                             Revenue = group.Sum(call => Double.Parse(call.Cost)),
                             CallCount = (group.Count() * 10) + 0.6942
-                        })
-                    .OrderBy(dataItem => Int32.Parse(dataItem.Date))
-                    .ToList();
+                        }).ToList();
+
+                // Merging with placeholders
+                groupedData = hourPlaceholders.Select(placeholder =>
+                {
+                    var actualData = groupedData.FirstOrDefault(g => g.Date == placeholder.Date);
+                    return actualData ?? placeholder;
+                }).OrderBy(dataItem => Int32.Parse(dataItem.Date)).ToList();
+
                 break;
         }
 

@@ -75,11 +75,11 @@
     </div>
 
     <!-- Output box -->
-    <div class="flex-grow text-center p-4 pt-2">
+    <div class="text-center p-4 pt-2">
         <p class="text-lg font-semibold mb-2">Program Outputs</p>
         @if (selectedProgram != null)
         {
-            <div style="margin-top: 0rem;">
+            <div style="margin-top: 0rem;" class="flex justify-end items-end">
                 @foreach (var output in selectedProgram.ProgramStructure.ProgramEnd)
                 {
                     if (output.Name == "End")
@@ -87,7 +87,7 @@
                         continue;
                     }
                     var index = selectedProgram.ProgramStructure.ProgramEnd.IndexOf(output) - 1;
-                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition max-w-2xl">
                         @switch (output.Type)
                         {
                             case NodeBaseApi.Version2.Type.Picture:
@@ -101,7 +101,7 @@
                                 <p class="font-semibold">Type: Text</p>
                                 if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
                                 {
-                                    <p>@ProgramOutput.ToArray()[index]</p>
+                                    <p class="break-words">@ProgramOutput.ToArray()[index]</p>
                                 }
                                 break;
                             case NodeBaseApi.Version2.Type.Number:
