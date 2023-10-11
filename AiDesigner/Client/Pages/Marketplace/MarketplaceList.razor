@@ -18,8 +18,9 @@
                     }
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
                         <!-- Add Image Here -->
-                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 260px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" loading="lazy" />
-                        <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+@*                         <AiDesigner.Client.Components.ShowImage ImageData="article.ProgramImage"></AiDesigner.Client.Components.ShowImage>
+ *@                      <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 260px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" loading="lazy" />
+                      <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
                         <p class="w-full text-left dark:text-white ml-4">@article.AuthorName</p>
                         <br />
                         <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
