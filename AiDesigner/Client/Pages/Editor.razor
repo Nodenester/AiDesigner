@@ -871,6 +871,7 @@
         {
             programBlock.Block.Inputs = customBlockProgram.ProgramStructure.ProgramStart.Select(output => ConvertOutputToInput(output)).ToList();
             programBlock.Block.Outputs = customBlockProgram.ProgramStructure.ProgramEnd.Select(input => ConvertInputToOutput(input)).ToList();
+            programBlock.VariableId = Guid.Parse(customBlockId);
         }
     }
 
