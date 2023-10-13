@@ -913,12 +913,21 @@ video {
   width: 100%;
 }
 
-.max-w-2xl {
-  max-width: 42rem;
+.w-max {
+  width: -moz-max-content;
+  width: max-content;
 }
 
-.max-w-3xl {
-  max-width: 48rem;
+.w-5\/12 {
+  width: 41.666667%;
+}
+
+.w-4\/12 {
+  width: 33.333333%;
+}
+
+.max-w-2xl {
+  max-width: 42rem;
 }
 
 .max-w-screen-xl {
