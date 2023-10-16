@@ -256,6 +256,19 @@
                                                     </select>
                                                 </div>
                                             }
+                                            @if (node.Block.Name == "SelectBlock")
+                                            {
+                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                    <select @bind-value="node.Block.Inputs[1].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateBlockType(node, e.Value))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                        <option value="String">String</option>
+                                                        <option value="Picture">Picture</option>
+                                                        <option value="Number">Number</option>
+                                                        <option value="Boolean">Boolean</option>
+                                                        <option value="Audio">Audio</option>
+                                                        <option value="Object">Object</option>
+                                                    </select>
+                                                </div>
+                                            }
                                             @if(node.Block.Name == "Custom Block")
                                             {
                                                 <div style="width: calc(100%); margin-left: -0.6rem;">
@@ -1117,7 +1130,7 @@
 
         foreach (var input in node.Block.Inputs)
         {
-            if (input.Type != NodeBaseApi.Version2.Type.Trigger && input.Name != "Index")
+            if (input.Type != NodeBaseApi.Version2.Type.Trigger && input.Name != "Index" && input.Name != "Selector")
             {
                 input.Type = parsedType;
             }
@@ -1125,7 +1138,7 @@
 
         foreach (var output in node.Block.Outputs)
         {
-            if (output.Type != NodeBaseApi.Version2.Type.Trigger)
+            if (output.Type != NodeBaseApi.Version2.Type.Trigger && output.Name != "Index")
             {
                 output.Type = parsedType;
             }
