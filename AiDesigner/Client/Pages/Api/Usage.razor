@@ -1,0 +1,73 @@
+﻿@page "/documentation/api/apiusage"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-8">
+        
+        <!-- Title and Introduction -->
+        <h2 class="text-2xl font-bold mb-4">API Integration Guide</h2>
+        <p class="mb-4">This guide provides a walkthrough on how to integrate and use your program as an API. By following this guide, you'll be able to execute your AiDesigner program from any platform that supports HTTP requests.</p>
+        
+        <!-- Pre-requisites -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Pre-requisites</h3>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>A registered AiDesigner account.</li>
+                <li>An AiDesigner program you wish to execute via the API.</li>
+                <li>Required API Key and Program Key.</li>
+                <li>.NET environment (for the given example).</li>
+                <li>Installed Newtonsoft.Json library (for handling JSON in the given example).</li>
+            </ul>
+        </div>
+
+        <!-- API Endpoint and Method -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">API Endpoint and Method</h3>
+            <p class="mb-4">To execute your program, make a POST request to the following endpoint:</p>
+            <code>http://apiurl/api/Program/execute</code>
+        </div>
+
+        <!-- API Parameters -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">API Parameters</h3>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li><strong>programKey:</strong> The unique identifier for your program.</li>
+                <li><strong>apiKey:</strong> Your account's API key.</li>
+                <li><strong>sessionId:</strong> An optional session ID.</li>
+            </ul>
+        </div>
+
+        <!-- Sample Code Explanation -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Sample Code Overview</h3>
+            <p class="mb-4">The provided C# sample demonstrates how to execute your AiDesigner program by making a POST request to the API. Below is a breakdown of the major components:</p>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>The <strong>HttpClient</strong> class is used to send the HTTP request.</li>
+                <li>API parameters (programKey, apiKey, sessionId) are passed via the query string of the URL.</li>
+                <li>Inputs for your program are serialized into JSON format and sent in the request body.</li>
+                <li>The API response is deserialized to retrieve the program output.</li>
+            </ul>
+        </div>
+
+        <!-- Handling Responses -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Handling API Responses</h3>
+            <p class="mb-4">Once you've executed your program via the API, the server will respond with a JSON payload containing the results. Here's how to handle them:</p>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Always check the HTTP status code to ensure the request was successful.</li>
+                <li>If the code indicates success (e.g., 200 OK), deserialize the response to access your program's output.</li>
+                <li>For unsuccessful requests, consider logging or displaying the error message for debugging purposes.</li>
+            </ul>
+        </div>
+
+        <!-- Tips and Best Practices -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Tips and Best Practices</h3>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Ensure that your API key and other credentials are kept secure and not exposed to unauthorized parties.</li>
+                <li>Use the sessionId parameter to maintain state between multiple requests, if necessary.</li>
+                <li>Opt for using HTTPS for your requests to ensure data security during transmission.</li>
+                <li>Monitor your API usage to ensure you don't exceed any limits set by AiDesigner.</li>
+            </ul>
+        </div>
+    </section>
+</div>

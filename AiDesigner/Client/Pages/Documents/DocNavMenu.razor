@@ -21,13 +21,13 @@
             {
                 <ul class="ml-2 space-y-0">
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/introduction/gettingstarted" Match="NavLinkMatch.All">
-                            Getting started
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/introduction/overview" Match="NavLinkMatch.All">
+                            Overview
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/introduction/overview" Match="NavLinkMatch.All">
-                            Overview
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/introduction/gettingstarted" Match="NavLinkMatch.All">
+                            Getting started
                         </NavLink>
                     </li>
                     <li>
@@ -59,33 +59,43 @@
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/booleanlogic" Match="NavLinkMatch.All">
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/listblocks" Match="NavLinkMatch.All">
+                            List Blocks
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/booleanblocks" Match="NavLinkMatch.All">
                             Boolean Logic
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/stringManipulation" Match="NavLinkMatch.All">
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/stringmanipulation" Match="NavLinkMatch.All">
                             String Manipulation
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/math" Match="NavLinkMatch.All">
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/mathblocks" Match="NavLinkMatch.All">
                             Math
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/omageprocessing" Match="NavLinkMatch.All">
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/imageprocessing" Match="NavLinkMatch.All">
                             Image Processing
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/aimodels" Match="NavLinkMatch.All">
-                            Ai models
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/soundprocessing" Match="NavLinkMatch.All">
+                            Sound Processin
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/customblocks" Match="NavLinkMatch.All">
-                            Custom blocks
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/comparisonblocks" Match="NavLinkMatch.All">
+                            Comparison blocks
+                        </NavLink>
+                    </li>
+                    <li>
+                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/block/openaiblocks" Match="NavLinkMatch.All">
+                            Openai blocks
                         </NavLink>
                     </li>
                 </ul>
@@ -112,51 +122,48 @@
                         </NavLink>
                     </li>
                     <li>
-                        <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/api/codeexamples" Match="NavLinkMatch.All">
-                            Code examples
-                        </NavLink>
-                    </li>
-                    <li>
                         <NavLink class="text-md text-gray-500 dark:text-gray-400 hover:underline" href="/documentation/api/codegeneration" Match="NavLinkMatch.All">
-                            Code generation
+                            Code examples
                         </NavLink>
                     </li>
                 </ul>
             }
         </li>
-
-
         <!-- More menu and subamenu items -->
     </ul>
 </div>
 
 <style>
-.DocNavMenu {
-    width: 250px;
-    height: 100%;
-    background-color: #f5f5f5;
-    padding: 20px;
-}
+    .active {
+        color: #CCCCCC !important; /* Use !important to override any default styles */
+    }
 
-.DocNavMenu ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
+    .DocNavMenu {
+        width: 250px;
+        height: 100%;
+        background-color: #f5f5f5;
+        padding: 20px;
+    }
 
-.DocNavMenu li {
-    margin-bottom: 0px;
-}
+    .DocNavMenu ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
 
-.DocNavMenu li a {
-    text-decoration: none;
-    color: #333;
-}
+    .DocNavMenu li {
+        margin-bottom: 0px;
+    }
 
-.DocNavMenu li a.active {
-    font-weight: bold;
-    color: #007bff;
-}
+    .DocNavMenu li a {
+        text-decoration: none;
+        color: #333;
+    }
+
+    .DocNavMenu li a.active {
+        font-weight: bold;
+        color: #007bff;
+    }
 </style>
 
 @code {

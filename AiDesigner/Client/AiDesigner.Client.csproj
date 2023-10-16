@@ -24,11 +24,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Pages\Documents\Introduction\" />
-    <Folder Include="Pages\Documents\Block\" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Include="Pages\Marketplace\MarketplaceList.razor" />
   </ItemGroup>
 

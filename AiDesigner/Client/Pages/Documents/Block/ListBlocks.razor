@@ -1,0 +1,85 @@
+﻿@page "/documentation/block/listblocks"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">List Operation Blocks</h2>
+        <!-- Add Item Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Add Item</h3>
+            <p>Adds an item to a list.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list to add to. (Type: Object, List: True) <span class="text-red-500">*</span></li>
+                <li>Item: The item to add. (Type: Object) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list with the item added. (Type: Object, List: True)</li>
+            </ul>
+        </div>
+
+        <!-- Remove Item Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Remove Item</h3>
+            <p>Removes an item from a list by index.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list to remove from. (Type: Object, List: True) <span class="text-red-500">*</span></li>
+                <li>Index: The index of the item to remove. (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list with the item removed. (Type: Object, List: True)</li>
+            </ul>
+        </div>
+
+        <!-- Get Item Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Get Item</h3>
+            <p>Gets an item from a list by index.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list to get from. (Type: Object, List: True) <span class="text-red-500">*</span></li>
+                <li>Index: The index of the item to get. (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Item: The item from the list. (Type: Object)</li>
+            </ul>
+        </div>
+
+        <!-- Set Item Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Set Item</h3>
+            <p>Sets an item in a list by index.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list to set in. (Type: Object, List: True) <span class="text-red-500">*</span></li>
+                <li>Index: The index of the item to set. (Type: Number) <span class="text-red-500">*</span></li>
+                <li>Item: The item to set. (Type: Object) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list with the item set. (Type: Object, List: True)</li>
+            </ul>
+        </div>
+
+        <!-- Find Item Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Find Item</h3>
+            <p>Finds the index of an item in a list.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: The list to search in. (Type: Object, List: True) <span class="text-red-500">*</span></li>
+                <li>Item: The item to find. (Type: Object) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Index: The index of the item in the list. (Type: Number)</li>
+            </ul>
+        </div>
+    </section>
+</div>
+@code {
+
+}

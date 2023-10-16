@@ -1,0 +1,43 @@
+﻿@page "/documentation/block/openaiblocks"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-4">
+        <h2 class="text-2xl font-bold mb-4">Mathematical Operation Blocks</h2>
+        <!-- GPT Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">GPT Block</h3>
+            <p>Generates text using the GPT models.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>API Key: Your OpenAI API key. (Type: String) <span class="text-red-500">*</span></li>
+                <li>Prompt: The text prompt to generate from. (Type: String) <span class="text-red-500">*</span></li>
+                <li>Max Tokens: The text Max token amount. (Type: Number) <span class="text-red-500">*</span></li>
+                <li>Temperature: The text temperature. (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Generated Text: The generated text. (Type: String)</li>
+            </ul>
+        </div>
+    </section>
+
+    <section class="mb-8">
+        <!-- DALL-E Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">DALL-E Block</h3>
+            <p>Generates images using the DALL-E model.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>API Key: Your OpenAI API key. (Type: String) <span class="text-red-500">*</span></li>
+                <li>Prompt: The text prompt to generate an image from. (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Generated Image: The generated image. (Type: Picture)</li>
+            </ul>
+        </div>
+    </section>
+</div>
+@code {
+
+}

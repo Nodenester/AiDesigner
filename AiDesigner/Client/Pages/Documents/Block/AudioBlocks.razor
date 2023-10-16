@@ -1,0 +1,84 @@
+﻿@page "/documentation/block/soundprocessing"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Mathematical Operation Blocks</h2>
+        <!-- Audio Length Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Audio Length</h3>
+            <p>Gets the length of the audio in seconds.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Audio: The audio file. (Type: Audio) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Length: The length of the audio in seconds. (Type: Number)</li>
+            </ul>
+        </div>
+
+        <!-- Audio Volume Change Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Audio Volume Change</h3>
+            <p>Changes the volume of the audio.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Audio: The audio file. (Type: Audio) <span class="text-red-500">*</span></li>
+                <li>Volume: The desired volume level (0.0 to 1.0). (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Output Audio: The audio with the new volume level. (Type: Audio)</li>
+            </ul>
+        </div>
+
+        <!-- Audio Conversion Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Audio Conversion</h3>
+            <p>Converts the audio to a specified format.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Audio: The audio file. (Type: Audio) <span class="text-red-500">*</span></li>
+                <li>Target Format: The target audio format (e.g., MP3, WAV). (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Output Audio: The converted audio file. (Type: Audio)</li>
+            </ul>
+        </div>
+
+        <!-- Audio Trimming Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Audio Trimming</h3>
+            <p>Trims the audio to a specified duration.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Audio: The audio file. (Type: Audio) <span class="text-red-500">*</span></li>
+                <li>Start Time: The start time (in seconds). (Type: Number) <span class="text-red-500">*</span></li>
+                <li>End Time: The end time (in seconds). (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Output Audio: The trimmed audio file. (Type: Audio)</li>
+            </ul>
+        </div>
+
+        <!-- Audio Amplification Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Audio Amplification</h3>
+            <p>Amplifies the audio by a specified factor.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Audio: The audio file. (Type: Audio) <span class="text-red-500">*</span></li>
+                <li>Amplification Factor: The amplification factor. (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Output Audio: The amplified audio file. (Type: Audio)</li>
+            </ul>
+        </div>
+    </section>
+</div>
+@code { 
+
+}

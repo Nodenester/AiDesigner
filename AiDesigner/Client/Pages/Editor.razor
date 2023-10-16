@@ -164,9 +164,11 @@
                                         {
                                             <hr style="border-top: none; height: 10px; background-color: transparent;" />
                                         }
-                                        <button @onclick="Openapi" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
-                                                Create input
-                                        </button>
+                                        <div class="node-output d-flex">
+                                            <button @onclick="Openapi" class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                Add input
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -188,8 +190,8 @@
                                         {
                                             <hr style="border-top: none; height: 10px; background-color: transparent;" />
                                         }
-                                        <button @onclick="Openapo" class="btn btn-primary px-0 py-0 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
-                                            Create output
+                                        <button @onclick="Openapo" class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                            Add output
                                         </button>
                                     </div>
                                     <div class="right-part">
@@ -256,7 +258,7 @@
                                                     </select>
                                                 </div>
                                             }
-                                            @if (node.Block.Name == "SelectBlock")
+                                            @if (node.Block.Name == "Select")
                                             {
                                                 <div style="width: calc(100%); margin-left: -0.6rem;">
                                                     <select @bind-value="node.Block.Inputs[1].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateBlockType(node, e.Value))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
@@ -317,16 +319,30 @@
                                                     <span class="small-font">@input.Name</span>
                                                 </div>
                                             }
+                                            @if (node.Block.Name == "Select")
+                                            {
+                                                <button @onclick="() => AddSelectInput(node)" class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                    Add input
+                                                </button>
+                                            }
                                         </div>
                                         <div class="right-part">
                                             <!-- Right part content goes here -->
                                             @foreach (var output in node.Block.Outputs)
                                             {
-                                                <div class="node-output d-flex ">
+                                                <div class="node-output d-flex">
                                                     <span class="small-font">@output.Name</span>
                                                     <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
                                                 </div>
 
+                                            }
+                                            @if (node.Block.Name == "Switch")
+                                            {
+                                                <div class="node-output d-flex">
+                                                    <button @onclick="() => AddSwitchOutput(node)" class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                        Add case
+                                                    </button>
+                                                </div>
                                             }
                                         </div>
                                     </div>
@@ -338,10 +354,11 @@
             </div>
             <div id="error-shower" class="flex-auto bg-gray-800 dark:bg-gray-800 text-white py-3 mt-auto">
                 <!-- Error Shower Content -->
-                @foreach (var x in Errors)
+                Error handeling is not implemented yet / not good
+@*                 @foreach (var x in Errors)
                 {
                     <p class="text-white px-4" >@x</p>
-                }
+                } *@
             </div>
         </div>
 
@@ -1145,7 +1162,27 @@
         }
     }
 
+    private void AddSwitchOutput(ProgramBlock node)
+    {
+        int idx = node.Block.Outputs.Count();
+        node.Block.Outputs.Add(new Output
+        {
+            Name = $"Case {idx}",
+            Type = NodeBaseApi.Version2.Type.Trigger,
+            Description = $"Triggered for case {idx}.",
+        });
+    }
 
+    private void AddSelectInput(ProgramBlock node)
+    {
+        int idx = node.Block.Inputs.Count();
+        node.Block.Inputs.Add(new Input
+            {
+                Name = $"Input {idx}",
+                Type = NodeBaseApi.Version2.Type.Trigger,
+                Description = $"Input for case {idx}.",
+            });
+    }
 
     //Navbar logic
     private async Task SaveProgram()
@@ -1179,14 +1216,14 @@
 
     private async Task ExecuteProgram()
     {
-        var errors = CheckErrors(localProgram);
+        //var errors = CheckErrors(localProgram);
 
-        if (errors.Count > 0)
-        {
-            Errors = errors;
-        }
-        else
-        {
+        // if (errors.Count > 0)
+        // {
+        //     Errors = errors;
+        // }
+        // else
+        // {
             //Also Exacute program after
             if (localProgram is CustomProgram customProgram)
             {
@@ -1213,7 +1250,7 @@
                     //Dont run if there are no blocks
                 }
             }
-        }
+        // }
     }
 
     private async Task BuildProgram()
@@ -1222,16 +1259,16 @@
         {
             if (customProgram.ProgramStructure.ProgramBlocks.Count() != 0)
             {
-                var errors = CheckErrors(localProgram);
+                // var errors = CheckErrors(localProgram);
 
-                if (errors.Count > 0)
-                {
-                    Errors = errors;
-                }
-                else
-                {
+                // if (errors.Count > 0)
+                // {
+                //     Errors = errors;
+                // }
+                // else
+                // {
                     await UpdateDb(localProgram);
-                }
+                // }
             }
             else
             {

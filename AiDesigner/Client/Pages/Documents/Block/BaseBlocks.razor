@@ -1,0 +1,164 @@
+﻿@page "/documentation/block/baseblocks"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Loop Blocks</h2>
+        @* IndexLoop *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">IndexLoop Block</h3>
+            <p>A loop that iterates a specified number of times.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: The trigger input for starting the loop (Type: Trigger)</li>
+                <li>LoopCount: The number of iterations for the loop (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: The trigger output for each iteration of the loop (Type: Trigger)</li>
+                <li>Index: The current index of the loop (Type: Number)</li>
+                <li>Complete: The trigger output when the loop is completed (Type: Trigger)</li>
+            </ul>
+        </div>
+
+        @* ForLoop *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">ForLoop Block</h3>
+            <p>A loop that iterates through each item in a list.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: The trigger input for starting the loop (Type: Trigger)</li>
+                <li>List: The list to loop through (Type: Object) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: The trigger output for each iteration of the loop (Type: Trigger)</li>
+                <li>CurrentItem: The current item in the list being looped through (Type: Object)</li>
+                <li>Complete: The trigger output when the loop is completed (Type: Trigger)</li>
+            </ul>
+        </div>
+
+        @* WhileLoop *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">WhileLoop Block</h3>
+            <p>A loop that continues to iterate while a condition is true.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: The trigger input for starting the loop (Type: Trigger)</li>
+                <li>Condition: The condition to be checked each iteration (Type: Boolean) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: The trigger output for each iteration of the loop (Type: Trigger)</li>
+                <li>Complete: The trigger output when the loop is completed (Type: Trigger)</li>
+            </ul>
+        </div>
+    </section>
+
+    <br />
+    <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+
+    @* Conditional *@
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Conditional Blocks</h2>
+        @* IfBlock *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">IfBlock</h3>
+            <p>A conditional block that executes different outputs based on a boolean condition.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: Triggers the IfBlock (Type: Trigger)</li>
+                <li>Condition: The condition to be checked (Type: Boolean) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>True: The trigger output when the condition is true (Type: Trigger)</li>
+                <li>False: The trigger output when the condition is false (Type: Trigger)</li>
+            </ul>
+        </div>
+    </section>
+
+    <br />
+    <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Variable Handling Blocks</h2>
+        @* SetVariable *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">SetVariable Block</h3>
+            <p>Sets the value of a variable.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: Triggers Set Variable (Type: Trigger)</li>
+                <li>Value: The value to set (Type: Object) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: Trigger output (Type: Trigger)</li>
+            </ul>
+        </div>
+        @* GetVariable *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">GetVariable Block</h3>
+            <p>Gets the value of a variable.</p>
+            <h4 class="font-bold mt-2">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Value: The value of the variable (Type: Object)</li>
+            </ul>
+        </div>
+    </section>
+
+    <br />
+<hr style="width: 100%; margin-left: auto; margin-right: auto;">
+
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Selection Blocks</h2>
+        @* Select *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Select Block</h3>
+            <p>Selects one of the inputs based on the selector value.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Selector: The index of the input to select. (Type: Number) <span class="text-red-500">*</span></li>
+                <li>Input 1: Input for case 1 (Type: Object)</li>
+                <li>Input 2: Input for case 2 (Type: Object)</li>
+                <li>... Automatically more inputs as needed</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Output: The selected input. (Type: Object)</li>
+            </ul>
+        </div>
+        @* Switch *@
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Switch Block</h3>
+            <p>Triggers different outputs based on a selector value.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trigger: The trigger input for starting the switch (Type: Trigger) <span class="text-red-500">*</span></li>
+                <li>Selector: The value to be checked. (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>DefaultOutput: The default output if no cases match. (Type: Trigger)</li>
+                <li>Case 1: Triggered for case 1. (Type: Trigger)</li>
+                <li>Case 2: Triggered for case 2. (Type: Trigger)</li>
+            </ul>
+        </div>
+    </section>
+
+    <br />
+    <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Custom Blocks</h2>
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Introducing Custom Blocks</h3>
+            <p>Custom Blocks are dynamic units that encapsulate sub-programs, enhancing the modularity and reusability of your designs.</p>
+            <p>While they function similarly to standalone programs, their true power lies in their integration capability. You can seamlessly embed them within other programs, inheriting the session context of the primary program, ensuring a streamlined execution flow.</p>
+        </div>
+    </section>
+</div>
+
+@code {
+
+}
