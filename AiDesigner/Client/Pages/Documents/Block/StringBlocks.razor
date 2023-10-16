@@ -1,0 +1,207 @@
+﻿@page "/documentation/block/stringmanipulation"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">String Manipulation Blocks</h2>
+
+        <!-- Concatenation Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Concatenation</h3>
+            <p>A block that concatenates two strings.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>String 1: The first string (Type: String) <span class="text-red-500">*</span></li>
+                <li>String 2: The second string (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Result: The concatenated string (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Length Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Length</h3>
+            <p>A block that returns the length of a string.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Length: The length of the input string (Type: Number)</li>
+            </ul>
+        </div>
+
+        <!-- Substring Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Substring</h3>
+            <p>A block that returns a substring from a given string.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+                <li>Start Index: The starting position of the substring (Type: Number) <span class="text-red-500">*</span></li>
+                <li>Length: The length of the substring (Type: Number) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Substring: The extracted substring (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Lowercase Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Lowercase</h3>
+            <p>Converts a string to lowercase.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Lowercase String: The converted lowercase string (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Uppercase Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Uppercase</h3>
+            <p>Converts a string to uppercase.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Uppercase String: The converted uppercase string (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Contains Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Contains</h3>
+            <p>Checks if a string contains a specified substring.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+                <li>Substring: The substring to search for (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Contains: Whether the string contains the substring (Type: Boolean)</li>
+            </ul>
+        </div>
+
+        <!-- Split Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Split</h3>
+            <p>A block that splits a string into an array of substrings based on a specified delimiter.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+                <li>Delimiter: The delimiter (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Substrings: The array of substrings (Type: String) [List]</li>
+            </ul>
+        </div>
+
+        <!-- Join Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Join</h3>
+            <p>A block that concatenates an array of strings into a single string with a specified separator.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Array of Strings: The array of strings (Type: String) [List] <span class="text-red-500">*</span></li>
+                <li>Separator: The separator (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Resultant String: The concatenated string (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Replace Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Replace</h3>
+            <p>A block that replaces occurrences of a specified substring with another substring.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+                <li>Search String: The substring to replace (Type: String) <span class="text-red-500">*</span></li>
+                <li>Replacement String: The replacement string (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Resultant String: The resultant string (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Trim Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Trim</h3>
+            <p>A block that removes all leading and trailing white-space characters from the current string.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Trimmed String: The trimmed string (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- IndexOf Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">IndexOf</h3>
+            <p>A block that returns the index of the first occurrence of a specified substring.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+                <li>Search String: The substring to search for (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Index: The index of the first occurrence (Type: Number)</li>
+            </ul>
+        </div>
+
+        <!-- RegularExpressionMatch Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">RegularExpressionMatch</h3>
+            <p>A block that checks if a string matches a specified regular expression pattern.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The input string (Type: String) <span class="text-red-500">*</span></li>
+                <li>Regular Expression: The regular expression (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Match Result: Whether the string matches the pattern (Type: Boolean)</li>
+                <li>Matched Groups: The groups matched by the regular expression (Type: String) [List]</li>
+            </ul>
+        </div>
+
+        <!-- Format Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Format</h3>
+            <p>A block that replaces the format items in a specified string with the string representation of specified objects.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Format String: The format string (Type: String) <span class="text-red-500">*</span></li>
+                <li>Arguments: The arguments (Type: String) [List] <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Formatted String: The formatted string (Type: String)</li>
+            </ul>
+        </div>
+
+    </section>
+</div>
+
+
+@code {
+
+}

@@ -29,8 +29,11 @@
                     <option value="Audio">Audio</option>
                     <option value="Object">Object</option>
                 </select>
-                <input id="isSessionVariable" type="checkbox" @bind="CurrentVariablet.IsSessionVariable" class="ml-2 w-6 h-6 accent-green-600 rounded ml-1" />
-                <label for="isSessionVariable" class="ml-2">Is Session Variable?</label>
+                @if (CurrentProgram != null && CurrentProgram.SupportsSessions)
+                {
+                    <input id="isSessionVariable" type="checkbox" @bind="CurrentVariablet.IsSessionVariable" class="ml-2 w-6 h-6 accent-green-600 rounded ml-1" />
+                    <label for="isSessionVariable" class="ml-2">Is Session Variable?</label>
+                }
             </div>
             <!-- Modal footer -->
             <div class="flex items-center justify-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600">
@@ -46,6 +49,9 @@
 
     [Parameter]
     public EventCallback<Variable> OnNewOutputCreated { get; set; }
+
+    [CascadingParameter(Name = "AP")]
+    public ProgramObject CurrentProgram { get; set; }
 
     public void Open()
     {

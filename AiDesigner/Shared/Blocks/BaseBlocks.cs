@@ -153,18 +153,18 @@ namespace AiDesigner.Shared.Blocks
     }
 
     //Switch
-    public class SelectBlock : Block
+    public class Select : Block
     {
-        public SelectBlock()
+        public Select()
         {
             Id = Guid.NewGuid();
-            Name = "SelectBlock";
+            Name = "Select";
             Description = "Selects one of the inputs based on the selector value.";
             Inputs = new List<Input>
         {
             new Input { Id = Guid.NewGuid(), Name = "Selector", Description = "The index of the input to select.", Type = Type.Number, IsRequired = true },
-            new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input.", Type = Type.Object, IsRequired = false },
-            new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input.", Type = Type.Object, IsRequired = false },
+            new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "Input for case 1", Type = Type.Object, IsRequired = false },
+            new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Input for case 2", Type = Type.Object, IsRequired = false },
             // ... atomaticly more inputs as needed
         };
             Outputs = new List<Output>
@@ -175,6 +175,31 @@ namespace AiDesigner.Shared.Blocks
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
+    public class Switch : Block
+    {
+        public Switch()
+        {
+            Id = Guid.NewGuid();
+            Name = "Switch";
+            Description = "Triggers different outputs based on a selector value.";
+
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Trigger", Description = "The trigger input for starting the switch", Type = Type.Trigger, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Selector", Description = "The value to be checked.", Type = Type.Number, IsRequired = true }
+    };
+
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "DefaultOutput", Description = "The default output if no cases match.", Type = Type.Trigger },
+        new Output { Id = Guid.NewGuid(), Name = "Case 1", Description = "Triggered for case 1.", Type = Type.Trigger },
+        new Output { Id = Guid.NewGuid(), Name = "Case 2", Description = "Triggered for case 2.", Type = Type.Trigger },
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
 
     //Custom block
     public class CustomBlock : Block
