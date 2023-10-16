@@ -21,15 +21,7 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            double firstNumber = Convert.ToDouble(inputs[0]);
-            double secondNumber = Convert.ToDouble(inputs[1]);
-
-            double sum = firstNumber + secondNumber;
-
-            return new List<object> { sum };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
     public class SubtractBlock : Block
@@ -50,15 +42,7 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            double firstNumber = Convert.ToDouble(inputs[0]);
-            double secondNumber = Convert.ToDouble(inputs[1]);
-
-            double difference = firstNumber - secondNumber;
-
-            return new List<object> { difference };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
     public class MultiplyBlock : Block
@@ -79,15 +63,7 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            double firstNumber = Convert.ToDouble(inputs[0]);
-            double secondNumber = Convert.ToDouble(inputs[1]);
-
-            double product = firstNumber * secondNumber;
-
-            return new List<object> { product };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
     public class DivideBlock : Block
@@ -108,20 +84,113 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            double firstNumber = Convert.ToDouble(inputs[0]);
-            double secondNumber = Convert.ToDouble(inputs[1]);
-
-            if (secondNumber == 0)
-            {
-                throw new DivideByZeroException("Cannot divide by zero.");
-            }
-
-            double quotient = firstNumber / secondNumber;
-
-            return new List<object> { quotient };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    public class ModulusBlock : Block
+    {
+        public ModulusBlock()
+        {
+            Id = Guid.NewGuid();
+            Name = "ModulusBlock";
+            Description = "Calculates the remainder of the division of the first number by the second number.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "First Number", Description = "The dividend.", Type = Type.Number, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Second Number", Description = "The divisor.", Type = Type.Number, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Remainder", Description = "The remainder of the division.", Type = Type.Number }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class PowerBlock : Block
+    {
+        public PowerBlock()
+        {
+            Id = Guid.NewGuid();
+            Name = "PowerBlock";
+            Description = "Raises the first number to the power of the second number.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Base", Description = "The base number.", Type = Type.Number, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Exponent", Description = "The exponent.", Type = Type.Number, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Result", Description = "The result of the operation.", Type = Type.Number }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class SquareRootBlock : Block
+    {
+        public SquareRootBlock()
+        {
+            Id = Guid.NewGuid();
+            Name = "SquareRootBlock";
+            Description = "Calculates the square root of a number.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Number", Description = "The number.", Type = Type.Number, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Result", Description = "The square root of the number.", Type = Type.Number }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class AbsoluteValueBlock : Block
+    {
+        public AbsoluteValueBlock()
+        {
+            Id = Guid.NewGuid();
+            Name = "AbsoluteValueBlock";
+            Description = "Calculates the absolute value of a number.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Number", Description = "The number.", Type = Type.Number, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Result", Description = "The absolute value of the number.", Type = Type.Number }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class RandomNumberBlock : Block
+    {
+        private Random _random = new Random();
+
+        public RandomNumberBlock()
+        {
+            Id = Guid.NewGuid();
+            Name = "RandomNumberBlock";
+            Description = "Generates a random number between the specified minimum and maximum values.";
+
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Min", Description = "Minimum value (inclusive).", Type = Type.Number, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Max", Description = "Maximum value (exclusive).", Type = Type.Number, IsRequired = true }
+        };
+
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Result", Description = "The generated random number.", Type = Type.Number }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
 }

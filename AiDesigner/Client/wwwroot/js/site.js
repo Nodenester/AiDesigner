@@ -94,7 +94,7 @@ window.jsPlumbInterop = {
 
         this.instance.draggable(nodes, {
             //borde ändra till detta som inställnign typ
-            grid: [currentGridSize, currentGridSize], 
+            grid: [5, 5], 
             start: function (params) {
                 var zoom = currentZoom;
                 var left = parseFloat(params.el.style.left);
@@ -108,6 +108,8 @@ window.jsPlumbInterop = {
                 var zoom = currentZoom;
                 var left = parseFloat(params.pos[0]) / zoom;
                 var top = parseFloat(params.pos[1]) / zoom;
+
+                console.log("left: " + left + " top: " + top);
 
                 params.el.style.left = left + 'px';
                 params.el.style.top = top + 'px';

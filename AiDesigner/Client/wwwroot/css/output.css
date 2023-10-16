@@ -801,6 +801,10 @@ video {
   height: 1.5rem;
 }
 
+.h-64 {
+  height: 16rem;
+}
+
 .h-8 {
   height: 2rem;
 }
@@ -913,19 +917,6 @@ video {
   width: 100%;
 }
 
-.w-max {
-  width: -moz-max-content;
-  width: max-content;
-}
-
-.w-5\/12 {
-  width: 41.666667%;
-}
-
-.w-4\/12 {
-  width: 33.333333%;
-}
-
 .max-w-2xl {
   max-width: 42rem;
 }
@@ -956,6 +947,10 @@ video {
 
 .flex-grow-0 {
   flex-grow: 0;
+}
+
+.grow {
+  flex-grow: 1;
 }
 
 .transform {
