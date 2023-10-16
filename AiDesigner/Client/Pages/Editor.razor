@@ -144,7 +144,7 @@
                         @if(_localProgram != null)
                         {
                             <div id="Input" class="node" style="left: @(_localProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(_localProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
-                                <div class="top-part dark:bg-gray-800">
+                                <div class="top-part dark:bg-gray-600">
                                     <span style="margin-left: 10px;">Input</span>
                                 </div>
                                 <div class="main-part dark:bg-gray-700">
@@ -171,7 +171,7 @@
                                 </div>
                             </div>
                             <div id="Output" class="node" style="left: @(_localProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(_localProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
-                                <div class="top-part dark:bg-gray-800">
+                                <div class="top-part dark:bg-gray-600">
                                         <span style="margin-left: 10px;">Output</span>
                                 </div>
                                 <div class="main-part dark:bg-gray-700">
@@ -200,13 +200,13 @@
                             @foreach (var node in _localProgram.ProgramStructure.ProgramBlocks)
                             {
                                 <div id="@node.Id" class="node" style="left: @(node.X.ToString() + "px"); top: @(node.Y.ToString() + "px");" @onclick="(() => SelectNode(node))">
-                                    <div class="top-part dark:bg-gray-800">
-                                        <div style="display: inline-block; margin-left: 10px;">
+                                    <div class="top-part dark:bg-gray-600">
+                                        <div style="display: inline-block; margin-left: 10px;" class="w-full">
                                             <span>@node.Block.Name</span>
                                             @if (node.Block.Name == "Get Variable")
                                             {
-                                                <div style="margin-left:-0.6rem;">
-                                                    <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, -1, 0, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                    <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, -1, 0, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="@Guid.Empty"disabled selected hidden>Select Variable</option>
                                                         @foreach (var Variable in localProgram.ProgramStructure.Variables)
                                                         {
@@ -217,8 +217,8 @@
                                             }
                                             @if (node.Block.Name == "Set Variable")
                                             {
-                                                <div style="margin-left:-0.6rem;">
-                                                    <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, 1, -1, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                    <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, 1, -1, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="@Guid.Empty" disabled selected hidden>Select Variable</option>
                                                         @foreach (var Variable in localProgram.ProgramStructure.Variables)
                                                         {
@@ -229,10 +229,10 @@
                                             }
                                             @if (node.Block.Name == "For Loop")
                                             {
-                                                <div style="margin-left:-0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem;">
                                                     @if (node.Block.Outputs[1].Type != null)
                                                     {
-                                                        <select @bind-value="node.Block.Outputs[1].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, e.Value))" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                        <select @bind-value="node.Block.Outputs[1].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, e.Value))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                             <option value="String">String</option>
                                                             <option value="Picture">Picture</option>
                                                             <option value="Number">Number</option>
@@ -243,13 +243,26 @@
                                                     }
                                                 </div>
                                             }
+                                            @if (node.Block.Name == "Set Item" || node.Block.Name == "Get Item" || node.Block.Name == "Add Item" || node.Block.Name == "Remove Item" || node.Block.Name == "Find Item")
+                                            {
+                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                    <select @bind-value="node.Block.Inputs[0].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateBlockType(node, e.Value))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                        <option value="String">String</option>
+                                                        <option value="Picture">Picture</option>
+                                                        <option value="Number">Number</option>
+                                                        <option value="Boolean">Boolean</option>
+                                                        <option value="Audio">Audio</option>
+                                                        <option value="Object">Object</option>
+                                                    </select>
+                                                </div>
+                                            }
                                             @if(node.Block.Name == "Custom Block")
                                             {
-                                                <div style="margin-left:-0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem;">
                                                     @if (node != null)
                                                     {
                                                         <select @onchange="((ChangeEventArgs e) => SelectCustomBlock(node, e.Value.ToString()))"
-                                                                class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                                class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                             <option disabled selected hidden>Select block</option>
                                                             @foreach (var CustomBlock in EAPs.Where(eap => eap is CustomBlockProgram))
                                                             {
@@ -258,6 +271,26 @@
                                                         </select>
                                                     }
                                                 </div>
+                                            }
+                                            @if (node.Block.Name == "GPT Block")
+                                            {
+                                                if(node != null)
+                                                {
+                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                    <select @bind-value="node.VariableId" @bind-value:event="oninput" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                        <option value="00000000-0000-0000-0000-000000000000">Default Model</option>
+                                                        <option value="10000000-0000-0000-0000-000000000000">ChatGPT Turbo</option>
+                                                        <option value="20000000-0000-0000-0000-000000000000">Davinci Text</option>
+                                                        <option value="30000000-0000-0000-0000-000000000000">Davinci Code</option>
+                                                        <option value="40000000-0000-0000-0000-000000000000">GPT4</option>
+                                                        <option value="50000000-0000-0000-0000-000000000000">GPT4 32k Context</option>
+                                                        <option value="60000000-0000-0000-0000-000000000000">Ada Text</option>
+                                                        <option value="70000000-0000-0000-0000-000000000000">Ada Text Embedding</option>
+                                                        <option value="80000000-0000-0000-0000-000000000000">Babbage Text</option>
+                                                        <option value="90000000-0000-0000-0000-000000000000">Text Moderation Latest</option>
+                                                    </select>
+                                                </div>
+                                                }
                                             }
                                         </div>
                                     </div>
@@ -1071,6 +1104,35 @@
             Console.WriteLine($"Invalid value: {valueStr}");
         }
     }
+
+    private void UpdateBlockType(ProgramBlock node, object value)
+    {
+        if (!Enum.IsDefined(typeof(NodeBaseApi.Version2.Type), value.ToString()))
+        {
+            Console.WriteLine($"Invalid value: {value}");
+            return;
+        }
+
+        NodeBaseApi.Version2.Type parsedType = (NodeBaseApi.Version2.Type)Enum.Parse(typeof(NodeBaseApi.Version2.Type), value.ToString());
+
+        foreach (var input in node.Block.Inputs)
+        {
+            if (input.Type != NodeBaseApi.Version2.Type.Trigger && input.Name != "Index")
+            {
+                input.Type = parsedType;
+            }
+        }
+
+        foreach (var output in node.Block.Outputs)
+        {
+            if (output.Type != NodeBaseApi.Version2.Type.Trigger)
+            {
+                output.Type = parsedType;
+            }
+        }
+    }
+
+
 
     //Navbar logic
     private async Task SaveProgram()

@@ -1,4 +1,5 @@
 ﻿using NodeBaseApi.Version2;
+using System.Text.RegularExpressions;
 using Type = NodeBaseApi.Version2.Type;
 
 namespace AiDesigner.Shared.Blocks
@@ -21,12 +22,7 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            var result = (string)inputs[0] + (string)inputs[1];
-            programStructure.OutputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
     public class Length : Block
@@ -46,12 +42,8 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            var length = ((string)inputs[0]).Length;
-            programStructure.OutputValues[Outputs[0].Id] = length;
-            return new List<object> { length };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
     }
 
     public class Substring : Block
@@ -73,12 +65,8 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            var substring = ((string)inputs[0]).Substring((int)inputs[1], (int)inputs[2]);
-            programStructure.OutputValues[Outputs[0].Id] = substring;
-            return new List<object> { substring };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
     }
 
     public class Lowercase : Block
@@ -98,12 +86,8 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            var result = ((string)inputs[0]).ToLower();
-            programStructure.OutputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
     }
 
     public class Uppercase : Block
@@ -123,12 +107,8 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
-        {
-            var result = ((string)inputs[0]).ToUpper();
-            programStructure.OutputValues[Outputs[0].Id] = result;
-            return new List<object> { result };
-        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
     }
 
     public class Contains : Block
@@ -149,12 +129,163 @@ namespace AiDesigner.Shared.Blocks
         };
         }
 
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure)
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
+    }
+
+    public class Split : Block
+    {
+        public Split()
         {
-            var contains = ((string)inputs[0]).Contains((string)inputs[1]);
-            programStructure.OutputValues[Outputs[0].Id] = contains;
-            return new List<object> { contains };
+            Id = Guid.NewGuid();
+            Name = "Split";
+            Description = "A block that splits a string into an array of substrings based on a specified delimiter.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Delimiter", Description = "The delimiter.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Substrings", Description = "The array of substrings.", Type = Type.String, IsList = true }
+    };
         }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
+    }
+
+    public class Join : Block
+    {
+        public Join()
+        {
+            Id = Guid.NewGuid();
+            Name = "Join";
+            Description = "A block that concatenates an array of strings into a single string with a specified separator.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Array of Strings", Description = "The array of strings.", Type = Type.String, IsRequired = true, IsList = true },
+        new Input { Id = Guid.NewGuid(), Name = "Separator", Description = "The separator.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Resultant String", Description = "The concatenated string.", Type = Type.String }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
+    }
+
+    public class Replace : Block
+    {
+        public Replace()
+        {
+            Id = Guid.NewGuid();
+            Name = "Replace";
+            Description = "A block that replaces occurrences of a specified substring with another substring.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Search String", Description = "The substring to replace.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Replacement String", Description = "The replacement string.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Resultant String", Description = "The resultant string.", Type = Type.String }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
+    }
+
+    public class Trim : Block
+    {
+        public Trim()
+        {
+            Id = Guid.NewGuid();
+            Name = "Trim";
+            Description = "A block that removes all leading and trailing white-space characters from the current string.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Trimmed String", Description = "The trimmed string.", Type = Type.String }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
+    }
+
+    public class IndexOf : Block
+    {
+        public IndexOf()
+        {
+            Id = Guid.NewGuid();
+            Name = "IndexOf";
+            Description = "A block that returns the index of the first occurrence of a specified substring.";
+            Inputs = new List<Input>
+    {
+        new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+        new Input { Id = Guid.NewGuid(), Name = "Search String", Description = "The substring to search for.", Type = Type.String, IsRequired = true }
+    };
+            Outputs = new List<Output>
+    {
+        new Output { Id = Guid.NewGuid(), Name = "Index", Description = "The index of the first occurrence.", Type = Type.Number }
+    };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
+    }
+
+    public class RegularExpressionMatch : Block
+    {
+        public RegularExpressionMatch()
+        {
+            Id = Guid.NewGuid();
+            Name = "RegularExpressionMatch";
+            Description = "A block that checks if a string matches a specified regular expression pattern.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The input string.", Type = Type.String, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Regular Expression", Description = "The regular expression.", Type = Type.String, IsRequired = true }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Match Result", Description = "Whether the string matches the pattern.", Type = Type.Boolean },
+            new Output { Id = Guid.NewGuid(), Name = "Matched Groups", Description = "The groups matched by the regular expression.", Type = Type.String, IsList = true }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
+    }
+
+    public class Format : Block
+    {
+        public Format()
+        {
+            Id = Guid.NewGuid();
+            Name = "Format";
+            Description = "A block that replaces the format items in a specified string with the string representation of specified objects.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Format String", Description = "The format string.", Type = Type.String, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Arguments", Description = "The arguments.", Type = Type.String, IsRequired = true, IsList = true }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Formatted String", Description = "The formatted string.", Type = Type.String }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+
     }
 
 }

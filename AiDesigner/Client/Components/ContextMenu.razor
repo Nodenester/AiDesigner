@@ -1,9 +1,11 @@
 ﻿@using AiDesigner.Shared.Blocks;
 @using Microsoft.JSInterop
 @using AiDesigner.Shared
+@using NodeExacuteApi.Data.Blocks;
+@using NodeExacuteApi.Data.Blocks.AiModels;
 @inject IJSRuntime JSRuntime
 
-<div id="contextMenu" class="context-menu hidden bg-gray-700 w-48 h-48 overflow-auto absolute z-10" style="border-radius: 10px;">
+<div id="contextMenu" class="context-menu hidden bg-gray-700 w-64 h-64 overflow-auto absolute z-10" style="border-radius: 10px;">
     <input id="searchInput" type="text" placeholder="Search..." @oninput="UpdateFilter" class="px-1 py-1 w-full border-b-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none" />
     <ul class="px-1 py-0 dark:bg-gray-700">
         @RenderItems(FilteredItems)
@@ -57,7 +59,20 @@
                 new Item { Name = "If", block = new IfBlock() },
                 new Item { Name = "Set Variable", block = new SetVariable() },
                 new Item { Name = "Get Variable", block = new GetVariable() },
+                new Item { Name = "Switch", block = new SelectBlock() },
                 new Item { Name = "Custom Block", block = new CustomBlock() },
+            }
+        },
+        new Item
+        {
+            Name = "List handeling",
+            SubItems = new List<Item>
+            {
+                new Item { Name = "Add Item", block = new AddItem() },
+                new Item { Name = "Remove Item", block = new RemoveItem() },
+                new Item { Name = "Get Item", block = new GetItem() },
+                new Item { Name = "Set Item", block = new SetItem() },
+                new Item { Name = "Find Item", block = new FindItem() },
             }
         },
         new Item
@@ -69,6 +84,14 @@
                 new Item { Name = "Or", block = new OrBlock() },
                 new Item { Name = "Not", block = new NotBlock() },
                 new Item { Name = "Xor", block = new XorBlock() },
+                new Item { Name = "Nand", block = new NandBlock() },
+                new Item { Name = "Nor", block = new NorBlock() },
+                new Item { Name = "Equality", block = new BooleanEquality() },
+                new Item { Name = "BooleanToggle", block = new BooleanToggle() },
+                new Item { Name = "ToString", block = new BooleanToString() },
+                new Item { Name = "StringToBoolean", block = new StringToBoolean() },
+                new Item { Name = "BooleanToInteger", block = new BooleanToInteger() },
+
             }
         },
         new Item
@@ -79,8 +102,12 @@
                new Item { Name = "Add", block = new AddBlock() },
                new Item { Name = "Subtract", block = new SubtractBlock() },
                new Item { Name = "Multiply", block = new MultiplyBlock() },
-               new Item { Name = "Divide", block = new AndBlock() },
-
+               new Item { Name = "Divide", block = new DivideBlock() },
+               new Item { Name = "Modulo", block = new ModulusBlock() },
+               new Item { Name = "Power", block = new PowerBlock() },
+               new Item { Name = "Square Root", block = new SquareRootBlock() },
+               new Item { Name = "Absolute", block = new AbsoluteValueBlock() },
+               new Item { Name = "Random", block = new RandomNumberBlock() },
             }
         },
         new Item
@@ -94,6 +121,63 @@
                new Item { Name = "To Lowercase", block = new Lowercase() },
                new Item { Name = "To Uppercase", block = new Uppercase() },
                new Item { Name = "Contains", block = new Contains() },
+               new Item { Name = "Split", block = new Split() },
+               new Item { Name = "Join", block = new Join() },
+               new Item { Name = "Replace", block = new Replace() },
+               new Item { Name = "Trim", block = new Trim() },
+               new Item { Name = "IndexOf", block = new IndexOf() },
+               new Item { Name = "RegularExpressionMatch", block = new RegularExpressionMatch() },
+               new Item { Name = "Format", block = new Format() },
+            }
+        },
+        new Item
+        {
+            Name = "Image Blocks",
+            SubItems = new List<Item>
+            {
+                new Item { Name = "Resize image", block = new ImageResize() },
+                new Item { Name = "Rotate image", block = new ImageRotate() },
+                new Item { Name = "Grayscale image", block = new ImageGrayscale() },
+                new Item { Name = "Depth map", block = new DepthMap() },
+                new Item { Name = "Threshold", block = new Threshold() },
+                new Item { Name = "Blur", block = new Blur() },
+                new Item { Name = "EdgeDetection", block = new EdgeDetection() },
+                new Item { Name = "ColorFilter", block = new ColorFilter() },
+                new Item { Name = "Histogram Equalization", block = new HistogramEqualization() },
+                new Item { Name = "ImageInversion", block = new ImageInversion() },
+                new Item { Name = "Simple Chroma Key", block = new SimpleChromaKey() },
+
+
+            }
+        },
+        new Item
+        {
+            Name = "Audio Blocks",
+            SubItems = new List<Item>
+            {
+                new Item { Name = "Audio Length", block = new AudioLength() },
+                new Item { Name = "Audio volume", block = new AudioVolumeChange() },
+                new Item { Name = "Audio Conversion", block = new AudioConversion() },
+                new Item { Name = "Trim audio", block = new AudioTrimming() },
+                new Item { Name = "Amplify Audio", block = new AudioAmplification() },
+
+            }
+        },
+        new Item
+        {
+            Name = "Ai models",
+            SubItems = new List<Item>
+            {      
+                new Item
+                {
+                    Name = "OpenAi api",
+                    SubItems = new List<Item>
+                    {
+                        new Item { Name = "Gpt Block", block = new GPTBlock() },
+                        new Item { Name = "Dall-E block", block = new DALLEBlock() },
+                    }
+                },
+
             }
         },
     };

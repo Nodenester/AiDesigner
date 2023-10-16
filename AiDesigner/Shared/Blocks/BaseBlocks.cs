@@ -152,6 +152,30 @@ namespace AiDesigner.Shared.Blocks
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    //Switch
+    public class SelectBlock : Block
+    {
+        public SelectBlock()
+        {
+            Id = Guid.NewGuid();
+            Name = "SelectBlock";
+            Description = "Selects one of the inputs based on the selector value.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Selector", Description = "The index of the input to select.", Type = Type.Number, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Input 1", Description = "First input.", Type = Type.Object, IsRequired = false },
+            new Input { Id = Guid.NewGuid(), Name = "Input 2", Description = "Second input.", Type = Type.Object, IsRequired = false },
+            // ... atomaticly more inputs as needed
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Output", Description = "The selected input.", Type = Type.Object }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
     //Custom block
     public class CustomBlock : Block
     {
