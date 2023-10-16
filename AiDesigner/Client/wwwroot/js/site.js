@@ -100,8 +100,8 @@ window.jsPlumbInterop = {
                 var left = parseFloat(params.el.style.left);
                 var top = parseFloat(params.el.style.top);
 
-                params.el.style.left = (left * zoom) + 'px';
-                params.el.style.top = (top * zoom) + 'px';
+                //params.el.style.left = (left * zoom) + 'px';
+                //params.el.style.top = (top * zoom) + 'px';
             },
 
             drag: throttle(function (params) {
@@ -109,10 +109,8 @@ window.jsPlumbInterop = {
                 var left = parseFloat(params.pos[0]) / zoom;
                 var top = parseFloat(params.pos[1]) / zoom;
 
-                console.log("left: " + left + " top: " + top);
-
-                params.el.style.left = left + 'px';
-                params.el.style.top = top + 'px';
+                //params.el.style.left = left + 'px';
+                //params.el.style.top = top + 'px';
 
                 // get all child elements with class Connection
                 var connections = params.el.getElementsByClassName('Connection');
@@ -173,7 +171,6 @@ window.jsPlumbInterop = {
                             // Set the connector type for the connection
                             connection.setConnector(connectorType);
                         });
-
                         // Since the connector type might have changed, request a repaint
                         jsPlumbInterop.instance.repaintEverything();
                     });
@@ -189,7 +186,6 @@ window.jsPlumbInterop = {
 
                 updateNodeLocation(refrence, nodeId, newX, newY);
             }
-
         });
     },
 
@@ -340,6 +336,9 @@ window.jsPlumbInterop = {
             el.style[p[i] + "Transform"] = s;
             el.style[p[i] + "TransformOrigin"] = oString;
         }
+        if (zoomValue != null && this.instance != null) {
+            this.instance.setZoom(zoomValue)
+        }
 
         el.style["transform"] = s;
         el.style["transformOrigin"] = oString;
@@ -358,16 +357,16 @@ window.jsPlumbInterop = {
                     var left = parseFloat(params.el.style.left);
                     var top = parseFloat(params.el.style.top);
 
-                    params.el.style.left = (left * zoom) + 'px';
-                    params.el.style.top = (top * zoom) + 'px';
+                    //params.el.style.left = (left * zoom) + 'px';
+                    //params.el.style.top = (top * zoom) + 'px';
                 },
                 drag: throttle(function (params) {
                     var zoom = currentZoom;
                     var left = parseFloat(params.pos[0]) / zoom;
                     var top = parseFloat(params.pos[1]) / zoom;
 
-                    params.el.style.left = left + 'px';
-                    params.el.style.top = top + 'px';
+                    //params.el.style.left = left + 'px';
+                    //params.el.style.top = top + 'px';
 
                     // get all child elements with class Connection
                     var connections = params.el.getElementsByClassName('Connection');
@@ -423,7 +422,6 @@ window.jsPlumbInterop = {
                                 var connectorType = ["Bezier", { curviness: 100 }];
                                 if (verticalDistance < 10 || overallDistance < 50) {
                                     connectorType = "Straight";
-                                    console.log("connector straight");
                                 }
 
                                 // Set the connector type for the connection
