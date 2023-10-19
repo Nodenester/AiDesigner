@@ -1179,7 +1179,7 @@
         node.Block.Inputs.Add(new Input
             {
                 Name = $"Input {idx}",
-                Type = NodeBaseApi.Version2.Type.Trigger,
+                Type = node.Block.Inputs[2].Type,
                 Description = $"Input for case {idx}.",
             });
     }
