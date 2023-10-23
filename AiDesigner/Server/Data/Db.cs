@@ -622,12 +622,13 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> GetArticlesConnectedToUserAsync(string userId)
         {
             const string query = @"
-                SELECT a.*, u.IsCreator, u.Rating, u.Review, u.IsFavorite, AVG(ua.Rating) as AverageRating
+                SELECT a.*, p.IsPublic, u.IsCreator, u.Rating, u.Review, u.IsFavorite, AVG(ua.Rating) as AverageRating
                 FROM Ludde.Workshop_Article a
                 INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
                 LEFT JOIN Ludde.User_Article ua ON a.Id = ua.ArticleId
+                Left JOIN Ludde.programs p ON a.ProgramId = p.Id
                 WHERE u.UserId = @UserId
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status, u.IsCreator, u.Rating, u.Review, u.IsFavorite;
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status, u.IsCreator, u.Rating, u.Review, u.IsFavorite, p.IsPublic;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -968,6 +969,66 @@ namespace AiDesigner.Server.Data
                 return null;
             }
         }
+
+        //Session stuff
+        public async Task<Guid> CreateSessionAsync(Session session)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+            INSERT INTO Ludde.sessions (SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime)
+            VALUES (@SessionId, @UserId, @ProgramId, @Variables, @SessionName, GETUTCDATE(), GETUTCDATE());
+        ";
+
+                await connection.ExecuteAsync(query, session);
+            }
+
+            return Guid.Parse(session.SessionId);
+        }
+
+        public async Task<IEnumerable<Session>> GetSessionsAsync(Guid? userId = null, Guid? programId = null)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    var query = @"
+                SELECT SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime
+                FROM Ludde.sessions
+                WHERE 1=1
+            ";
+
+                    var parameters = new DynamicParameters();
+
+                    if (userId.HasValue)
+                    {
+                        query += " AND UserId = @UserId";
+                        parameters.Add("UserId", userId);
+                    }
+
+                    if (programId.HasValue)
+                    {
+                        query += " AND ProgramId = @ProgramId";
+                        parameters.Add("ProgramId", programId);
+                    }
+
+                    return await connection.QueryAsync<Session>(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    // Handle SQL specific exceptions
+                    Console.WriteLine($"SQL Error: {sqlEx.Message} \n StackTrace: {sqlEx.StackTrace}");
+                    throw;  // Re-throw the exception so the caller is aware something went wrong
+                }
+                catch (Exception ex)
+                {
+                    // Handle general exceptions
+                    Console.WriteLine($"Error: {ex.Message} \n StackTrace: {ex.StackTrace}");
+                    throw;  // Re-throw the exception so the caller is aware something went wrong
+                }
+            }
+        }
+
 
     }
 }

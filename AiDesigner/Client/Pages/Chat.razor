@@ -67,9 +67,17 @@
         <!-- Vertical Line -->
         <div class="bg-gray-500 w-[2px] flex-grow"></div>
 
+        <!-- Session dropdown -->
+        @if (selectedProgram != null && selectedProgram.SupportsSessions)
+        {
+            <div class="mt-2">
+                <SelectSession IsDark="true" SelectSessions="setCurrentSession" ProgramId="@selectedProgram.Id.ToString()"></SelectSession>
+            </div>
+        }
+
         <!-- Button -->
         <div class="align-center mb-0 mt-auto">
-            <button class="py-1 bg-green-600 text-white rounded mt-4 px-6 h-12 w-48 hover:bg-green-700" @onclick="ExecuteProgram">
+            <button class="py-1 bg-green-600 text-white rounded @(selectedProgram != null && selectedProgram.SupportsSessions ? "mt-2" : "mt-4") px-6 h-12 w-48 hover:bg-green-700" @onclick="ExecuteProgram">
                 Execute Program
             </button>
         </div>
@@ -183,6 +191,8 @@
 
     List<object> ProgramOutput { get; set; } = new List<object>();
 
+    Session currentSession = new Session();
+
     protected override async Task OnInitializedAsync()
     {
 
@@ -208,6 +218,11 @@
                 if (true)
                 {
                     url += $"&isTest=true";
+                }
+
+                if (selectedProgram.SupportsSessions)
+                {
+                    url += $"&sessionId={currentSession.SessionId}";
                 }
 
                 try
@@ -370,5 +385,10 @@
                 selectedProgram.ProgramStructure.InputValues[inputId] = bytes;
             }
         }
+    }
+
+    private void setCurrentSession(Session session)
+    {
+        currentSession = session;
     }
 }

@@ -411,10 +411,13 @@ namespace NodeBaseApi.Version2
     }
     public class Session
     {
-        public Guid SessionId { get; set; }
-        public Guid UserId { get; set; }
-        public Guid ProgramId { get; set; }
+        public string SessionId { get; set; }
+        public string UserId { get; set; }
+        public string ProgramId { get; set; }
         public string Variables { get; set; }
+        public string SessionName { get; set; }
+        public DateTime CreatedTime { get; set; }
+        public DateTime LastEditedTime { get; set; }
     }
     public class Input
     {
@@ -496,6 +499,7 @@ namespace NodeBaseApi.Version2
         public int Downloads { get; set; } = 0;
         public int Rating { get; set; } = 0;
         public string Status { get; set; } = "Pending";
+        public bool IsPublic { get; set; } = false;
 
         // Navigation property for the relationship
         public List<ArticleImages> ArticleImages { get; set; }

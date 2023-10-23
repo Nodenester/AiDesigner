@@ -126,7 +126,7 @@
 <div class="flex flex-wrap gap-4 mt-8">
     @if (workshopArticles != null)
     {
-        @foreach (var article in workshopArticles)
+        @foreach (var article in workshopArticles.OrderBy(a => !a.IsPublic))
         {
             <div class="relative h-40 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center custom-button" style="width: 17rem;">
                 <!-- Remove Button -->
@@ -163,9 +163,12 @@
 
                     <!-- Clone Button -->
                     <div class="self-end">
+                        @if (article.IsPublic)
+                        {
                         <button @onclick="(() => CloneArticle(article.ProgramId))" class="py-1 bg-green-600 hover:bg-green-700 text-white rounded" style="margin-right: 2rem; padding-left: 1.5rem; padding-right: 1.5rem; margin-top: 2rem;">
                             Clone
                         </button>
+                        }
                     </div>
                 </div>
             </div>

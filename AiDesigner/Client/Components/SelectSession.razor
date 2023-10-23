@@ -1,0 +1,104 @@
+﻿@using AiDesigner.Client.Components
+@using AiDesigner.Client.Modals;
+@using AiDesigner.Shared.Data;
+@using Newtonsoft.Json;
+@using NodeBaseApi.Version2;
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using static AiDesigner.Client.Components.InputList;
+@inject HttpClient Http
+
+<Dropdown IsDark="@IsDark" Selected="@(selectedSession?.SessionName ?? string.Empty)" width="w-48">
+    @if (sessions != null && sessions.Count() != 0)
+    {
+        @foreach (var session in sessions)
+        {
+            <button @onclick="@(() => SelectOption(session.SessionName))"
+                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(selectedSession != null && selectedSession.SessionName == session.SessionName ? "bg-gray-600" : "") dark:hover:bg-gray-600">
+                @session.SessionName
+            </button>
+        }
+    }
+    <button @onclick="@addSession.Open" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create New Session</button>
+</Dropdown>
+
+<AiDesigner.Client.Modals.AddSession @ref="addSession" ProgramId="@ProgramId" OnNewSessionCreated="HandleSessionCreated" />
+
+@code {
+    [Parameter]
+    public string ProgramId { get; set; }
+
+    [Parameter]
+    public EventCallback<Session> SelectSessions { get; set; }
+
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    [Parameter]
+    public bool IsDark { get; set; }
+
+    public List<Session> sessions { get; set; } = new List<Session>();
+    public Session selectedSession { get; set; } = new Session { SessionName = "Session" };
+
+    AddSession addSession = new AddSession();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await GetUserSessions();
+    }
+
+    private async Task GetUserSessions()
+    {
+        if (CascAuth != null && ProgramId != null)
+        {
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    // Construct the URL with query parameters
+                    var url = $"Chat/Session/GetUserSessions?userId={userId}&programId={ProgramId}";
+
+                    try
+                    {
+                        var response = await Http.GetAsync(url);
+                        Console.WriteLine(await response.Content.ReadAsStringAsync());
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var json = await response.Content.ReadAsStringAsync();
+                            sessions = JsonConvert.DeserializeObject<List<Session>>(json);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Failed to get user sessions: {response.StatusCode}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Request error: {ex.Message}");
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    private async Task SelectOption(string sessionName)
+    {
+        selectedSession = sessions.FirstOrDefault(s => s.SessionName == sessionName);
+        await SelectSessions.InvokeAsync(selectedSession);
+    }
+
+    private void HandleSessionCreated(Session newSession)
+    {
+        sessions.Add(newSession);
+    }
+}
