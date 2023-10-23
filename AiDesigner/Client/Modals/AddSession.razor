@@ -1,0 +1,100 @@
+﻿@using NodeBaseApi.Version2;
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@inject HttpClient Http;
+
+<div class="@($"fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full {(IsModalOpen ? "block" : "hidden")}")" style="background-color: rgba(0, 0, 0, 0.5); position: fixed; z-index: 9999;">
+    <div class="relative w-full max-w-2xl max-h-full mx-auto">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+            <!-- Modal header -->
+            <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 dark:bg-gray-800">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Create Session
+                </h3>
+                <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" @onclick="Close">
+                    <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
+                </button>
+            </div>
+            <!-- Modal body -->
+            <div class="p-6 space-y-6 dark:text-gray-300 dark:bg-gray-600 dark:text-white">
+                <div class="flex flex-col space-y-2">
+                    <label for="sessionName" class="text-sm font-semibold text-gray-900 dark:text-white">Session Name:</label>
+                    <input type="text" @bind="CurrentSession.SessionName" placeholder="Session Name" class="w-full p-2 rounded dark:bg-gray-700 dark:text-white outline-none" />
+                </div>
+                <div class="flex flex-col space-y-2">
+                    <label for="sessionId" class="text-sm font-semibold text-gray-900 dark:text-white">Generated Session ID:</label>
+                    <input type="text" value="@CurrentSession.SessionId" readonly class="w-full p-2 rounded dark:bg-gray-700 dark:text-white outline-none cursor-not-allowed" />
+                </div>
+                <!-- If you want to display more fields without user input, add them similarly. -->
+            </div>
+            <!-- Modal footer -->
+            <div class="flex items-center justify-center p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600">
+                <button type="button" class="btn btn-primary px-4 py-2 text-sm font-semibold text-white bg-green-600 hover:bg-green-700 border-0 outline-none" @onclick="@HandleCreateSessionClick">Create</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    select#xyz {
+        border: none;
+    }
+</style>
+
+@code {
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    [Parameter]
+    public string ProgramId { get; set; }
+
+    private bool IsModalOpen { get; set; }
+    private Session CurrentSession { get; set; } = new Session { SessionId = Guid.NewGuid().ToString() };
+
+    [Parameter]
+    public EventCallback<Session> OnNewSessionCreated { get; set; }
+
+    public void Open()
+    {
+        CurrentSession.SessionId = Guid.NewGuid().ToString(); // Generate new Session ID each time the modal opens
+        IsModalOpen = true;
+        StateHasChanged();
+    }
+
+    public void Close()
+    {
+        IsModalOpen = false;
+        StateHasChanged();
+    }
+
+    private async Task HandleCreateSessionClick()
+    {
+        if (CascAuth != null)
+        {
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                CurrentSession.CreatedTime = DateTime.UtcNow;
+                CurrentSession.LastEditedTime = DateTime.UtcNow;
+                CurrentSession.ProgramId = ProgramId;
+                CurrentSession.UserId = userId.ToString();
+                CurrentSession.Variables = "";
+                var response = await Http.PostAsJsonAsync("Chat/Session/Create", CurrentSession);
+                if (response.IsSuccessStatusCode)
+                {
+                    await OnNewSessionCreated.InvokeAsync(CurrentSession);
+                    Close();
+                }
+                else
+                {
+                    Console.WriteLine(response.RequestMessage);
+                }
+
+            }
+        }
+        Close();
+        CurrentSession = new Session();
+    }
+}

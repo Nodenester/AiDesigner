@@ -243,5 +243,42 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+
+        //Session stuff
+        // POST api/Session/Create
+        [HttpPost("Session/Create")]
+        public async Task<ActionResult> CreateSession([FromBody] Session request)
+        {
+            try
+            {
+                var sessionId = await _dbConnection.CreateSessionAsync(request);
+                if (sessionId != Guid.Empty)
+                    return Ok(new { message = "Session created successfully.", sessionId = sessionId });
+                else
+                    return BadRequest("Failed to create session.");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+        // GET api/Session/GetUserSessions
+        [HttpGet("Session/GetUserSessions")]
+        public async Task<ActionResult<IEnumerable<Session>>> GetUserSessions([FromQuery] Guid userId, [FromQuery] Guid? programId = null)
+        {
+            try
+            {
+                var sessions = await _dbConnection.GetSessionsAsync(userId, programId);
+                return Ok(sessions);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
     }
 }
