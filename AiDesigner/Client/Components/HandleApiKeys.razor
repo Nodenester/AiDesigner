@@ -1,0 +1,94 @@
+﻿@using AiDesigner.Client.Modals;
+@using NodeBaseApi.Version2;
+@using System.Text.Json;
+@using System.Text;
+@inject HttpClient Http;
+
+<style>
+    .table-container {
+        height: 17.8rem;
+        max-height: 17.8rem;
+        overflow-y: auto;
+    }
+
+    .add-button-container {
+        position: relative;
+    }
+
+    .add-button {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+    }
+</style>
+
+<div class="table-container">
+    <table class="Table w-full rounded-lg bg-gray-700">
+        <thead>
+            <tr class="">
+                <th class="py-2 px-4 text-left">Api key</th>
+                <th class="py-2 px-2 text-left">Key</th>
+                <th class="py-2 px-4 text-left">Created</th>
+                <th class="py-2 px-4 text-right pr-4 add-button-container">
+                    <button @onclick="AddApiKey" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-1 px-4 rounded add-button">
+                        +
+                    </button>
+                </th>
+            </tr>
+        </thead>
+        <tbody class="">
+            @foreach (var key in ApiKeys)
+            {
+                <tr class="border-t border-gray-500">
+                    <td class="py-2 px-4">@key.Name</td>
+                    <td class="py-2 px-2">@key.apiKey</td>
+                    <td class="py-2 px-4">@key.Created</td>
+                    <td class="py-2 pr-4 text-right">
+                        <button @onclick="(() => RemoveApiKey(key))" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded">
+                            x
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<AddApiKey @ref="addApiKey" />
+
+@code {
+    [CascadingParameter(Name = "ApiKeys")]
+    public List<ApiKey> ApiKeys { get; set; }
+
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    private AddApiKey addApiKey { get; set; }
+
+    private void AddApiKey()
+    {
+        addApiKey.Open();
+    }
+
+    private async Task RemoveApiKey(ApiKey key)
+    {
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            var response = await Http.DeleteAsync($"Chat/ApiKey/Delete/{key.apiKey}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                ApiKeys.Remove(key);
+                StateHasChanged();
+            }
+            else
+            {
+                // Log or display the error
+                Console.WriteLine($"Failed to remove article connection. Status code: {response.StatusCode}");
+            }
+        }
+    }
+}

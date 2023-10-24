@@ -881,15 +881,15 @@ namespace AiDesigner.Server.Data
                 return null;
             }
         }
-        public async Task<int> DeleteApiKeyAsync(string apiKey, string userId)
+        public async Task<int> DeleteApiKeyAsync(string apiKey)
         {
             var query = @"
                 DELETE FROM Ludde.ApiKeys
-                WHERE ApiKey = @ApiKey AND UserId = @UserId;
+                WHERE ApiKey = @ApiKey;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
-            return await connection.ExecuteAsync(query, new { ApiKey = apiKey, UserId = userId });
+            return await connection.ExecuteAsync(query, new { ApiKey = apiKey });
         }
 
         //Call handeling
@@ -1029,6 +1029,37 @@ namespace AiDesigner.Server.Data
             }
         }
 
+        public async Task<int> DeleteSessionAsync(string sessionId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    var query = @"
+                DELETE FROM Ludde.sessions
+                WHERE SessionId = @SessionId;
+            ";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("SessionId", sessionId);
+
+                    var affectedRows = await connection.ExecuteAsync(query, parameters);
+                    return affectedRows;  // This will return the number of rows affected by the DELETE statement.
+                }
+                catch (SqlException sqlEx)
+                {
+                    // Handle SQL specific exceptions
+                    Console.WriteLine($"SQL Error: {sqlEx.Message} \n StackTrace: {sqlEx.StackTrace}");
+                    throw;  // Re-throw the exception so the caller is aware something went wrong
+                }
+                catch (Exception ex)
+                {
+                    // Handle general exceptions
+                    Console.WriteLine($"Error: {ex.Message} \n StackTrace: {ex.StackTrace}");
+                    throw;  // Re-throw the exception so the caller is aware something went wrong
+                }
+            }
+        }
 
     }
 }

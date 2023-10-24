@@ -9,11 +9,9 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http;
 
-<AddApiKey @ref="addApiKey" />
-
-<div class="container dark:bg-gray-600 w-full">
-    <div class="" style="margin-inline: -0.7rem;">
-        <div style="display: flex; justify-content: space-between;">
+<div class="dark:bg-gray-600">
+    <div class="" style="width: 100% !important;">
+        <div style="space-between;">
             <RadzenCard class="w-full mb-4 dark:bg-gray-700 rounded-lg rz-shadow-0" Style="display: flex; align-items: center; gap: 0.5rem;">
                 <div style="display: flex; gap: 0.5rem;" class="w-1/2">
                     <Dropdown @ref="dropdown" Selected="@SelectedApi" width="w-48">
@@ -23,7 +21,6 @@
                         {
                             <button @onclick="@(() => SelectOption(apiKey.Name))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == apiKey.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@apiKey.Name</button>
                         }
-                        <button @onclick="AddApiKey" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create ApiKey</button>
                     </Dropdown>
                     <Dropdown @ref="programdropdown" Selected="@SelectedProgram" width="w-48">
                         <button @onclick="@(() => SelectProgram("All"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
@@ -48,7 +45,7 @@
             </RadzenCard>
         </div>
 
-        <RadzenChart Style="height: 32.125rem !important;" class="dark:bg-gray-700 rounded-lg">
+        <RadzenChart Style="height: 28.4rem !important;" class="dark:bg-gray-700 rounded-lg">
             <RadzenColumnSeries Data="@ShowCalls.ToArray()" CategoryProperty="Date" Title="Call Count" ValueProperty="CallCount">
                 <RadzenSeriesDataLabels Visible="@showDataLabels" />
             </RadzenColumnSeries>
@@ -85,7 +82,6 @@
     [CascadingParameter(Name = "EAPs")]
     public List<ProgramObject> EAPs { get; set; }
 
-    private AddApiKey addApiKey { get; set; }
     private List<Call> Calls { get; set; }
     private List<Call> currentCalls { get; set; }
 
@@ -148,11 +144,6 @@
         programdropdown.ToggleDropdown();
         SelectedProgram = program;
         SetCurrentCalls();
-    }
-
-    private void AddApiKey()
-    {
-        addApiKey.Open();
     }
 
     private async Task GetCalls()

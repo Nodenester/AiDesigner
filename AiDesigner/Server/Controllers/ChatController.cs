@@ -188,7 +188,6 @@ namespace NodeBaseApi.Controllers
             }
         }
 
-
         //ApiKeyStuff
         // POST api/Chat/ApiKey/Create
         [HttpPost("ApiKey/Create")]
@@ -225,13 +224,13 @@ namespace NodeBaseApi.Controllers
             }
         }
 
-        // DELETE api/Chat/ApiKey/Delete
-        [HttpDelete("ApiKey/Delete")]
-        public async Task<ActionResult> Delete([FromBody] ApiKey request)
+        // DELETE Chat/ApiKey/Delete/{id}
+        [HttpDelete("ApiKey/Delete/{id}")]
+        public async Task<ActionResult> Delete(string id)
         {
             try
             {
-                var affectedRows = await _dbConnection.DeleteApiKeyAsync(request.apiKey, request.UserId);
+                var affectedRows = await _dbConnection.DeleteApiKeyAsync(id);
                 if (affectedRows > 0)
                     return Ok("API Key deleted successfully.");
                 else
@@ -272,6 +271,25 @@ namespace NodeBaseApi.Controllers
             {
                 var sessions = await _dbConnection.GetSessionsAsync(userId, programId);
                 return Ok(sessions);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+        // DELETE api/Session/Delete/{sessionId}
+        [HttpDelete("Session/Delete/{sessionId}")]
+        public async Task<ActionResult> DeleteSession(string sessionId)
+        {
+            try
+            {
+                var affectedRows = await _dbConnection.DeleteSessionAsync(sessionId);
+                if (affectedRows > 0)
+                    return Ok("Session deleted successfully.");
+                else
+                    return BadRequest("Failed to delete session.");
             }
             catch (Exception ex)
             {

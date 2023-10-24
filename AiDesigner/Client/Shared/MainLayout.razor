@@ -18,7 +18,7 @@
     <CascadingValue Value="@APs" Name="APs">
         <CascadingValue Value="@AP" Name="AP">
             <div class="page h-screen flex">
-                @if (Title == "home" || Title == "library")
+                @if (Title == "home" || Title == "library" || Title == "statistics")
                 {
                     <div class="flex-none w-48">
                         <NavMenu />
@@ -43,7 +43,7 @@
                         }
 
                         @* Should documentation seen top nav menu? *@
-                        @if (Title != "home" && Title != "library" && Title != "editor" && !Title.Contains("documentation"))
+                        @if (Title != "home" && Title != "library" && Title != "editor" && Title != "statistics" && !Title.Contains("documentation"))
                         {
                             <div class="text-lg top-row px-3 py-2 bg-white dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; ">
                                 <div class="container mx-auto sm:px-4">
@@ -117,7 +117,7 @@
                             </CascadingValue>
                         </CascadingValue>
 
-                        @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page")
+                            @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics")
                         {
                             <Footer></Footer>
                         }
