@@ -14,8 +14,16 @@
         @foreach (var session in sessions)
         {
             <button @onclick="@(() => SelectOption(session.SessionName))"
-                    class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(selectedSession != null && selectedSession.SessionName == session.SessionName ? "bg-gray-600" : "") dark:hover:bg-gray-600">
-                @session.SessionName
+                    class="button-container block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 flex justify-between items-center @(selectedSession != null && selectedSession.SessionName == session.SessionName ? "bg-gray-600" : "") dark:hover:bg-gray-600">
+
+                <!-- Session Name with ellipsis overflow -->
+                <span class="session-name">@session.SessionName</span>
+
+                <!-- Close button (Initially hidden but shows on hover) -->
+                <span class="close-button ml-4">
+                    <button @onclick="@(() => RemoveSession(session))" @onclick:stopPropagation="true" class="px-2 rounded-full text-white text-lg">x</button>
+                </span>
+
             </button>
         }
     }
@@ -23,6 +31,31 @@
 </Dropdown>
 
 <AiDesigner.Client.Modals.AddSession @ref="addSession" ProgramId="@ProgramId" OnNewSessionCreated="HandleSessionCreated" />
+
+<style>
+    /* styles.css or wherever your styles are defined */
+
+    .button-container {
+        position: relative;
+    }
+
+        .button-container:hover .close-button {
+            opacity: 1 !important;
+        }
+
+    .close-button {
+        opacity: 0;
+        transition: opacity 0.2s;
+    }
+
+    .session-name {
+        flex-grow: 1;
+        max-width: calc(100% - 50px); /* adjust the value as necessary to account for the width of the close button and other elements */
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+</style>
 
 @code {
     [Parameter]
@@ -45,6 +78,26 @@
     protected override async Task OnParametersSetAsync()
     {
         await GetUserSessions();
+    }
+
+    private async Task SelectOption(string sessionName)
+    {
+        selectedSession = sessions.FirstOrDefault(s => s.SessionName == sessionName);
+        await SelectSessions.InvokeAsync(selectedSession);
+    }
+
+    private void HandleSessionCreated(Session newSession)
+    {
+        sessions.Add(newSession);
+    }
+
+    private async Task RemoveSession(Session session)
+    {
+        var response = await Http.DeleteAsync($"Chat/Session/Delete/{session.SessionId}");
+        if (response.IsSuccessStatusCode)
+        {
+            sessions.Remove(session);
+        }
     }
 
     private async Task GetUserSessions()
@@ -91,14 +144,4 @@
         }
     }
 
-    private async Task SelectOption(string sessionName)
-    {
-        selectedSession = sessions.FirstOrDefault(s => s.SessionName == sessionName);
-        await SelectSessions.InvokeAsync(selectedSession);
-    }
-
-    private void HandleSessionCreated(Session newSession)
-    {
-        sessions.Add(newSession);
-    }
 }

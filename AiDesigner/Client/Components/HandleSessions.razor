@@ -1,0 +1,124 @@
+﻿@using AiDesigner.Client.Modals;
+@using Newtonsoft.Json;
+@using NodeBaseApi.Version2;
+@using System.Text.Json;
+@using System.Text;
+@inject HttpClient Http;
+
+<style>
+    .table-container {
+        height: 17.8rem;
+        max-height: 17.8rem;
+        overflow-y: auto;
+    }
+
+    .add-button-container {
+        position: relative;
+    }
+
+    .add-button {
+        position: absolute;
+        top: 50%;
+        right: 10px;
+        transform: translateY(-50%);
+    }
+</style>
+
+<div class="table-container">
+    <table class="Table w-full rounded-lg bg-gray-700">
+        <thead>
+            <tr class="">
+                <th class="py-2 px-4 text-left">Session</th>
+                <th class="py-2 px-2 text-left">Key</th>
+                <th class="py-2 px-4 text-left">Created</th>
+                <th class="py-2 px-4 text-right pr-4 add-button-container">
+                </th>
+            </tr>
+        </thead>
+        <tbody class="">
+            @foreach (var session in sessions)
+            {
+                <tr class="border-t border-gray-500">
+                    <td class="py-2 px-4">@session.SessionName</td>
+                    <td class="py-2 px-2">@session.SessionId</td>
+                    <td class="py-2 px-4">@session.CreatedTime</td>
+                    <td class="py-2 pr-4 text-right">
+                        <button @onclick="(() => RemoveSession(session))" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-1 px-3 rounded">
+                            x
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<AddSession @ref="addSession" />
+
+@code {
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    public List<Session> sessions { get; set; } = new List<Session>();
+
+    private AddSession addSession { get; set; }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await GetUserSessions();
+    }
+
+    private void AddSession()
+    {
+        addSession.Open();
+    }
+
+    private async Task RemoveSession(Session session)
+    {
+        var response = await Http.DeleteAsync($"Chat/Session/Delete/{session.SessionId}");
+        if (response.IsSuccessStatusCode)
+        {
+            sessions.Remove(session);
+        }
+    }
+
+    private async Task GetUserSessions()
+    {
+        if (CascAuth != null)
+        {
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    // Construct the URL with query parameters
+                    var url = $"Chat/Session/GetUserSessions?userId={userId}";
+
+                    try
+                    {
+                        var response = await Http.GetAsync(url);
+                        Console.WriteLine(await response.Content.ReadAsStringAsync());
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var json = await response.Content.ReadAsStringAsync();
+                            sessions = JsonConvert.DeserializeObject<List<Session>>(json);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Failed to get user sessions: {response.StatusCode}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Request error: {ex.Message}");
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+            }
+        }
+    }
+}
