@@ -94,6 +94,7 @@
                     <ul class="list-disc list-inside text-gray-600 dark:text-gray-300">
                         <li><strong>Author:</strong> @SelectedArticle.AuthorName</li>
                         <li><strong>Type:</strong> @SelectedArticle.Type</li>
+                        <li><strong>Public:</strong> @SelectedArticle.IsPublic</li>
                         <li><strong>Created:</strong> @SelectedArticle.Created.ToShortDateString() </li>
                         <li><strong>Downloads:</strong> @SelectedArticle.Downloads</li>
                     </ul>
@@ -178,6 +179,10 @@
                     IsFavorite = false
                 };
             var response = await Http.PostAsJsonAsync(requestUri, userArticle);
+            if (response.IsSuccessStatusCode)
+            {
+                VaultedArticles.Add(SelectedArticle);
+            }
         }
     }
 

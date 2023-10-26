@@ -19,7 +19,7 @@
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
                         <!-- Add Image Here -->
 @*                         <AiDesigner.Client.Components.ShowImage ImageData="article.ProgramImage"></AiDesigner.Client.Components.ShowImage>
- *@                     <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 260px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" loading="lazy" />
+*@                      <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
                      <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
                         <p class="w-full text-left dark:text-white ml-4">@article.AuthorName</p>
                         <br />
@@ -45,7 +45,7 @@
                 {
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center">
                         <!-- Placeholder for Image -->
-                        <div style="width: 100%; height: 260px; border-radius: 4px; margin-bottom: 8px;" class="bg-gray-700"></div>
+                        <div style="width: 100%; height: 16.25rem; border-radius: 0.25rem; margin-bottom: 0.5rem;" class="bg-gray-700"></div>
 
                         <!-- Placeholder for Title -->
                         <div class="w-1/3 bg-gray-300 dark:bg-gray-600 h-6 mb-2 ml-4 self-start"></div>

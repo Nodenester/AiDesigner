@@ -545,6 +545,44 @@ namespace NodeBaseApi.Version2
         public string Name { get; set; }
     }
 
+    //Tutoraial stuff
+    public class Tutorial
+    {
+        public int TutorialId { get; set; }
+        public string Name { get; set; }
+        public string Text { get; set; }
+        public byte[] Image { get; set; }
+        public bool IsCompleted { get; set; } // User-specific
+        public DateTime? CompletionDate { get; set; } // User-specific
+    }
+
+    public class UserTutorial
+    {
+        public string UserId { get; set; }
+        public int TutorialId { get; set; }
+        public bool IsCompleted { get; set; }
+        public DateTime CompletionDate { get; set; }
+    }
+
+    //chache stuff
+    public class ChacheAnalytics
+    {
+        public List<DataItem> programItems { get; set; }
+        public List<DataItem> sourceItems { get; set; }
+        public List<Call> last100Calls { get; set; }
+        public List<WorkshopArticle> workshopArticles { get; set; }
+        public List<NewsArticle> newsArticle { get; set; }
+    }
+
+    public class DataItem
+    {
+        public string ProgramShortcut { get; set; }
+        public string Program { get; set; }
+        public double Cost { get; set; }
+    }
+
+
+
     //.netStuuff
 
 

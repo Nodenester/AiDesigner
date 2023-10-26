@@ -103,13 +103,17 @@
                         </div>
                     }
                     <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
-                        <CascadingValue Value="@addApiKey" Name="addApiKey">
-                            <CascadingValue Value="@apiKeys" Name="ApiKeys">
-                                <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
-                                    <CascadingValue Value="@passingArticle" Name="passingArticle">
-                                        <CascadingValue Value=@setTokens Name="Settokens">
-                                            <CascadingValue Value=@NewAps Name="NewAps">
-                                                @Body
+                        <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
+                            <CascadingValue Value="@analytics" Name="analytics"> 
+                                <CascadingValue Value="@addApiKey" Name="addApiKey">
+                                    <CascadingValue Value="@apiKeys" Name="ApiKeys">
+                                        <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                                            <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                                <CascadingValue Value=@setTokens Name="Settokens">
+                                                    <CascadingValue Value=@NewAps Name="NewAps">
+                                                        @Body
+                                                    </CascadingValue>
+                                                </CascadingValue>
                                             </CascadingValue>
                                         </CascadingValue>
                                     </CascadingValue>
@@ -245,11 +249,15 @@
     public WorkshopArticle passingArticle;
     private List<ApiKey> apiKeys = new List<ApiKey>();
 
+    public ChacheAnalytics analytics = new ChacheAnalytics();
+
     public int CurrentTokens { get; set; } = 0;
 
     public AuthenticationState AuthState { get; set; }
 
     private bool isDarkMode = true;
+
+    public EventCallback<ChacheAnalytics> setAnalytic => EventCallback.Factory.Create<ChacheAnalytics>(this, SetAnalytic);
 
     public EventCallback<ProgramObject> NewAps => EventCallback.Factory.Create<ProgramObject>(this, AddAps);
 
@@ -260,6 +268,30 @@
     public EventCallback<WorkshopArticle> setPassingArticle => EventCallback.Factory.Create<WorkshopArticle>(this, SetPassingArticle);
 
     public EventCallback<ApiKey> addApiKey => EventCallback.Factory.Create<ApiKey>(this, AddApiKey);
+
+    public void SetAnalytic(ChacheAnalytics Analytics)
+    {
+        if (Analytics.last100Calls != null)
+        {
+            analytics.last100Calls = Analytics.last100Calls;
+        }
+        if (Analytics.programItems != null)
+        {
+            analytics.programItems = Analytics.programItems;
+        }
+        if (Analytics.sourceItems != null)
+        {
+            analytics.sourceItems = Analytics.sourceItems;
+        }
+        if (Analytics.workshopArticles != null)
+        {
+            analytics.workshopArticles = Analytics.workshopArticles;
+        }
+        if (Analytics.newsArticle != null)
+        {
+            analytics.newsArticle = Analytics.newsArticle;
+        }
+    }
 
     public void SetTokens(int tokens)
     {

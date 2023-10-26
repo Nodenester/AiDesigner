@@ -1,4 +1,5 @@
 ﻿@page "/home"
+@using AiDesigner.Client.Components
 @using Newtonsoft.Json;
 @using Microsoft.AspNetCore.Authorization;
 @using NodeBaseApi.Version2;
@@ -10,12 +11,32 @@
 <PageTitle>Home</PageTitle>
 
 <div class="flex justify-between h-full">
-    <div class="self-end dark:bg-gray-600 rounded-lg h-full flex flex-col">
-        <!-- top part -->
-        <div class="flex-grow dark:bg-gray-600 rounded-lg w-full">
-            <AiDesigner.Client.Components.CallChart ></AiDesigner.Client.Components.CallChart>
+    <div class="self-end dark:bg-gray-600 rounded-lg flex flex-col">
+        <div class="dark:bg-gray-600 rounded-lg w-full mb-4 flex space-x-4">
+            <div class="flex-grow p-0 dark:bg-gray-700 rounded-lg">
+            </div>
+            <div class="flex-shrink-0 p-0 dark:bg-gray-700 rounded-lg">
+                @if(Calls != null)
+                {
+                    <AiDesigner.Client.Components.LatestUses Calls="@Latest100Calls" />
+                }
+                else
+                {
+                    <AiDesigner.Client.Components.LatestUses />
+                }
+            </div>
+
+            <div class=" w-1/6 flex-shrink-0 flex justify-center dark:bg-gray-700 rounded-lg">
+                @if(Calls != null)
+                {
+                    <AiDesigner.Client.Components.CallPieCharts Calls="@Calls" />
+                }
+                else
+                {
+                    <AiDesigner.Client.Components.CallPieCharts />
+                }
+            </div>
         </div>
-      <!-- bottom part -->
         <div class="flex flex-col items-start align-baseline mb-0 dark:bg-gray-700 rounded-lg">
             <div class="flex flex-nowrap gap-3 m-3">
                 @if(EAPs.Count() != 0)
@@ -77,9 +98,9 @@
                         </div>
                     }
                 }
-                @if (Articles != null)
+                @if (analytics.workshopArticles != null)
                 {
-                    @foreach (var article in Articles)
+                    @foreach (var article in analytics.workshopArticles)
                     {
                         <button @onclick="() => OpenWorkshopArticle(article)" class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-center">
                             <!-- Add Image Here -->
@@ -124,9 +145,9 @@
         <!-- News Section -->
         <div class="text-center p-4 overflow-y-auto">
             <p class="text-lg font-semibold mb-4">Latest News</p>
-            @if (LatestArticles != null)
+            @if (analytics.newsArticle != null)
             {
-                @foreach (var article in LatestArticles)
+                @foreach (var article in analytics.newsArticle)
                 {
                     <div class="mb-2">
                         <button class="w-full h-auto p-2 rounded-lg shadow hover:shadow-lg transition
@@ -172,19 +193,71 @@
     [CascadingParameter(Name = "NewAps")]
     protected EventCallback<ProgramObject> NewAps { get; set; }
 
+    [CascadingParameter(Name = "analytics")]
+    public ChacheAnalytics analytics { get; set; }
+
+    [CascadingParameter(Name = "setAnalytics")]
+    public EventCallback<ChacheAnalytics> setAnalytics { get; set; }
+
+
     private List<NewsArticle> LatestArticles;
     private NewsArticle selectedArticle;
     private List<WorkshopArticle> Articles;
+    private List<Call> Calls;
+    private List<Call> Latest100Calls => Calls.OrderByDescending(call => call.EndTime).Take(100).ToList();
 
     protected override async Task OnInitializedAsync()
     {
-        if (LatestArticles == null)
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
         {
-            await GetLatestNews();
-        }
-        if (Articles == null)
-        {
-            await GetLatestThreeArticles();
+            if (analytics.newsArticle != null && analytics.newsArticle.Count() != 0 && selectedArticle == null)
+            {
+                selectedArticle = analytics.newsArticle[0];
+                Console.WriteLine(selectedArticle.Title);
+            }
+            // Check whether everything is already loaded
+            if ((analytics != null && analytics.newsArticle != null && analytics.workshopArticles != null
+                              && analytics.newsArticle.Count() != 0 && analytics.workshopArticles.Count() != 0))
+            {
+                GetLatestCalls();
+                return;  // Exit early if everything's loaded.
+            }
+
+            List<Task> tasks = new List<Task>();
+
+            // Load Calls if necessary
+            if (Calls == null)
+            {
+                //GetLatestCalls();
+                tasks.Add(GetLatestCalls());
+            }
+
+            // Load LatestArticles if necessary
+            if (LatestArticles == null)
+            {
+                tasks.Add(GetLatestNews());
+            }
+
+            // Load Articles if necessary
+            if (Articles == null)
+            {
+                tasks.Add(GetLatestThreeArticles());
+            }
+
+            await Task.WhenAll(tasks);
+
+            // Only set analytics if all data is available and hasn't been set before
+            if (LatestArticles != null && Articles != null && Calls != null)
+            {
+                await setAnalytics.InvokeAsync(new ChacheAnalytics()
+                    {
+                        workshopArticles = Articles,
+                        newsArticle = LatestArticles,
+                    });
+            }
         }
     }
 
@@ -256,6 +329,7 @@
             Console.WriteLine($"An unknown exception occurred while getting latest 3 articles: {e.Message}");
         }
     }
+
     private async Task GetLatestNews()
     {
         try
@@ -279,6 +353,47 @@
         catch (Exception ex)
         {
             Console.WriteLine($"An error occurred while fetching articles: {ex.Message}");
+        }
+    }
+
+    private async Task GetLatestCalls()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            var response = await Http.GetAsync($"Chat/Call/GetByUserId/{userId}");
+            if (response.IsSuccessStatusCode)
+            {
+                var responseBody = await response.Content.ReadAsStringAsync();
+
+                var allCalls = JsonConvert.DeserializeObject<List<Call>>(responseBody);
+
+                allCalls.ForEach(call =>
+                {
+                    if (call.StartTime.HasValue)
+                    {
+                        call.StartTime = call.StartTime.Value.ToLocalTime();
+                    }
+                    if (call.EndTime.HasValue)
+                    {
+                        call.EndTime = call.EndTime.Value.ToLocalTime();
+                    }
+                });
+
+                Calls = allCalls
+                    .GroupBy(call => call.StartTime)
+                    .Select(group => group.First())
+                    .ToList();
+
+                StateHasChanged();
+            }
+            else
+            {
+                var errorBody = await response.Content.ReadAsStringAsync();
+                Console.WriteLine(errorBody);  // Log the error response body to see what's being returned
+            }
         }
     }
 }

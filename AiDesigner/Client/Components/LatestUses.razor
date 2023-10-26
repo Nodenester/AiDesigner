@@ -1,0 +1,75 @@
+﻿@using AiDesigner.Client.Modals;
+@using NodeBaseApi.Version2;
+@using System.Text.Json;
+@using System.Text;
+@inject HttpClient Http;
+
+<style>
+    .table-container {
+        overflow-y: scroll;
+        overflow-x: hidden;
+        max-height: 35rem;
+        position: relative;
+    }
+</style>
+
+<h3 class="text-xl font-semibold px-3 py-2 rounded-md shadow-md">Requests</h3>
+<div class="table-container h-full w-56">
+    <table class="Table rounded-lg bg-gray-700">
+        <thead>
+            <tr class="">
+                <th class="py-2 px-2 text-left">Source</th>
+                <th class="py-2 px-2 text-left">Cost</th>
+                <th class="py-2 px-2 text-left">Done</th>
+            </tr>
+        </thead>
+        <tbody class="">
+            @if (SaveCalls != null && SaveCalls.last100Calls != null)
+            {
+                @foreach (var call in SaveCalls.last100Calls)
+                {
+                    <tr class="border-t border-gray-500">
+                        @if (call.IsTest.GetValueOrDefault())
+                        {
+                            <td class="py-2 px-2">Local</td>
+                        }
+                        else
+                        {
+                            <td class="py-2 px-2">Api</td>
+                        }
+                        <td class="py-2 px-2">@call.Cost</td>
+                        <td class="py-2 px-2">@call.EndTime.Value.ToShortDateString()</td>
+                    </tr>
+                }
+            }
+        </tbody>
+    </table>
+</div>
+
+
+@code {
+    [Parameter]
+    public List<Call> Calls { get; set; } = new List<Call>();
+
+    [CascadingParameter(Name = "analytics")]
+    public ChacheAnalytics SaveCalls { get; set; }
+
+    [CascadingParameter(Name = "setAnalytics")]
+    public EventCallback<ChacheAnalytics> SettCalls { get; set; }
+
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    bool isLoaded = false;
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Calls.Count() != 0 && !isLoaded)
+        {
+            await SettCalls.InvokeAsync(new ChacheAnalytics()
+                {
+                    last100Calls = Calls
+                });
+            isLoaded = true;
+        }
+    }
+}

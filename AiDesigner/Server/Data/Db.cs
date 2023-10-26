@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Data;
+using System.Data.Common;
 using System.Text;
 using AiDesigner.Shared.Data;
 using Azure;
 using Dapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using MySql.Data.MySqlClient;
 using Newtonsoft.Json;
@@ -377,9 +379,10 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> SearchArticlesAsync(int start, int end, string searchTerm = null, string searchClass = null, string type = null)
         {
             StringBuilder query = new StringBuilder(@"
-        SELECT a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
+        SELECT a.*, p.IsPublic, AVG(ISNULL(u.Rating, 0)) as AverageRating
         FROM Ludde.Workshop_Article a
         LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+        Left JOIN Ludde.programs p ON a.ProgramId = p.Id
         WHERE 1=1 AND Status = 'Accepted'"
             );
 
@@ -403,7 +406,7 @@ namespace AiDesigner.Server.Data
             }
 
             query.Append(@"
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, p.IsPublic
                 ORDER BY a.Created DESC
                 OFFSET @Start ROWS
                 FETCH NEXT (@End - @Start) ROWS ONLY;"
@@ -715,16 +718,30 @@ namespace AiDesigner.Server.Data
         public async Task ConnectArticleToUserAsync(UserArticle userArticle)
         {
             var query = @"
-                IF NOT EXISTS (SELECT 1 FROM Ludde.User_Article WHERE UserId = @UserId AND ArticleId = @ArticleId)
-                BEGIN
-                    INSERT INTO Ludde.User_Article (UserId, ArticleId, IsCreator, Rating, Review, IsFavorite)
-                    VALUES (@UserId, @ArticleId, @IsCreator, @Rating, @Review, @IsFavorite);
-                END
-            ";
+        IF NOT EXISTS (SELECT 1 FROM Ludde.User_Article WHERE UserId = @UserId AND ArticleId = @ArticleId)
+        BEGIN
+            INSERT INTO Ludde.User_Article (UserId, ArticleId, IsCreator, Rating, Review, IsFavorite)
+            VALUES (@UserId, @ArticleId, @IsCreator, @Rating, @Review, @IsFavorite);
+            
+            -- Increase the downloads count for the article by 1
+            UPDATE Ludde.Workshop_Article
+            SET Downloads = Downloads + 1
+            WHERE Id = @ArticleId;
+        END
+    ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
-            await connection.ExecuteAsync(query, new { UserId = userArticle.UserId, ArticleId = userArticle.ArticleId, IsCreator = userArticle.IsCreator, Rating = userArticle.Rating, Review = userArticle.Review, IsFavorite = userArticle.IsFavorite });
+            await connection.ExecuteAsync(query, new
+            {
+                UserId = userArticle.UserId,
+                ArticleId = userArticle.ArticleId,
+                IsCreator = userArticle.IsCreator,
+                Rating = userArticle.Rating,
+                Review = userArticle.Review,
+                IsFavorite = userArticle.IsFavorite
+            });
         }
+
         public async Task UpdateUserArticleAsync(UserArticle userArticle)
         {
             var query = @"
@@ -738,9 +755,18 @@ namespace AiDesigner.Server.Data
         public async Task<string> RemoveUserArticleAsync(string userId, string articleId)
         {
             var query = @"
-                DELETE FROM Ludde.User_Article 
-                WHERE UserId = @UserId AND ArticleId = @ArticleId;
-            ";
+        BEGIN TRANSACTION
+
+        DELETE FROM Ludde.User_Article 
+        WHERE UserId = @UserId AND ArticleId = @ArticleId;
+
+        -- Decrease the downloads count for the article by 1
+        UPDATE Ludde.Workshop_Article
+        SET Downloads = CASE WHEN Downloads > 0 THEN Downloads - 1 ELSE 0 END
+        WHERE Id = @ArticleId;
+
+        COMMIT
+    ";
 
             try
             {
@@ -919,7 +945,7 @@ namespace AiDesigner.Server.Data
                 FROM
                     UserCalls
                 WHERE
-                    RowNum <= 200;
+                    RowNum <= 5000;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -1060,6 +1086,180 @@ namespace AiDesigner.Server.Data
                 }
             }
         }
+
+        // tutorial stuff
+        public async Task<IEnumerable<Tutorial>> GetUncompletedTutorialsForUserAsync(string userId)
+        {
+            var query = @"
+        SELECT t.*
+        FROM Tutorials t
+        LEFT JOIN UserTutorials ut ON t.TutorialId = ut.TutorialId AND ut.UserId = @UserId
+        WHERE ut.UserId IS NULL OR ut.IsCompleted = 0;
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                return await connection.QueryAsync<Tutorial>(query, new { UserId = userId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<int> MarkTutorialAsCompletedForUserAsync(int tutorialId, string userId)
+        {
+            var query = @"
+        INSERT INTO UserTutorials (UserId, TutorialId, IsCompleted, CompletionDate)
+        VALUES (@UserId, @TutorialId, 1, GETUTCDATE())
+        ON DUPLICATE KEY UPDATE IsCompleted = 1, CompletionDate = GETUTCDATE();
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                return await connection.ExecuteAsync(query, new { UserId = userId, TutorialId = tutorialId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return 0;
+            }
+        }
+
+        public async Task<IEnumerable<Tutorial>> GetCompletedTutorialsForUserAsync(string userId)
+        {
+            var query = @"
+        SELECT t.*
+        FROM Tutorials t
+        JOIN UserTutorials ut ON t.TutorialId = ut.TutorialId
+        WHERE ut.UserId = @UserId AND ut.IsCompleted = 1;
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                return await connection.QueryAsync<Tutorial>(query, new { UserId = userId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<IEnumerable<Tutorial>> GetTutorialsWithUserDataAsync(string userId)
+        {
+            var query = @"
+        SELECT 
+            t.TutorialId, 
+            t.Name, 
+            t.Text, 
+            t.Image, 
+            ut.IsCompleted, 
+            ut.CompletionDate
+        FROM Tutorials t
+        LEFT JOIN UserTutorials ut ON t.TutorialId = ut.TutorialId AND ut.UserId = @UserId;
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+
+            try
+            {
+                return await connection.QueryAsync<Tutorial>(query, new { UserId = userId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
+        public async Task<int> CreateTutorialAsync(Tutorial tutorial)
+        {
+            var query = @"
+        INSERT INTO Tutorials (Name, Text, Image)
+        VALUES (@Name, @Text, @Image);
+        SELECT SCOPE_IDENTITY();
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                var tutorialId = await connection.ExecuteScalarAsync<int>(query, tutorial);
+                return tutorialId;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return 0;
+            }
+        }
+
+        // This function updates an existing tutorial
+        public async Task<bool> UpdateTutorialAsync(Tutorial tutorial)
+        {
+            var query = @"
+        UPDATE Tutorials
+        SET Name = @Name, Text = @Text, Image = @Image
+        WHERE TutorialId = @TutorialId;
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                var affectedRows = await connection.ExecuteAsync(query, tutorial);
+                return affectedRows > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        // This function deletes a tutorial based on its ID
+        public async Task<bool> DeleteTutorialAsync(int tutorialId)
+        {
+            var query = @"
+        DELETE FROM Tutorials
+        WHERE TutorialId = @TutorialId;
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                var affectedRows = await connection.ExecuteAsync(query, new { TutorialId = tutorialId });
+                return affectedRows > 0;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+        }
+
+        // This function retrieves all tutorials
+        public async Task<IEnumerable<Tutorial>> GetAllTutorialsAsync()
+        {
+            var query = @"
+        SELECT * FROM Tutorials;
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                return await connection.QueryAsync<Tutorial>(query);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
+
 
     }
 }

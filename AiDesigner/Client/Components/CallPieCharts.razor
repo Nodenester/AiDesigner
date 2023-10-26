@@ -1,0 +1,179 @@
+﻿@using NodeBaseApi.Version2;
+@using Radzen.Blazor
+
+<!-- Added d-flex and align-items-start classes -->
+<div class="w-full mx-1 pl-0">
+    <h3 class="text-xl font-semibold px-3 py-2 rounded-md shadow-md">Source</h3>
+    <div style="height: 18.36rem !important; margin-top: -2rem;">
+        @if (analytics.sourceItems != null && analytics.sourceItems.Count() != 0)
+        {
+            <RadzenChart SeriesClick=@OnSeriesClick>
+                <RadzenPieSeries Data="@analytics.sourceItems" Title="Cost" CategoryProperty="ProgramShortcut" ValueProperty="Cost"
+                             TooltipTemplate="@FormatTooltip"> 
+            </RadzenPieSeries>
+            </RadzenChart>
+        }
+        else
+        {
+            <RadzenChart>
+                <RadzenPieSeries Data="@revenue" Title="Cost" CategoryProperty="ProgramShortcut" ValueProperty="Cost"
+                                 TooltipTemplate="@FormatTooltip">
+                </RadzenPieSeries>
+            </RadzenChart>
+        }
+    </div>
+    <h3 class="text-xl font-semibold px-3 py-2 rounded-md shadow-md">Programs</h3>
+    <div style="height: 18.36rem !important; margin-top: -2rem;">
+        @if (analytics.programItems != null && analytics.programItems.Count() != 0)
+        {
+        <RadzenChart SeriesClick=@OnSeriesClick>
+            <RadzenPieSeries Data="@analytics.programItems" Title="Cost" CategoryProperty="ProgramShortcut" ValueProperty="Cost"
+                TooltipTemplate="@FormatTooltip">
+            </RadzenPieSeries>
+        </RadzenChart>
+        }
+        else{
+            <RadzenChart >
+                <RadzenPieSeries Data="@revenue" Title="Cost" CategoryProperty="ProgramShortcut" ValueProperty="Cost" 
+                    TooltipTemplate="@FormatTooltip">
+                </RadzenPieSeries>
+            </RadzenChart>
+        }
+    </div>
+</div>
+
+@code {
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    [Parameter]
+    public List<Call> Calls { get; set; } = new List<Call>();
+
+    [CascadingParameter(Name = "EAPs")]
+    public List<ProgramObject> EAPs { get; set; }
+
+    [CascadingParameter(Name = "ApiKeys")]
+    public List<ApiKey> ApiKeys { get; set; }
+
+
+    [CascadingParameter(Name = "analytics")]
+    public ChacheAnalytics analytics { get; set; }
+
+    [CascadingParameter(Name = "setAnalytics")]
+    public EventCallback<ChacheAnalytics> setAnalytics { get; set; }
+
+    public List<DataItem> programItems { get; set; } = new List<DataItem>();
+    public List<DataItem> sourceItems { get; set; } = new List<DataItem>();
+
+    bool isLoaded = false;
+    protected override async Task OnParametersSetAsync()
+    {
+        if (programItems.Count() == 0)
+        {
+            CreateProgramItems();
+        }
+        if (sourceItems.Count() == 0)
+        {
+            CreateSourceItems();
+        }
+        if (programItems.Count() != 0 && sourceItems.Count() != 0 && !isLoaded)
+        {
+            await setAnalytics.InvokeAsync(new ChacheAnalytics()
+                {
+                    programItems = programItems,
+                    sourceItems = sourceItems
+                });
+            isLoaded = true;
+        }
+    }
+
+    void OnSeriesClick(SeriesClickEventArgs args)
+    {
+
+    }
+
+    void CreateProgramItems()
+    {
+        foreach (var eap in EAPs)
+        {
+            List<Call> group = Calls.Where(x => x.ProgramId == eap.Id.ToString()).ToList();
+            if(group.Count > 0)
+            {
+                programItems.Add(new DataItem()
+                    {
+                        ProgramShortcut = Convert.ToString(eap.Name[0]),
+                        Program = eap.Name,
+                        Cost = group.Sum(x =>
+                        {
+                            double costValue;
+                            return double.TryParse(x.Cost, out costValue) ? costValue : 0.0;
+                        })
+                    });
+            }
+        }
+        StateHasChanged();
+    }
+
+    void CreateSourceItems()
+    {
+        if(CascAuth == null)
+        {
+            return;
+        }
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            List<Call> group = Calls.Where(x => x.ApiUserId == userId.ToString()).ToList();
+            if (group.Count > 0)
+            {
+                sourceItems.Add(new DataItem()
+                    {
+                        ProgramShortcut = "L",
+                        Program = "Local",
+                        Cost = group.Sum(x =>
+                        {
+                            double costValue;
+                            return double.TryParse(x.Cost, out costValue) ? costValue : 0.0;
+                        })
+                    });
+            }
+        }
+        foreach(var apiKey in ApiKeys)
+        {
+            List<Call> group = Calls.Where(x => x.ApiUserId == apiKey.apiKey).ToList();
+            if(group.Count > 0)
+            {
+                sourceItems.Add(new DataItem()
+                    {
+                        ProgramShortcut = Convert.ToString(apiKey.Name[0]),
+                        Program = apiKey.Name,
+                        Cost = group.Sum(x =>
+                        {
+                            double costValue;
+                            return double.TryParse(x.Cost, out costValue) ? costValue : 0.0;
+                        })
+                    });
+            }
+        }
+        StateHasChanged();
+    }
+
+    RenderFragment FormatTooltip(DataItem data)
+    {
+        return builder =>
+        {
+            builder.OpenElement(0, "div");
+            builder.AddContent(1, data.Program);
+            builder.AddMarkupContent(2, "<br/>");
+            builder.AddContent(3, $"{data.Cost} Tokens");
+            builder.CloseElement();
+        };
+    }
+
+    //Just exampel
+    List<DataItem> revenue = new List<DataItem>()
+    {
+        new DataItem() { Program = "Exampel", Cost = 1, ProgramShortcut = "E1" },
+    };
+}
