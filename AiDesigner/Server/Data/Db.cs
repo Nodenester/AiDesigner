@@ -1111,16 +1111,24 @@ namespace AiDesigner.Server.Data
 
         public async Task<int> MarkTutorialAsCompletedForUserAsync(int tutorialId, string userId)
         {
-            var query = @"
-        INSERT INTO UserTutorials (UserId, TutorialId, IsCompleted, CompletionDate)
-        VALUES (@UserId, @TutorialId, 1, GETUTCDATE())
-        ON DUPLICATE KEY UPDATE IsCompleted = 1, CompletionDate = GETUTCDATE();
-    ";
+            var insertQuery = @"
+            IF NOT EXISTS (SELECT 1 FROM UserTutorials WHERE UserId = @UserId AND TutorialId = @TutorialId)
+            BEGIN
+                INSERT INTO UserTutorials (UserId, TutorialId, IsCompleted, CompletionDate)
+                VALUES (@UserId, @TutorialId, 1, GETUTCDATE())
+            END
+            ELSE
+            BEGIN
+                UPDATE UserTutorials
+                SET IsCompleted = 1, CompletionDate = GETUTCDATE()
+                WHERE UserId = @UserId AND TutorialId = @TutorialId
+            END
+        ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
             try
             {
-                return await connection.ExecuteAsync(query, new { UserId = userId, TutorialId = tutorialId });
+                return await connection.ExecuteAsync(insertQuery, new { UserId = userId, TutorialId = tutorialId });
             }
             catch (Exception ex)
             {

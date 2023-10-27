@@ -15,7 +15,7 @@ using NodeBaseApi.Version2;
 
 namespace AiDesigner.Server.Controllers
 {
-    [Route("api/Tutorial")]
+    [Route("Tutorial")]
     [ApiController]
     public class TutorialController : ControllerBase
     {
@@ -73,12 +73,19 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
-        // PUT api/Tutorial/Complete/{tutorialId}/{userId}
-        [HttpPut("Complete/{tutorialId}/{userId}")]
-        public async Task<ActionResult> MarkTutorialAsCompleted(int tutorialId, string userId)
+        // PUT api/Tutorial/Complete/{input}
+        [HttpPut("Complete/{input}")]
+        public async Task<ActionResult> MarkTutorialAsCompleted(string input)
         {
             try
             {
+                var parts = input.Split(':');
+                if (parts.Length != 2)
+                    return BadRequest("Invalid input format. Expected format: tutorialId:userId");
+
+                int tutorialId = int.Parse(parts[0]);
+                string userId = parts[1];
+
                 var result = await _dbConnection.MarkTutorialAsCompletedForUserAsync(tutorialId, userId);
                 if (result > 0)
                     return Ok("Tutorial marked as completed successfully.");
@@ -91,6 +98,7 @@ namespace AiDesigner.Server.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+
 
         // GET api/Tutorial/Completed/{userId}
         [HttpGet("Completed/{userId}")]

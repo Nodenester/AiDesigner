@@ -98,7 +98,6 @@
                     try
                     {
                         var response = await Http.GetAsync(url);
-                        Console.WriteLine(await response.Content.ReadAsStringAsync());
                         if (response.IsSuccessStatusCode)
                         {
                             var json = await response.Content.ReadAsStringAsync();

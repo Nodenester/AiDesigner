@@ -1,0 +1,107 @@
+﻿@using AiDesigner.Shared;
+@using NodeBaseApi.Version2;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject HttpClient Http;
+
+<div class="relative inline-block">
+    <!-- Trigger Button -->
+    <button @onclick="TogglePopup" class="bg-gray-500 hover:bg-gray-600 text-white py-1 px-2 rounded focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-600 rounded-md">
+        Show Tutorial
+    </button>
+
+    @if (showPopup)
+    {
+        <div class="absolute left-0 mt-2 w-96 z-50">
+            <div class="dark:bg-gray-600 rounded-lg shadow-lg p-6">
+                <h3 class="text-xl font-semibold mb-4 dark:text-gray-200">@tutorial.Name</h3>
+                
+                @if(tutorial.Image != null)
+                {
+                    <img src="data:image/jpeg;base64,@Convert.ToBase64String(tutorial.Image)" alt="@tutorial.Name" class="w-full h-48 object-cover mb-4 rounded" />
+                }
+
+                <p class="text-gray-600 mb-4 dark:text-gray-400">@tutorial.Text</p>
+
+                @if(tutorial.IsCompleted)
+                {
+                    <div class="text-green-500 mb-4 dark:text-green-400">Completed on @tutorial.CompletionDate?.ToString("MMMM dd, yyyy")</div>
+                }
+
+                <div class="flex justify-between">
+                    <button class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-800" @onclick="() => PreviousTutorial()">Previous</button>
+                    <button class="bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded focus:outline-none dark:bg-green-700 dark:hover:bg-green-800" @onclick="() => CompleteTutorial()">Complete</button>
+                    <button class="bg-gray-500 hover:bg-gray-600 text-white py-2 px-4 rounded focus:outline-none dark:bg-gray-700 dark:hover:bg-gray-800" @onclick="() => NextTutorial()">Next</button>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public Tutorial tutorial { get; set; }
+    [Parameter]
+    public List<Tutorial> tutorials { get; set; }
+
+    [Parameter]
+    public EventCallback<Tutorial> settTutorial { get; set; }
+
+    [Parameter]
+    public EventCallback<Tutorial> completeTutorial { get; set; }
+
+    private int currentTutorialIndex;
+
+    private bool showPopup = false;
+
+    protected override void OnParametersSet()
+    {
+        if(tutorials != null && tutorials != null)
+        {
+            currentTutorialIndex = tutorials.FindIndex(t => t.TutorialId == tutorial.TutorialId);
+        }
+    }
+
+    private void TogglePopup()
+    {
+        showPopup = !showPopup;
+    }
+
+    private async Task CompleteTutorial()
+    {
+        if (tutorial != null)
+        {
+            tutorial.IsCompleted = true;
+            tutorial.CompletionDate = DateTime.Now;
+
+            completeTutorial.InvokeAsync(tutorial);
+
+            var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+            var user = authState.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                Http.PutAsJsonAsync($"Tutorial/Complete/{tutorial.TutorialId + ":" + userId.ToString()}", tutorial);
+            }
+        }
+    }
+
+    private async Task NextTutorial()
+    {
+        if (tutorials != null && currentTutorialIndex < tutorials.Count() - 1)
+        {
+            currentTutorialIndex++;
+            tutorial = tutorials[currentTutorialIndex];
+            _ = settTutorial.InvokeAsync(tutorial);
+        }
+    }
+
+    private async Task PreviousTutorial()
+    {
+        if (currentTutorialIndex > 0)
+        {
+            currentTutorialIndex--;
+            tutorial = tutorials[currentTutorialIndex];
+            _ = settTutorial.InvokeAsync(tutorial);
+        }
+    }
+}

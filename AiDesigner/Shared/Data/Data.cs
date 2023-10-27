@@ -572,6 +572,7 @@ namespace NodeBaseApi.Version2
         public List<Call> last100Calls { get; set; }
         public List<WorkshopArticle> workshopArticles { get; set; }
         public List<NewsArticle> newsArticle { get; set; }
+        public List<Tutorial> tutorials { get; set; }
     }
 
     public class DataItem
