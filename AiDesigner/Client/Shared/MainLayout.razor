@@ -61,8 +61,14 @@
                         <div style="border-width:0" class="top-row auth bg-white dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow flex items-center">
 
                             <div style="border-width:0" class="top-row auth bg-white dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow flex items-center">
+
+                                @if (CurrentTutorial != null)
+                                {
+                                    <AiDesigner.Client.Components.TutorialPopup completeTutorial="Completetutorial" settTutorial="SetTutorial" tutorials="@analytics.tutorials" tutorial="@CurrentTutorial"></AiDesigner.Client.Components.TutorialPopup>
+                                }
+
                                 <!-- Token Count -->
-                                <div class="bg-blue-500 dark:bg-gray-600 p-1 rounded-lg text-white mr-4 items-center">
+                                <div class="bg-blue-500 dark:bg-gray-600 p-1 rounded-lg text-white mx-4 items-center">
                                     <span>Tokens: @CurrentTokens</span>
                                 </div>
 
@@ -103,15 +109,18 @@
                         </div>
                     }
                     <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
-                        <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
-                            <CascadingValue Value="@analytics" Name="analytics"> 
-                                <CascadingValue Value="@addApiKey" Name="addApiKey">
-                                    <CascadingValue Value="@apiKeys" Name="ApiKeys">
-                                        <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
-                                            <CascadingValue Value="@passingArticle" Name="passingArticle">
-                                                <CascadingValue Value=@setTokens Name="Settokens">
-                                                    <CascadingValue Value=@NewAps Name="NewAps">
-                                                        @Body
+                    <CascadingValue Value="@setTutorial" Name="setTutorial">
+                        <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
+                            <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
+                                <CascadingValue Value="@analytics" Name="analytics"> 
+                                    <CascadingValue Value="@addApiKey" Name="addApiKey">
+                                        <CascadingValue Value="@apiKeys" Name="ApiKeys">
+                                            <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                                                <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                                    <CascadingValue Value=@setTokens Name="Settokens">
+                                                        <CascadingValue Value=@NewAps Name="NewAps">
+                                                            @Body
+                                                        </CascadingValue>
                                                     </CascadingValue>
                                                 </CascadingValue>
                                             </CascadingValue>
@@ -120,8 +129,9 @@
                                 </CascadingValue>
                             </CascadingValue>
                         </CascadingValue>
+                    </CascadingValue>
 
-                            @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics")
+                        @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics")
                         {
                             <Footer></Footer>
                         }
@@ -251,11 +261,15 @@
 
     public ChacheAnalytics analytics = new ChacheAnalytics();
 
+    public Tutorial CurrentTutorial;
+
     public int CurrentTokens { get; set; } = 0;
 
     public AuthenticationState AuthState { get; set; }
 
     private bool isDarkMode = true;
+
+    public EventCallback<Tutorial> setTutorial => EventCallback.Factory.Create<Tutorial>(this, SetTutorial);
 
     public EventCallback<ChacheAnalytics> setAnalytic => EventCallback.Factory.Create<ChacheAnalytics>(this, SetAnalytic);
 
@@ -291,6 +305,20 @@
         {
             analytics.newsArticle = Analytics.newsArticle;
         }
+        if (Analytics.tutorials != null)
+        {
+            analytics.tutorials = Analytics.tutorials;
+        }
+    }
+
+    public void SetTutorial(Tutorial tutorial)
+    {
+        CurrentTutorial = tutorial;
+    }
+
+    public void Completetutorial(Tutorial tutorial)
+    {
+        analytics.tutorials[tutorial.TutorialId -1] = tutorial;
     }
 
     public void SetTokens(int tokens)
@@ -321,13 +349,23 @@
         apiKeys.Add(apiKey);
     }
 
-    //Make this update when loggin in and other stuff and make it api     this might work
     protected override async Task OnInitializedAsync()
     {
+        // NavigationManagers.LocationChanged += HandleLocationChanged;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await UpdatePrograms();
         await GetTokens();
         await GetApiKeys();
+
+        // var uri = new Uri(NavigationManagers.Uri); // Get the current URL
+        // if (uri.AbsolutePath == "/library" || uri.AbsolutePath == "/editor" || uri.AbsolutePath == "/marketplace")
+        // {
+        //     shouldRender = true;
+        // }
+        // else
+        // {
+        //     shouldRender = false;
+        // }
     }
 
     private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
@@ -504,6 +542,31 @@
         Title = NavigationManagers.ToBaseRelativePath(NavigationManagers.Uri).ToLower();
         StateHasChanged();
     }
+
+    // private bool shouldRender = true;
+    // protected override bool ShouldRender()
+    // {
+    //     return shouldRender;
+    // }
+
+    // private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    // {
+    //     shouldRender = true;
+    //     var uri = new Uri(e.Location);
+    //     if (uri.AbsolutePath == "/library" || uri.AbsolutePath == "/editor" || uri.AbsolutePath == "/marketplace")
+    //     {
+    //         StateHasChanged();
+    //         return;
+    //     }
+    //     StateHasChanged();
+    //     shouldRender = false;
+    // }
+
+    // public void Dispose()
+    // {
+    //     // It's important to unsubscribe from the event to prevent memory leaks
+    //     NavigationManagers.LocationChanged -= HandleLocationChanged;
+    // }
 }
 
 
