@@ -11,8 +11,8 @@
 <PageTitle>Home</PageTitle>
 
 <div class="flex justify-between h-full">
-    <div class="self-end dark:bg-gray-600 rounded-lg flex flex-col">
-        <div class="dark:bg-gray-600 rounded-lg w-full mb-4 flex space-x-4 pr-6">
+    <div class="self-end dark:bg-gray-600 rounded-lg flex flex-col h-full">
+        <div class="dark:bg-gray-600 rounded-lg w-full mb-4 flex space-x-4 pr-6 h-full">
             <div class="flex-grow p-0 dark:bg-gray-700 rounded-lg">
                 <AiDesigner.Client.Components.LatestTutorials />
             </div>
@@ -27,7 +27,7 @@
                 }
             </div>
 
-            <div class=" w-1/6 flex-shrink-0 flex justify-center dark:bg-gray-700 rounded-lg">
+@*             <div class=" w-1/6 flex-shrink-0 flex justify-center dark:bg-gray-700 rounded-lg">
                 @if(Calls != null)
                 {
                     <AiDesigner.Client.Components.CallPieCharts Calls="@Calls" />
@@ -36,147 +36,15 @@
                 {
                     <AiDesigner.Client.Components.CallPieCharts />
                 }
-            </div>
+            </div> *@
         </div>
         <div class="flex flex-col items-start align-baseline mb-0 dark:bg-gray-700 rounded-lg mr-6">
-            <div class="flex flex-nowrap gap-3 m-3">
-                @if(EAPs.Count() != 0)
-                {
-                    @foreach (var eap in EAPs.OrderByDescending(e => e.LastOpened).Take(3))
-                    {
-                        <button class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-between relative custom-button"
-                        @onclick="() => OpenProject(eap)">
-                            <!-- Image -->
-                            @if (eap.Image != null)
-                            {
-                                <div class="w-full h-4/5">
-                                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(eap.Image)}")" alt="@eap.Name" style="width: 100%; height: 100%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
-                                </div>
-                            }
-                            else
-                            {
-                                <div style="margin-top: 9.7rem;" />
-                            }
-
-                            <!-- Divider -->
-                            <hr style="width: 100%; margin-left: auto; margin-right: auto;">
-
-                            <!-- Program Name -->
-                            <div class="w-full align-middle content-center">
-                                <h1 class="dark:text-white mb-2 text-xl m-auto">@eap.Name</h1>
-                            </div>
-                        </button>
-                    }
-                    @for (var i = 0; i < (3- EAPs.Count()); i++)
-                    {
-                        <div class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-start">
-                            <!-- Add Image Here -->
-                            <div class="w-full h-4/5">
-                                <div class="w-full h-full bg-gray-600"></div>
-                            </div>
-                            <br />
-                            <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.6rem;">
-                            <div class="w-full flex items-center justify-center">
-                                <div class="h-8 w-28 bg-gray-700 mt-1"></div>
-                            </div>
-                        </div>
-                    }
-                }
-                else
-                {
-                    @for (var i = 0; i < 3; i++)
-                    {
-                        <div class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-start">
-                            <!-- Add Image Here -->
-                            <div class="w-full h-4/5">
-                                <div class="w-full h-full bg-gray-600"></div>
-                            </div>
-                            <br />
-                            <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.6rem;">
-                            <div class="w-full flex items-center justify-center">
-                                <div class="h-8 w-28 bg-gray-700 mt-1"></div>
-                            </div>
-                        </div>
-                    }
-                }
-                @if (analytics.workshopArticles != null)
-                {
-                    @foreach (var article in analytics.workshopArticles)
-                    {
-                        <button @onclick="() => OpenWorkshopArticle(article)" class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-center">
-                            <!-- Add Image Here -->
-                            <div class="w-full h-4/5 flex items-center justify-center">
-                                <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="height: 100%; object-fit: cover; flex-grow: 1;" class="rounded-t overflow-hidden" loading="lazy" />
-                            </div>
-                            <br />
-                            <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.5rem;">
-                            <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
-                                <p class="text-left dark:text-white text-lg m-1 ml-3 overflow-hidden w-20">@article.Name</p>
-                                <button @onclick="() => Addtovault(article)" @onclick:stopPropagation="true" class="bg-green-600 hover:bg-green-700 text-white rounded p-1 m-1 w-24">Add to vault</button>
-                            </div>
-                            <br />
-                        </button>
-                    }
-                }
-                else
-                {
-                    @for(var i = 0; i < 3; i++)
-                    {
-                        <div class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-start">
-                            <!-- Add Image Here -->
-                            <div class="w-full h-4/5">
-                                <div class="w-full h-full bg-gray-600"></div>
-                            </div>
-                            <br />
-                            <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.5rem;">
-                            <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
-                                <p class="bg-gray-700 text-left dark:text-white text-lg m-1 ml-3 overflow-hidden w-20"></p>
-                                <div class="bg-green-600 hover:bg-green-700 text-white rounded p-1 m-1 w-24">Add to vault</div>
-                            </div>
-                            <br />
-                        </div>
-                    }
-                }
-            </div>
+            <ProgramsAndWorkshop analytics="analytics" EAPs="EAPs"></ProgramsAndWorkshop>
         </div>
     </div>
 
     <div class="flex flex-col justify-start dark:bg-gray-700 w-96 rounded-lg">
-        <!-- Notice the 'justify-end' -->
-        <!-- News Section -->
-        <div class="text-center p-4 overflow-y-auto">
-            <p class="text-lg font-semibold mb-4">Latest News</p>
-            @if (analytics.newsArticle != null)
-            {
-                @foreach (var article in analytics.newsArticle)
-                {
-                    <div class="mb-2">
-                        <button class="w-full h-auto p-2 rounded-lg shadow hover:shadow-lg transition
-                        @(selectedArticle == article ? "dark:bg-gray-500 bg-gray-100" : "dark:bg-gray-600 bg-gray-200") text-black"
-                        @onclick="() => SetSelectedNewsArticle(article)">
-                            <div class="truncate dark:text-white text-lg">@article.Title</div>
-                            <div>@article.PublishDate.ToShortDateString()</div>
-                            @if (selectedArticle == article)
-                            {
-                                <div class="mt-2 flex flex-col items-center">
-                                    @if (article.ImageData != null)
-                                    {
-                                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ImageData)}")" alt="@article.Title" style="width: 300px; height: 300px; object-fit: cover; border-radius: 4px; margin-bottom: 8px;" loading="lazy" />
-                                    }
-                                    <p class="dark:text-white">@article.Content</p>
-                                </div>
-                            }
-                            else
-                            {
-                                <div class="mt-2">
-                                    <p class="truncate dark:text-white">@article.Content.Substring(0, 50)...</p>
-                                </div>
-                            }
-                        </button>
-                    </div>
-                }
-            }
-        </div>
+        <LatestNews initialArticle="selectedArticle"></LatestNews>
     </div>
 </div>
 
@@ -190,7 +58,6 @@
     [CascadingParameter(Name = "SetPassingArticle")]
     protected EventCallback<WorkshopArticle> SetPassingArticle { get; set; }
 
-
     [CascadingParameter(Name = "NewAps")]
     protected EventCallback<ProgramObject> NewAps { get; set; }
 
@@ -202,10 +69,11 @@
 
 
     private List<NewsArticle> LatestArticles;
-    private NewsArticle selectedArticle;
     private List<WorkshopArticle> Articles;
     private List<Call> Calls;
     private List<Call> Latest100Calls => Calls.OrderByDescending(call => call.EndTime).Take(100).ToList();
+    private NewsArticle selectedArticle;
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -223,7 +91,7 @@
             if ((analytics != null && analytics.newsArticle != null && analytics.workshopArticles != null
                               && analytics.newsArticle.Count() != 0 && analytics.workshopArticles.Count() != 0))
             {
-                GetLatestCalls();
+                _ = GetLatestCalls();
                 return;  // Exit early if everything's loaded.
             }
 
@@ -260,44 +128,6 @@
                     });
             }
         }
-    }
-
-    private async Task Addtovault(WorkshopArticle article)
-    {
-        var user = CascAuth.User;
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out Guid userId))
-        {
-            var isCreator = article.AuthorId == userId.ToString();
-
-            string requestUri = "Workshop/connect-article-to-user";
-            UserArticle userArticle = new UserArticle
-                {
-                    ArticleId = article.Id,
-                    UserId = userId.ToString(),
-                    IsCreator = isCreator,
-                    Rating = 0,
-                    Review = "",
-                    IsFavorite = false
-                };
-            var response = await Http.PostAsJsonAsync(requestUri, userArticle);
-        }
-    }
-
-    private void SetSelectedNewsArticle(NewsArticle article)
-    {
-        selectedArticle = article;
-    }
-
-    private void OpenProject(ProgramObject programObject)
-    {
-        NewAps.InvokeAsync(programObject);
-    }
-
-    private void OpenWorkshopArticle(WorkshopArticle article)
-    {
-        SetPassingArticle.InvokeAsync(article);
-        NavigationManager.NavigateTo($"/marketplace");
     }
 
     //Api / db

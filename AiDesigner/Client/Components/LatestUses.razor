@@ -72,4 +72,9 @@
             isLoaded = true;
         }
     }
+
+    protected override bool ShouldRender()
+    {
+        return !isLoaded;
+    }
 }

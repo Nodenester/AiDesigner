@@ -20,7 +20,7 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6 dark:bg-gray-700">
             @if (analytics != null && analytics.tutorials != null)
             {
-                @foreach (var tutorial in analytics.tutorials.Where(t => !t.IsCompleted))
+                @foreach (var tutorial in analytics.tutorials.Where(t => !t.IsCompleted).Take(6))
                 {
                     <button class="relative p-2 rounded @(tutorial == currentTutorial ? "bg-gray-100 dark:bg-gray-500" : "bg-gray-200 dark:bg-gray-600") text-black dark:text-white flex items-start custom-button" @onclick="(() => HandleClick(tutorial))">
                         <!-- Image Container -->

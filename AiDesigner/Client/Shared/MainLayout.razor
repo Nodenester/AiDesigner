@@ -311,9 +311,12 @@
         }
     }
 
-    public void SetTutorial(Tutorial tutorial)
+    public async Task SetTutorial(Tutorial tutorial)
     {
+        shouldRender = false;
         CurrentTutorial = tutorial;
+        await Task.Delay(20);
+        shouldRender = true;
     }
 
     public void Completetutorial(Tutorial tutorial)
@@ -522,8 +525,11 @@
 
     private async Task ToggleDarkMode()
     {
+        shouldRender = false;
         isDarkMode = !isDarkMode;
         await JSRuntime.InvokeVoidAsync("toggleDarkMode");
+        await Task.Delay(20);
+        shouldRender = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -543,11 +549,11 @@
         StateHasChanged();
     }
 
-    // private bool shouldRender = true;
-    // protected override bool ShouldRender()
-    // {
-    //     return shouldRender;
-    // }
+    private bool shouldRender = true;
+    protected override bool ShouldRender()
+    {
+        return shouldRender;
+    }
 
     // private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
     // {

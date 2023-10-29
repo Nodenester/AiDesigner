@@ -11,7 +11,7 @@
 
     @if (showPopup)
     {
-        <div class="absolute left-0 mt-2 w-96 z-50">
+        <div class="absolute mt-2 w-96 z-50" style="left: -1rem;">
             <div class="dark:bg-gray-600 rounded-lg shadow-lg p-6">
                 <h3 class="text-xl font-semibold mb-4 dark:text-gray-200">@tutorial.Name</h3>
                 
@@ -104,4 +104,6 @@
             _ = settTutorial.InvokeAsync(tutorial);
         }
     }
+
+
 }

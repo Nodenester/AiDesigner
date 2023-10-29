@@ -50,7 +50,8 @@ namespace AiDesigner.Server.Controllers
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    return Ok(response);
+                    //Console.WriteLine(ex.Message);
                     // Consider logging the exception for further analysis if needed.
                 }
 

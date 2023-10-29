@@ -10,14 +10,13 @@
 }
 
 <div class="row manageAccount">
-    <div class="col-md-3 manageNav">
+@*     <div class="col-md-3 manageNav">
         <h1 class="" style="display: flex; align-items: center; justify-content: center; color: white;">Manage Account</h1>
         <partial name="_ManageNav" />
-    </div>
+    </div> *@
     <div class="col-md-9 manageBody">
-        <h2>Change your account settings</h2>
-
-        @RenderBody()
+@*         <h2>Change your account settings</h2>
+ *@     @RenderBody()
     </div>
 </div>
 
@@ -25,10 +24,10 @@
     /* Styling for the manage account row */
     .row.manageAccount {
         display: flex;
-        justify-content: start;
-        align-items: center;
-        height: 85vh; 
-        background-color: #353535;
+        justify-content: center;
+        align-items: center; /* This is for vertical centering; remove if not needed */
+        height: 85vh; /* Assuming you still want this height */
+        background-color: #353535; /* Assuming you still want this background color */
     }
 
 /*     #2b2b2b
@@ -43,10 +42,11 @@
 
     /* Adjust the styling of the manageBody */
     .manageBody {
+        width: auto; /* Let it take only as much width as needed, remove 'fit-content' if previously set */
+        min-width: 30%; 
         padding: 20px;
         border-radius: 8px;
         background-color: #2b2b2b;
-        width: fit-content;
     }
 
     h2 {

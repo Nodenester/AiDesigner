@@ -75,10 +75,15 @@
 
     AddSession addSession = new AddSession();
 
-    protected override async Task OnParametersSetAsync()
+    protected override async Task OnInitializedAsync()
     {
         await GetUserSessions();
     }
+
+    // protected override async Task OnParametersSetAsync()
+    // {
+    //     await GetUserSessions();
+    // }
 
     private async Task SelectOption(string sessionName)
     {
