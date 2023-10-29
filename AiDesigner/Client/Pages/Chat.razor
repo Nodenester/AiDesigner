@@ -7,6 +7,7 @@
 @using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2;
 @using static AiDesigner.Client.Components.InputList;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http
 @attribute [Authorize]
 
@@ -195,7 +196,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+        if (user != null)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                await GetCustomPrograms(userId.ToString());
+                await GetWorkshopPrograms(userId.ToString());
+            }
+        }
     }
 
     ApiService apiService = new ApiService("https://localhost:44313/");
@@ -222,7 +233,7 @@
 
                 if (selectedProgram.SupportsSessions)
                 {
-                    url += $"&sessionId={currentSession.SessionId}";
+                    url += $"&sessionId={currentSession?.SessionId}";
                 }
 
                 try
@@ -235,7 +246,8 @@
                     }
                     else
                     {
-                        Console.Error.WriteLine($"Error: {response.StatusCode}");
+                        Console.WriteLine("Failed");
+                        //Console.Error.WriteLine($"Error: {response.StatusCode}");
                     }
                 }
                 catch (Exception ex)
@@ -281,16 +293,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        if (CascAuth != null)
-        {
-            var user = CascAuth.User;
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            if (Guid.TryParse(userIdClaim, out Guid userId))
-            {
-                await GetCustomPrograms(userId.ToString());
-                await GetWorkshopPrograms(userId.ToString());
-            }
-        }
+
     }
 
     private void SetValue(InputItem inputItem)

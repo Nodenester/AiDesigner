@@ -843,14 +843,20 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
+                    DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+
                     IF NOT EXISTS (SELECT 1 FROM Ludde.TokenWallet WHERE UserId = @UserId)
                     BEGIN
-                        INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens)
+                        INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens, LastRefill)
                         OUTPUT inserted.Tokens
-                        VALUES (NEWID(), @UserId, 0);
+                        VALUES (NEWID(), @UserId, 0, @Today);
                     END
                     ELSE
                     BEGIN
+                        UPDATE Ludde.TokenWallet
+                        SET Tokens = 1000, LastRefill = @Today
+                        WHERE UserId = @UserId AND LastRefill <> @Today AND Tokens < 1000;
+    
                         SELECT Tokens
                         FROM Ludde.TokenWallet
                         WHERE UserId = @UserId;
@@ -945,7 +951,7 @@ namespace AiDesigner.Server.Data
                 FROM
                     UserCalls
                 WHERE
-                    RowNum <= 5000;
+                    RowNum <= 125;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);

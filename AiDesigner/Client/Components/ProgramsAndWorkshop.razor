@@ -1,0 +1,161 @@
+﻿@using NodeBaseApi.Version2;
+@inject HttpClient Http;
+@inject NavigationManager NavigationManager;
+
+<div class="flex flex-nowrap gap-3 m-3">
+    @if (EAPs.Count() != 0)
+    {
+        @foreach (var eap in EAPs.OrderByDescending(e => e.LastOpened).Take(3))
+        {
+            <button class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-between relative custom-button"
+            @onclick="() => OpenProject(eap)">
+                <!-- Image -->
+                @if (eap.Image != null)
+                {
+                    <div class="w-full h-4/5">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(eap.Image)}")" alt="@eap.Name" style="width: 100%; height: 100%; object-fit: cover; flex-grow: 1;" class="rounded-t" loading="lazy" />
+                    </div>
+                }
+                else
+                {
+                    <div style="margin-top: 9.7rem;" />
+                }
+
+                <!-- Divider -->
+                <hr style="width: 100%; margin-left: auto; margin-right: auto;">
+
+                <!-- Program Name -->
+                <div class="w-full align-middle content-center">
+                    <h1 class="dark:text-white mb-2 text-xl m-auto">@eap.Name</h1>
+                </div>
+            </button>
+        }
+        @for (var i = 0; i < (3 - EAPs.Count()); i++)
+        {
+            <div class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-start">
+                <!-- Add Image Here -->
+                <div class="w-full h-4/5">
+                    <div class="w-full h-full bg-gray-600"></div>
+                </div>
+                <br />
+                <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.6rem;">
+                <div class="w-full flex items-center justify-center">
+                    <div class="h-8 w-28 bg-gray-700 mt-1"></div>
+                </div>
+            </div>
+        }
+    }
+    else
+    {
+        @for (var i = 0; i < 3; i++)
+        {
+            <div class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-start">
+                <!-- Add Image Here -->
+                <div class="w-full h-4/5">
+                    <div class="w-full h-full bg-gray-600"></div>
+                </div>
+                <br />
+                <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.6rem;">
+                <div class="w-full flex items-center justify-center">
+                    <div class="h-8 w-28 bg-gray-700 mt-1"></div>
+                </div>
+            </div>
+        }
+    }
+    @if (analytics.workshopArticles != null)
+    {
+        @foreach (var article in analytics.workshopArticles)
+        {
+            <button @onclick="() => OpenWorkshopArticle(article)" class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-center">
+                <!-- Add Image Here -->
+                <div class="w-full h-4/5 flex items-center justify-center">
+                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="height: 100%; object-fit: cover; flex-grow: 1;" class="rounded-t overflow-hidden" loading="lazy" />
+                </div>
+                <br />
+                <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.5rem;">
+                <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                    <p class="text-left dark:text-white text-lg m-1 ml-3 overflow-hidden w-20">@article.Name</p>
+                    <button @onclick="() => Addtovault(article)" @onclick:stopPropagation="true" class="bg-green-600 hover:bg-green-700 text-white rounded p-1 m-1 w-24">Add to vault</button>
+                </div>
+                <br />
+            </button>
+        }
+    }
+    else
+    {
+        @for (var i = 0; i < 3; i++)
+        {
+            <div class="w-48 h-48 p-0 rounded bg-gray-200 dark:bg-gray-600 text-black dark:text-white flex flex-col items-center justify-start">
+                <!-- Add Image Here -->
+                <div class="w-full h-4/5">
+                    <div class="w-full h-full bg-gray-600"></div>
+                </div>
+                <br />
+                <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.5rem;">
+                <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                    <p class="bg-gray-700 text-left dark:text-white text-lg m-1 ml-3 overflow-hidden w-20"></p>
+                    <div class="bg-green-600 hover:bg-green-700 text-white rounded p-1 m-1 w-24">Add to vault</div>
+                </div>
+                <br />
+            </div>
+        }
+    }
+</div>
+@code {
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    [Parameter]
+    public ChacheAnalytics analytics { get; set; } 
+
+    [Parameter]
+    public List<ProgramObject> EAPs { get; set; }
+
+    [CascadingParameter(Name = "NewAps")]
+    protected EventCallback<ProgramObject> NewAps { get; set; }
+
+    [CascadingParameter(Name = "SetPassingArticle")]
+    protected EventCallback<WorkshopArticle> SetPassingArticle { get; set; }
+
+    private bool shouldRender { get; set; } = true;
+
+    private async Task Addtovault(WorkshopArticle article)
+    {
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            var isCreator = article.AuthorId == userId.ToString();
+
+            string requestUri = "Workshop/connect-article-to-user";
+            UserArticle userArticle = new UserArticle
+                {
+                    ArticleId = article.Id,
+                    UserId = userId.ToString(),
+                    IsCreator = isCreator,
+                    Rating = 0,
+                    Review = "",
+                    IsFavorite = false
+                };
+            var response = await Http.PostAsJsonAsync(requestUri, userArticle);
+            shouldRender = false;
+        }
+    }
+
+
+    private void OpenProject(ProgramObject programObject)
+    {
+        NewAps.InvokeAsync(programObject);
+    }
+
+    private void OpenWorkshopArticle(WorkshopArticle article)
+    {
+        SetPassingArticle.InvokeAsync(article);
+        NavigationManager.NavigateTo($"/marketplace");
+    }
+
+    protected override bool ShouldRender()
+    {
+        return shouldRender;
+    }
+}

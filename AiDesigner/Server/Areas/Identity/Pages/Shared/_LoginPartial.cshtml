@@ -1,4 +1,5 @@
-﻿@using Microsoft.AspNetCore.Identity
+﻿@using AiDesigner.Server.Areas.Identity.Pages.Account.Manage;
+@using Microsoft.AspNetCore.Identity
 @using AiDesigner.Server.Models
 @inject SignInManager<ApplicationUser> SignInManager
 @inject UserManager<ApplicationUser> UserManager
@@ -6,30 +7,121 @@
 
 @{
     var returnUrl = "/";
-    if (Context.Request.Query.TryGetValue("returnUrl", out var existingUrl)) {
+    if (Context.Request.Query.TryGetValue("returnUrl", out var existingUrl))
+    {
         returnUrl = existingUrl;
     }
+
+    var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
 
-<ul class="navbar-nav">
-@if (SignInManager.IsSignedIn(User))
-{
-    <li class="nav-item">
-        <a  class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Manage/Index" title="Manage">Hello @User.Identity?.Name!</a>
-    </li>
-    <li class="nav-item">
-        <form class="form-inline" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
-            <button  type="submit" class="nav-link btn btn-link text-dark">Logout</button>
-        </form>
-    </li>
-}
-else
-{
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@returnUrl">Register</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@returnUrl">Login</a>
-    </li>
-}
+<ul class="navbar-nav" style="height: 4rem;">
+    @if (SignInManager.IsSignedIn(User))
+    {
+        <!-- Dropdown for logged in user's name and account management options -->
+        <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle text-dark" href="" id="userDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Hello @User.Identity?.Name!</a>
+
+            <ul class="dropdown-menu navContainer" aria-labelledby="userDropdown">
+                <li><a class="dropdown-item @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
+                <li><a class="dropdown-item @ManageNavPages.EmailNavClass(ViewContext)" id="email" asp-page="./Email">Email</a></li>
+                <li><a class="dropdown-item @ManageNavPages.ChangePasswordNavClass(ViewContext)" id="change-password" asp-page="./ChangePassword">Password</a></li>
+
+                @if (hasExternalLogins)
+                {
+                    <li><a class="dropdown-item @ManageNavPages.ExternalLoginsNavClass(ViewContext)" id="external-login" asp-page="./ExternalLogins">External logins</a></li>
+                }
+
+                <li><a class="dropdown-item @ManageNavPages.TwoFactorAuthenticationNavClass(ViewContext)" id="two-factor" asp-page="./TwoFactorAuthentication">Two-factor authentication</a></li>
+                <li><a class="dropdown-item @ManageNavPages.PersonalDataNavClass(ViewContext)" id="personal-data" asp-page="./PersonalData">Personal data</a></li>
+            </ul>
+        </li>
+        <li class="nav-item">
+            <form class="form-inline" style="margin-bottom: 0rem;" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
+                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+            </form>
+        </li>
+    }
+    else
+    {
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@returnUrl">Register</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@returnUrl">Login</a>
+        </li>
+    }
 </ul>
+
+<!-- The styles you provided are included here and remain unchanged -->
+<style>
+    /* Existing styles */
+    .navContainer {
+        background-color: #2b2b2b;
+        border-radius: 8px;
+        padding: 15px;
+    }
+
+    .manageNavList {
+        list-style-type: none;
+        padding: 0;
+    }
+
+        .manageNavList li {
+            margin-bottom: 12px;
+        }
+
+            .manageNavList li a {
+                color: #eaeaea;
+                text-decoration: none;
+                padding: 8px 12px;
+                border-radius: 4px;
+                display: block;
+            }
+
+                .manageNavList li a:hover, .manageNavList li a.active {
+                    background-color: #353535; /* Background color for hover or active state */
+                    color: white;
+                }
+
+    /* Additional styles */
+    .navbar-nav {
+        display: flex;
+        align-items: center; /* This centers the items vertically */
+    }
+
+    .navbar-nav .nav-link {
+        display: flex;
+        align-items: center;
+        background-color: #2b2b2b;
+        padding: 10px 15px;
+        margin-right: 10px; /* Margin between buttons */
+        border-radius: 8px; /* Rounder corners */
+        transition: background-color 0.3s ease;
+    }
+
+        .navbar-nav .nav-link:last-child {
+            margin-right: 0; /* Ensures the last button doesn't have extra margin on its right */
+        }
+
+        .navbar-nav .nav-link:hover, .navbar-nav .nav-link.active {
+            background-color: #353535;
+        }
+
+    .nav-item form .nav-link.btn {
+        border: none;
+    }
+
+    .nav-item.dropdown .dropdown-menu {
+        background-color: #2b2b2b;
+    }
+
+    .nav-item.dropdown .dropdown-item {
+        color: #b0b0b0;
+    }
+
+        .nav-item.dropdown .dropdown-item:hover, .nav-item.dropdown .dropdown-item.active {
+            background-color: #353535;
+            color: #ffffff;
+        }
+</style>
