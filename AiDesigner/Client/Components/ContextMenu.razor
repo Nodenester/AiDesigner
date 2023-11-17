@@ -171,6 +171,50 @@
             {      
                 new Item
                 {
+                    Name = "Text generation",
+                    SubItems = new List<Item>
+                    {
+                        new Item { Name = "Llama 7b", block = new Llama27b() },
+                        new Item { Name = "Llama 13b", block = new Llama213b() },
+                        new Item { Name = "Llama 70b", block = new Llama270b() },
+                    }
+                },
+                new Item
+                {
+                    Name = "Text handeling",
+                    SubItems = new List<Item>
+                    {
+                        new Item { Name = "Summarize", block = new Summarize() },
+                        new Item { Name = "Text to text", block = new TextToText() },
+                        new Item { Name = "Factual checker", block = new FactualConsistency() },
+                    }
+                },
+                new Item
+                {
+                    Name = "Image handeling",
+                    SubItems = new List<Item>
+                    {
+                        new Item { Name = "Image generation", block = new TextToImage() },
+                        new Item { Name = "Image segmentation", block = new Segmentation() },
+                        new Item { Name = "Image captioning", block = new ImageCaptioning() },
+                        new Item { Name = "Object croping", block = new ObjectCroping() },
+                        new Item { Name = "Text reader", block = new TextReader() },
+
+                    }
+                },
+                new Item
+                {
+                    Name = "Image handeling",
+                    SubItems = new List<Item>
+                    {
+                        new Item { Name = "Transcription", block = new Transcription() },
+                        new Item { Name = "Text to Speech", block = new TextToSpeech() },
+                        new Item { Name = "Music eeneration", block = new MusicGeneration() },
+                        new Item { Name = "Speech enhancement", block = new SpeechEnhancement() },
+                    }
+                },
+                new Item
+                {
                     Name = "OpenAi api",
                     SubItems = new List<Item>
                     {
@@ -178,7 +222,6 @@
                         new Item { Name = "Dall-E block", block = new DALLEBlock() },
                     }
                 },
-
             }
         },
     };
