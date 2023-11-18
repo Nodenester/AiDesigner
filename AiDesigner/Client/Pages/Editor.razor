@@ -271,14 +271,27 @@
                                                     </select>
                                                 </div>
                                             }
-                                            @if(node.Block.Name == "Custom Block")
+                                            @if (node.Block.Name == "Custom Block")
                                             {
                                                 <div style="width: calc(100%); margin-left: -0.6rem;">
-                                                    @if (node != null)
+                                                    @if (APO != null && APO.ProgramStructure.CustomPrograms.ContainsKey(node.Id))
+                                                    {
+                                                        <select @bind-value="APO.ProgramStructure.CustomPrograms[node.Id].Id"
+                                                                @bind-value:event="oninput"
+                                                                @onchange="((ChangeEventArgs e) => SelectCustomBlock(node, e.Value.ToString()))"
+                                                                class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
+                                                            <option value="@Guid.Empty" disabled selected hidden>Select block</option>
+                                                            @foreach (var CustomBlock in EAPs.Where(eap => eap is CustomBlockProgram))
+                                                            {
+                                                                <option value="@CustomBlock.Id">@CustomBlock.Name</option>
+                                                            }
+                                                        </select>
+                                                    }
+                                                    else if (APO != null)
                                                     {
                                                         <select @onchange="((ChangeEventArgs e) => SelectCustomBlock(node, e.Value.ToString()))"
                                                                 class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
-                                                            <option disabled selected hidden>Select block</option>
+                                                            <option value="@Guid.Empty" disabled selected hidden>Select block</option>
                                                             @foreach (var CustomBlock in EAPs.Where(eap => eap is CustomBlockProgram))
                                                             {
                                                                 <option value="@CustomBlock.Id">@CustomBlock.Name</option>
@@ -935,8 +948,19 @@
             programBlock.Block.Inputs = customBlockProgram.ProgramStructure.ProgramStart.Select(output => ConvertOutputToInput(output)).ToList();
             programBlock.Block.Outputs = customBlockProgram.ProgramStructure.ProgramEnd.Select(input => ConvertInputToOutput(input)).ToList();
             programBlock.VariableId = Guid.Parse(customBlockId);
+
+            Guid customBlockGuid = Guid.Parse(customBlockId);
+            if (APO.ProgramStructure.CustomPrograms.ContainsKey(programBlock.Id))
+            {
+                APO.ProgramStructure.CustomPrograms[programBlock.Id] = new CustomBlockProgram { Name = customBlockProgram.Name, Id = Guid.Parse(customBlockId) };
+            }
+            else
+            {
+                APO.ProgramStructure.CustomPrograms.Add(programBlock.Id, new CustomBlockProgram { Name = customBlockProgram.Name, Id = Guid.Parse(customBlockId) });
+            }
         }
     }
+
 
     string GetShape(string type, bool isList)
     {

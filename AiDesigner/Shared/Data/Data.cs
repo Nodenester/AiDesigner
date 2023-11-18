@@ -81,7 +81,7 @@ namespace NodeBaseApi.Version2
         public Tuple<double, double> CameraPos { get; set; } = new Tuple<double, double>(0, 0);
         public Dictionary<Guid, object> InputValues { get; set; } = new Dictionary<Guid, object>();
         public Dictionary<Guid, object> OutputValues { get; set; } = new Dictionary<Guid, object>();
-        public Dictionary<Guid, CustomProgram> CustomPrograms { get; set; } = new Dictionary<Guid, CustomProgram>();
+        public Dictionary<Guid, CustomBlockProgram> CustomPrograms { get; set; } = new Dictionary<Guid, CustomBlockProgram>();
         public Dictionary<Guid, object> BlockOutputValues { get; set; } = new Dictionary<Guid, object>();
         public Dictionary<Guid, object> DirectInputValues { get; set; } = new Dictionary<Guid, object>();
 

@@ -18,7 +18,10 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             Description = "Llama 2-7b API";
             Inputs = new List<Input>
             {
-                new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-7b API" }
+                new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API", IsRequired = true },
+                new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
+                new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
             };
             Outputs = new List<Output>
             {
@@ -37,13 +40,16 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             Name = "Llama2 13b";
             Description = "Llama 2-13b API";
             Inputs = new List<Input>
-        {
-            new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API" }
-        };
+            {
+                new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API", IsRequired = true },
+                new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
+                new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+            };
             Outputs = new List<Output>
-        {
-            new Output { Name = "ApiResponse", Type = Type.String, Description = "The API response from Llama 2-13b" }
-        };
+            {
+                new Output { Name = "ApiResponse", Type = Type.String, Description = "The API response from Llama 2-13b" }
+            };
         }
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
@@ -57,13 +63,16 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
             Name = "Llama2 70b";
             Description = "Llama 2-70b API";
             Inputs = new List<Input>
-        {
-            new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-70b API" }
-        };
+            {
+                new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API", IsRequired = true },
+                new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
+                new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+            };
             Outputs = new List<Output>
-        {
-            new Output { Name = "ApiResponse", Type = Type.String, Description = "The API response from Llama 2-70b" }
-        };
+            {
+                new Output { Name = "ApiResponse", Type = Type.String, Description = "The API response from Llama 2-70b" }
+            };
         }
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
