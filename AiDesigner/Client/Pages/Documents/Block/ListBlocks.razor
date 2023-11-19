@@ -78,6 +78,20 @@
                 <li>Index: The index of the item in the list. (Type: Number)</li>
             </ul>
         </div>
+
+        <!-- Object To List Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Object To List</h3>
+            <p>Converts an object to a list of objects. If the object is already a list, it returns the list. Otherwise, it creates a new list with the object as its sole element.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Object: The object to convert to a list. If the object is a list, the same list is returned. (Type: Object) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>List: A list of objects. If the input was a list, this is the same list; otherwise, it's a new list containing the input object. (Type: Object, List: True)</li>
+            </ul>
+        </div>
     </section>
 </div>
 @code {

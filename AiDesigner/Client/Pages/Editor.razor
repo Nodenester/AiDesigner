@@ -207,7 +207,7 @@
                                             <span>@node.Block.Name</span>
                                             @if (node.Block.Name == "Get Variable")
                                             {
-                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.02rem;">
                                                     <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, -1, 0, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="@Guid.Empty"disabled selected hidden>Select Variable</option>
                                                         @foreach (var Variable in localProgram.ProgramStructure.Variables)
@@ -219,7 +219,7 @@
                                             }
                                             @if (node.Block.Name == "Set Variable")
                                             {
-                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.02rem;">
                                                     <select @bind-value="node.VariableId" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, localProgram.ProgramStructure.Variables[node.VariableId].Type, 1, -1, localProgram.ProgramStructure.Variables[node.VariableId].IsList))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="@Guid.Empty" disabled selected hidden>Select Variable</option>
                                                         @foreach (var Variable in localProgram.ProgramStructure.Variables)
@@ -231,7 +231,7 @@
                                             }
                                             @if (node.Block.Name == "For Loop")
                                             {
-                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.02rem;">
                                                     @if (node.Block.Outputs[1].Type != null)
                                                     {
                                                         <select @bind-value="node.Block.Outputs[1].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateType(node, e.Value))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
@@ -247,7 +247,7 @@
                                             }
                                             @if (node.Block.Name == "Set Item" || node.Block.Name == "Get Item" || node.Block.Name == "Add Item" || node.Block.Name == "Remove Item" || node.Block.Name == "Find Item")
                                             {
-                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.02rem;">
                                                     <select @bind-value="node.Block.Inputs[0].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateBlockType(node, e.Value))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="String">String</option>
                                                         <option value="Picture">Picture</option>
@@ -260,7 +260,7 @@
                                             }
                                             @if (node.Block.Name == "Select")
                                             {
-                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.02rem;">
                                                     <select @bind-value="node.Block.Inputs[1].Type" @bind-value:event="oninput" @onchange="((ChangeEventArgs e) => UpdateBlockType(node, e.Value))" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="String">String</option>
                                                         <option value="Picture">Picture</option>
@@ -273,7 +273,7 @@
                                             }
                                             @if (node.Block.Name == "Custom Block")
                                             {
-                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.03rem;">
                                                     @if (APO != null && APO.ProgramStructure.CustomPrograms.ContainsKey(node.Id))
                                                     {
                                                         <select @bind-value="APO.ProgramStructure.CustomPrograms[node.Id].Id"
@@ -304,7 +304,7 @@
                                             {
                                                 if(node != null)
                                                 {
-                                                <div style="width: calc(100%); margin-left: -0.6rem;">
+                                                <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.02rem;">
                                                     <select @bind-value="node.VariableId" @bind-value:event="oninput" class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
                                                         <option value="00000000-0000-0000-0000-000000000000">Default Model</option>
                                                         <option value="10000000-0000-0000-0000-000000000000">ChatGPT Turbo</option>
@@ -334,7 +334,13 @@
                                             }
                                             @if (node.Block.Name == "Select")
                                             {
-                                                <button @onclick="() => AddSelectInput(node)" class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                <button @onclick='() => AddSelectInput(node, "Input for case")' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                    Add input
+                                                </button>
+                                            }
+                                            @if (node.Block.Name == "Concatenation")
+                                            {
+                                                <button @onclick='() => AddSelectInput(node, "String" )' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
                                                     Add input
                                                 </button>
                                             }
@@ -375,9 +381,9 @@
             </div>
         </div>
 
-        <div id="right-side" class="resizable-x right-side w-2/12 bg-gray-200 dark:bg-gray-700 overflow-auto" style="width: 16.666667%;">
-            <div class="details-box p-0 border-b border-gray-300 dark:border-gray-600">
-                <p class="dark:bg-gray-700 border-gray-700 w-full align-top px-1">Details</p>
+<div id="right-side" class="resizable-x right-side w-2/12 bg-gray-200 dark:bg-gray-700 overflow-auto" style="height: fit-content; width: 16.666667%;">
+    <div class="details-box p-0 border-b border-gray-300 dark:border-gray-600" style="max-height: 79vh; overflow-y: auto;">
+        <p class="dark:bg-gray-700 border-gray-700 w-full align-top px-1">Details</p>
                 <!-- Block Settings Content -->
                 @if (SelectedDetail is ProgramBlock programBlock)
                 {
@@ -946,9 +952,21 @@
         if (customBlockProgram != null)
         {
             programBlock.Block.Inputs = customBlockProgram.ProgramStructure.ProgramStart.Select(output => ConvertOutputToInput(output)).ToList();
-            programBlock.Block.Outputs = customBlockProgram.ProgramStructure.ProgramEnd.Select(input => ConvertInputToOutput(input)).ToList();
-            programBlock.VariableId = Guid.Parse(customBlockId);
+            programBlock.Block.Inputs.ForEach(input =>
+            {
+                APO.ProgramStructure.RemoveConnection(input.Id);
+                input.Id = Guid.NewGuid();
+            });
 
+            // Processing Outputs
+            programBlock.Block.Outputs = customBlockProgram.ProgramStructure.ProgramEnd.Select(input => ConvertInputToOutput(input)).ToList();
+            programBlock.Outputs = programBlock.Block.Outputs.Select(output =>
+            {
+                APO.ProgramStructure.RemoveConnection(output.Id);
+                return Guid.NewGuid();
+            }).ToList();
+
+            programBlock.VariableId = Guid.Parse(customBlockId);
             Guid customBlockGuid = Guid.Parse(customBlockId);
             if (APO.ProgramStructure.CustomPrograms.ContainsKey(programBlock.Id))
             {
@@ -1197,14 +1215,20 @@
         });
     }
 
-    private void AddSelectInput(ProgramBlock node)
+    private void AddSelectInput(ProgramBlock node, string text)
     {
         int idx = node.Block.Inputs.Count();
+        if (node.Block.Inputs.FirstOrDefault().Name.Split(' ')[0] == text.Split(' ')[0])
+        {
+            idx++;
+        }
+
         node.Block.Inputs.Add(new Input
             {
-                Name = $"Input {idx}",
+                Id = Guid.NewGuid(),
+                Name = $"{text.Split(' ')[0]} {idx}",
                 Type = node.Block.Inputs[1].Type,
-                Description = $"Input for case {idx}.",
+                Description = $"{text} {idx}.",
             });
     }
 
@@ -1422,7 +1446,7 @@
     {
         return new Output
             {
-                Id = input.Id,
+                Id = Guid.NewGuid(),
                 Name = input.Name,
                 Description = input.Description,
                 Type = input.Type,
