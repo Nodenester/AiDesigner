@@ -1,0 +1,89 @@
+﻿@page "/documentation/block/imageaiblocks"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">AI Model Blocks</h2>
+        <!-- Segmentation Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Segmentation Block</h3>
+            <p>Processes an image using the NVIDIA SegFormer API and returns segmentation results.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ImageData: Image data for segmentation (Type: Picture)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>SegmentationResults: Segmentation results with labels and masks (Type: Object, IsList: true)</li>
+            </ul>
+        </div>
+        <!-- Image Classification Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Image Classification Block</h3>
+            <p>Processes an image using the ViT Base Patch16 API and returns a list of labels with scores. (To extract data, use an Object to List block.)</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ImageData: Image data for analysis (Type: Picture)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>AnalysisResults: Labels and scores from image analysis (Type: Object, IsList: true)</li>
+            </ul>
+        </div>
+
+        <!-- Image Captioning Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Image Captioning Block</h3>
+            <p>Generates a text description for a given image using the vit-gpt2-image-captioning model.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ImageData: Image data to be captioned (Type: Picture)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Caption: Generated image description (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Object Cropping Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Object Cropping Block</h3>
+            <p>Detects objects in an image using DETR-ResNet-50 and returns cropped images with labels. (To extract data, use an Object to List block.)</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ImageData: Image data for object detection (Type: Picture)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>CroppedImagesWithLabels: List of tuples containing cropped images and labels (Type: Object, IsList: true)</li>
+            </ul>
+        </div>
+
+        <!-- Text to Image Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Text to Image Block</h3>
+            <p>Generates an image from text using Stable Diffusion v1.5 model.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>TextPrompt: Text prompt for generating the image (Type: String)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>GeneratedImage: Generated image data (Type: Picture)</li>
+            </ul>
+        </div>
+
+        <!-- Text Reader Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Text Reader Block</h3>
+            <p>Reads text from images using the OCR-Donut-CORD model.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ImageData: Image data for text extraction (Type: Picture)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ExtractedText: Extracted text from the image (Type: String)</li>
+            </ul>
+        </div>
+    </section>
+</div>

@@ -1,0 +1,62 @@
+﻿@page "/documentation/block/audioaiblocks"
+
+<div class="container mx-auto p-6 font-mono">
+    <section class="mb-8">
+        <h2 class="text-2xl font-bold mb-4">Audio AI Model Blocks</h2>
+        <!-- Transcription Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Transcription Block</h3>
+            <p>Processes audio data using the Whisper Large V3 API and returns the transcription.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>AudioData: Audio data for processing (Type: Audio)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Transcription: Transcribed audio text (Type: String)</li>
+            </ul>
+        </div>
+        <!-- Text to Speech Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Text to Speech Block</h3>
+            <p>Converts text to speech using the Hugging Face Suno Bark API, supporting multiple languages and voice presets.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Text: Text input for speech synthesis (Type: String)</li>
+                <li>VoicePreset: Optional voice preset for speech synthesis (Type: String)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>AudioData: Generated speech audio data (Type: Audio)</li>
+            </ul>
+        </div>
+
+        <!-- Music Generation Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Music Generation Block</h3>
+            <p>Generates music based on textual prompts using the Hugging Face Music Generation API.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Prompt: Prompt describing the style or elements of the music (Type: String)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>MusicData: Generated music audio data (Type: Audio)</li>
+            </ul>
+        </div>
+
+        <!-- Speech Enhancement Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Speech Enhancement Block</h3>
+            <p>Enhances speech quality using the speechbrain/mtl-mimic-voicebank model.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>AudioData: Audio data for enhancement (Type: Audio)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>EnhancedAudio: Enhanced audio data (Type: Audio)</li>
+            </ul>
+        </div>
+    </section>
+</div>

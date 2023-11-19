@@ -115,4 +115,23 @@ namespace NodeExacuteApi.Data.Blocks
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
 
     }
+
+    public class ObjectToList : Block
+    {
+        public ObjectToList()
+        {
+            Id = Guid.NewGuid();
+            Name = "Object To List";
+            Description = "Converts an object to a list of objects. If the object is already a list, it returns the list.";
+            Inputs = new List<Input>
+            {
+                new Input { Id = Guid.NewGuid(), Name = "Object", Description = "The object to convert to a list.", Type = Type.Object, IsRequired = true }
+            };
+            Outputs = new List<Output>
+            {
+                new Output { Id = Guid.NewGuid(), Name = "List", Description = "List of objects.", Type = Type.Object, IsList = true }
+            };
+        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
 }
