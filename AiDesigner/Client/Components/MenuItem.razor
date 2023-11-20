@@ -1,46 +1,92 @@
 ﻿@using AiDesigner.Shared
 @inject IJSRuntime JSRuntime
+@using AiDesigner.Client.Components
+@inject TooltipService tooltipService
 
-<li class="my-0 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-white">
-    @if (Item.SubItems == null || !Item.SubItems.Any())
+<li class="menu-item dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600 dark:text-white" style="padding-left: 0.1rem; position: relative; z-index: 10000;">
+    @if (Item != null && Item.SubItems == null || !Item.SubItems.Any())
     {
-        <button class="w-full text-left" @onclick="HandleClick">@Item.Name</button>
+        <div class="relative group">
+            <RadzenStack Orientation="Orientation.Horizontal" JustifyContent="JustifyContent.Center" Class="rz-p-1">
+                <button @ref="buttonElement"
+                        @onmouseenter="@(() => ShowTooltip(buttonElement, Item.block.Description))"
+                        @onmouseleave="@HideTooltip"
+                        class="w-full text-left"
+                        @onclick="(() => HandleClick(Item))">
+                    @Item.Name
+                </button>
+            </RadzenStack>
+        </div>
     }
     else
     {
-        <details open="@Item.IsExpanded">
-            <summary @onclick="HandleClick">@Item.Name</summary>
-            <ul>
-                @foreach (var subItem in Item.SubItems)
-                {
-                    <MenuItem Item="subItem" OnItemClick="OnItemClick"></MenuItem>
-                }
-            </ul>
-        </details>
+        <div class="flex items-center justify-between" @onclick="ToggleSubmenu">
+            <span class="text-lg text-gray-600 dark:text-white w-full">
+                <span style="font-size: 0.9rem; display: inline-block; transition: transform 0.2s ease-in-out; @(Item.IsExpanded ? "transform: rotate(90deg);" : "")">▶</span>
+                @Item.Name
+            </span>
+        </div>
+        <ul class="@GetSubmenuClass()">
+            @foreach (var subItem in Item.SubItems)
+            {
+                <MenuItem Item="subItem" OnItemClick="OnItemClick"></MenuItem>
+            }
+        </ul>
     }
 </li>
 
+
 @code {
-    [Parameter] 
+    [Parameter]
     public Item Item { get; set; }
 
-    [Parameter] 
+    [Parameter]
     public EventCallback<Item> OnItemClick { get; set; }
 
-    private async Task HandleClick()
+    private ElementReference buttonElement;
+
+    void ShowTooltip(ElementReference elementReference, string content)
     {
-        if (Item.SubItems != null && Item.SubItems.Any())
+        tooltipService.Open(elementReference, content, new TooltipOptions
+            {
+                Position = TooltipPosition.Top,
+                Duration = Int32.MaxValue // Set a very long duration
+            });
+    }
+
+    void HideTooltip()
+    {
+        tooltipService.Close();
+    }
+
+    private void ToggleSubmenu()
+    {
+        Item.IsExpanded = !Item.IsExpanded;
+    }
+
+    private string GetSubmenuClass()
+    {
+        return Item.IsExpanded ? "visible" : "hidden";
+    }
+
+    private async Task HandleClick(Item item)
+    {
+        item.IsTooltipVisible = !item.IsTooltipVisible;
+        if (item.SubItems == null || !item.SubItems.Any())
         {
-            // Toggle the visibility of subitems
-            Item.IsExpanded = !Item.IsExpanded;
-        }
-        else
-        {
+            await JSRuntime.InvokeVoidAsync("hideContextMenu");
             if (OnItemClick.HasDelegate)
             {
-                await OnItemClick.InvokeAsync(Item);
+                await OnItemClick.InvokeAsync(item);
             }
-            await JSRuntime.InvokeVoidAsync("hideContextMenu");
         }
     }
 }
+
+<style>
+    .rz-tooltip-content {
+        max-width: 200px; /* Adjust as needed */
+        white-space: normal;
+        word-wrap: break-word;
+    }
+</style>

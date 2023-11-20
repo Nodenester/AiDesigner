@@ -26,7 +26,7 @@
 
                 <!-- Program Name -->
                 <div class="w-full align-middle content-center">
-                    <h1 class="dark:text-white mb-2 text-xl m-auto">@eap.Name</h1>
+                    <h1 class="dark:text-white mb-2 text-xl m-auto overflow-hidden whitespace-nowrap">@eap.Name</h1>
                 </div>
             </button>
         }
@@ -73,8 +73,8 @@
                 </div>
                 <br />
                 <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1.5rem;">
-                <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
-                    <p class="text-left dark:text-white text-lg m-1 ml-3 overflow-hidden w-20">@article.Name</p>
+                <div class="flex justify-between w-full h-1/5" style="margin-bottom: -1.5rem;">
+                    <p class="text-left dark:text-white text-lg m-1 ml-3 overflow-hidden w-20 whitespace-nowrap">@article.Name</p>
                     <button @onclick="() => Addtovault(article)" @onclick:stopPropagation="true" class="bg-green-600 hover:bg-green-700 text-white rounded p-1 m-1 w-24">Add to vault</button>
                 </div>
                 <br />

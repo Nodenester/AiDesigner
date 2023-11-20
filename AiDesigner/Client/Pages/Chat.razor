@@ -10,6 +10,8 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http
 @attribute [Authorize]
+@inject TooltipService tooltipService
+
 
 <div class="flex bo" style="height: 81%;">
     <!-- Select Program box -->
@@ -21,8 +23,11 @@
                 @foreach (var program in customPrograms)
                 {
                     <div class="mb-2 h-12">
-                        <button class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
-                        @onclick="() => SetSelectedProgram(program)">
+                        <button @ref='programButtonReferences[(program.Id, "custom")]'
+                                @onmouseenter='() => ShowTooltip(program.Id, "custom")'
+                                @onmouseleave="HideTooltip"
+                                class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
+                                @onclick="() => SetSelectedProgram(program)">
                             @program.Name
                         </button>
                     </div>
@@ -33,8 +38,11 @@
                 @foreach (var program in workshopPrograms)
                 {
                     <div class="mb-2 h-12">
-                        <button class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
-                        @onclick="() => SetSelectedProgram(program)">
+                        <button @ref='programButtonReferences[(program.Id, "")]'
+                                @onmouseenter='() => ShowTooltip(program.Id, "")'
+                                @onmouseleave="HideTooltip"
+                                class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
+                                @onclick="() => SetSelectedProgram(program)">
                             @program.Name
                         </button>
                     </div>
@@ -77,15 +85,28 @@
         }
 
         <!-- Button -->
-        <div class="align-center mb-0 mt-auto">
-            <button class="py-1 bg-green-600 text-white rounded @(selectedProgram != null && selectedProgram.SupportsSessions ? "mt-2" : "mt-4") px-6 h-12 w-48 hover:bg-green-700" @onclick="ExecuteProgram">
-                Execute Program
+        <div class="align-center mb-0 mt-2">
+            <button class="py-1 rounded px-6 h-12 w-48 @(isLoading ? "bg-gray-500 cursor-not-allowed" : isExecutionFailed ? "bg-red-600" : "bg-green-600 hover:bg-green-700") text-white"
+                    @onclick="ExecuteProgram"
+                    disabled="@isLoading">
+                @if (isLoading)
+                {
+                    <span>Loading...</span>
+                }
+                else if (isExecutionFailed)
+                {
+                    <span>Failed</span>
+                }
+                else
+                {
+                    <span>Execute Program</span>
+                }
             </button>
         </div>
     </div>
 
     <!-- Output box -->
-    <div class="box-style flex flex-col items-center text-center p-4 pt-2">
+    <div class="box-style flex flex-col items-center text-center p-4 pt-2 overflow-y-auto">
         <p class="text-lg font-semibold mb-2">Program Outputs</p>
         @if (selectedProgram != null)
         {
@@ -194,6 +215,35 @@
 
     Session currentSession = new Session();
 
+    private bool isLoading = false;
+    private bool isExecutionFailed = false;
+
+    private Dictionary<(Guid, string), ElementReference> programButtonReferences = new Dictionary<(Guid, string), ElementReference>();
+
+    void ShowTooltip(Guid programId, string source)
+    {
+        var key = (programId, source);
+        if (programButtonReferences.TryGetValue(key, out var elementReference))
+        {
+            var programsList = source == "custom" ? customPrograms : workshopPrograms;
+            var content = programsList.FirstOrDefault(p => p.Id == programId)?.Description;
+
+            if (content != null)
+            {
+                tooltipService.Open(elementReference, content, new TooltipOptions
+                    {
+                        Position = TooltipPosition.Top,
+                        Style = "max-width: 240px; white-space: normal; word-wrap: break-word;" // Set your desired max width and include wrapping properties
+                    });
+            }
+        }
+    }
+
+    void HideTooltip()
+    {
+        tooltipService.Close();
+    }
+
     protected override async Task OnInitializedAsync()
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
@@ -213,51 +263,67 @@
 
     private async Task ExecuteProgram()
     {
-        var nonNullInputValues = selectedProgram.ProgramStructure.InputValues
-            .Where(kvp => kvp.Value != null)
-            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-
-        if (CascAuth != null)
+        if (selectedProgram != null)
         {
-            var user = CascAuth.User;
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            if (Guid.TryParse(userIdClaim, out Guid userId))
+            var nonNullInputValues = selectedProgram.ProgramStructure.InputValues
+     .Where(kvp => kvp.Value != null)
+     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+            if (CascAuth != null)
             {
-                //ProgramOutput = await apiService.ExecuteProgramAsync(selectedProgram.ApiKey, nonNullInputValues, userId.ToString(), null, true);
-                var url = $"Execute?programKey={selectedProgram.ApiKey}&apiKey={userId}";
-
-                if (true)
+                var user = CascAuth.User;
+                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                if (Guid.TryParse(userIdClaim, out Guid userId))
                 {
-                    url += $"&isTest=true";
-                }
+                    //ProgramOutput = await apiService.ExecuteProgramAsync(selectedProgram.ApiKey, nonNullInputValues, userId.ToString(), null, true);
+                    var url = $"Execute?programKey={selectedProgram.ApiKey}&apiKey={userId}";
 
-                if (selectedProgram.SupportsSessions)
-                {
-                    url += $"&sessionId={currentSession?.SessionId}";
-                }
-
-                try
-                {
-                    var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
-
-                    if (response.IsSuccessStatusCode)
+                    if (true)
                     {
-                        ProgramOutput = await response.Content.ReadFromJsonAsync<List<object>>();
+                        url += $"&isTest=true";
                     }
-                    else
+
+                    if (selectedProgram.SupportsSessions)
                     {
-                        Console.WriteLine("Failed");
-                        //Console.Error.WriteLine($"Error: {response.StatusCode}");
+                        url += $"&sessionId={currentSession?.SessionId}";
                     }
+
+                    isLoading = true;
+                    isExecutionFailed = false;
+                    try
+                    {
+                        var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
+
+                        if (response.IsSuccessStatusCode)
+                        {
+                            ProgramOutput = await response.Content.ReadFromJsonAsync<List<object>>();
+                        }
+                        else
+                        {
+                            isExecutionFailed = true;
+                            Console.WriteLine($"Error executing program: {response.StatusCode}");
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        isExecutionFailed = true;
+                        Console.WriteLine($"Error executing program: {ex.Message}");
+                    }
+                    finally
+                    {
+                        isLoading = false;
+                        if (isExecutionFailed)
+                        {
+                            StateHasChanged();
+                            await Task.Delay(2000); // Wait for 3 seconds
+                            isExecutionFailed = false; // Reset the error state
+                        }
+                    }
+                    await GetTokens();
                 }
-                catch (Exception ex)
-                {
-                    Console.Error.WriteLine($"Exception: {ex.Message}");
-                }
-                await GetTokens();
             }
+            StateHasChanged();
         }
-        StateHasChanged();
     }
 
     private async Task GetTokens()

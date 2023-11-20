@@ -16,6 +16,7 @@
 @using AiDesigner.Shared.Data;
 @using System.Diagnostics;
 @using static AiDesigner.Client.Components.InputList;
+@inject TooltipService tooltipService
 
 @if (localProgram != null)
 {
@@ -327,42 +328,35 @@
                                             <!-- Left part content goes here -->
                                             @foreach (var input in node.Block.Inputs)
                                             {
-                                                <div class="node-input d-flex ">
-                                                    <div id="@input.Id" class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
+                                                <div class="node-input d-flex"
+                                                     @ref="inputElementReferences[input.Id.ToString()]"
+                                                     @onmouseenter="() => ShowTooltip(inputElementReferences[input.Id.ToString()], input.Description)"
+                                                     @onmouseleave="HideTooltip">
+                                                    <div id="@input.Id"
+                                                         class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection"
+                                                         @onclick="() => TryConnect(input)">
+                                                    </div>
                                                     <span class="small-font">@input.Name</span>
                                                 </div>
                                             }
-                                            @if (node.Block.Name == "Select")
-                                            {
-                                                <button @onclick='() => AddSelectInput(node, "Input for case")' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
-                                                    Add input
-                                                </button>
-                                            }
-                                            @if (node.Block.Name == "Concatenation")
-                                            {
-                                                <button @onclick='() => AddSelectInput(node, "String" )' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
-                                                    Add input
-                                                </button>
-                                            }
+                                            <!-- Other content like buttons -->
                                         </div>
                                         <div class="right-part">
                                             <!-- Right part content goes here -->
                                             @foreach (var output in node.Block.Outputs)
                                             {
-                                                <div class="node-output d-flex">
+                                                <div class="node-output d-flex"
+                                                     @ref="outputElementReferences[output.Id.ToString()]"
+                                                     @onmouseenter="() => ShowTooltip(outputElementReferences[output.Id.ToString()], output.Description)"
+                                                     @onmouseleave="HideTooltip">
                                                     <span class="small-font">@output.Name</span>
-                                                    <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
-                                                </div>
-
-                                            }
-                                            @if (node.Block.Name == "Switch")
-                                            {
-                                                <div class="node-output d-flex">
-                                                    <button @onclick="() => AddSwitchOutput(node)" class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
-                                                        Add case
-                                                    </button>
+                                                    <div id="@output.Id"
+                                                         class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection"
+                                                         @onclick="() => SelectOutput(output)">
+                                                    </div>
                                                 </div>
                                             }
+                                            <!-- Other content like buttons -->
                                         </div>
                                     </div>
                                 </div>
@@ -381,8 +375,8 @@
             </div>
         </div>
 
-<div id="right-side" class="resizable-x right-side w-2/12 bg-gray-200 dark:bg-gray-700 overflow-auto" style="height: fit-content; width: 16.666667%;">
-    <div class="details-box p-0 border-b border-gray-300 dark:border-gray-600" style="max-height: 79vh; overflow-y: auto;">
+        <div id="right-side" class="resizable-x right-side w-2/12 bg-gray-200 dark:bg-gray-700 h-fill mb-9" style="max-height: 78.4vh; width: 16.666667%;">
+            <div class="details-box p-0 border-b border-gray-300 dark:border-gray-600 h-full" style="max-height: 78.4vh; overflow-y: auto;">
         <p class="dark:bg-gray-700 border-gray-700 w-full align-top px-1">Details</p>
                 <!-- Block Settings Content -->
                 @if (SelectedDetail is ProgramBlock programBlock)
@@ -695,6 +689,7 @@
     private ProgramObject _localProgram;
     public float zoomvalue { get; set; } = 1;
     public object SelectedDetail { get; set; }
+    public ProgramBlock SelectedBlock { get; set; }
 
     public Output SelectedOutput { get; set; }
 
@@ -810,9 +805,25 @@
     }
 
     [JSInvokable]
+    public async void DeselectBlock()
+    {
+        SelectedBlock = null;
+    }
+
+    [JSInvokable]
+    public async void OnRemoveConnection(string connectionId)
+    {
+        Console.WriteLine("Connection removed: " + connectionId.Replace("-endpoint", ""));
+        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+        APO.ProgramStructure.RemoveConnection(Guid.Parse(connectionId.Replace("-endpoint", "")));
+        await DrawConnections(localProgram.ProgramStructure);
+        StateHasChanged();
+    }
+
+    [JSInvokable]
     public async void OnGlobalKeyPress(string key, string code)
     {
-        Console.WriteLine($"Key pressed: {key}, Code: {code}");
+        //Console.WriteLine($"Key pressed: {key}, Code: {code}");
         if (code == "Delete" || code == "Backspace test test")
         {
             await DeleteCurrentNode();
@@ -904,32 +915,16 @@
     {
         if (SelectedOutput != null)
         {
-            //Console.WriteLine("input id: " + input.Id);
-            if (localProgram is CustomProgram customProgram)
+        //Console.WriteLine("input id: " + input.Id);
+            if (APO.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
             {
-                if (customProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
-                {
-                    await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
-                    SelectedOutput = null;
-                    Console.WriteLine("Connection Succeded");
-                }
-                else
-                {
-                    Console.WriteLine("connection failed");
-                }
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
+                SelectedOutput = null;
+                Console.WriteLine("Connection Succeded");
             }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
+            else
             {
-                if (customBlockProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
-                {
-                    await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
-                    SelectedOutput = null;
-                    Console.WriteLine("Connection Succeded");
-                }
-                else
-                {
-                    Console.WriteLine("connection failed");
-                }
+                Console.WriteLine("connection failed");
             }
         }
     }
@@ -937,6 +932,7 @@
     public void SelectNode(ProgramBlock programBlock)
     {
         SelectedDetail = programBlock;
+        SelectedBlock = programBlock;
         //Console.WriteLine(programBlock.Block.Name);
     }
 
@@ -1052,7 +1048,7 @@
     {
         try
         {
-            if (SelectedDetail is ProgramBlock programBlock)
+            if (SelectedBlock is ProgramBlock programBlock)
             {
                 try
                 {
@@ -1377,6 +1373,7 @@
     }
 
     //Block logic
+
     //private void HandleButtonSelection(BlockSelector.ButtonItem button)
     //{
     //    // Handle the selected button
@@ -1384,6 +1381,19 @@
     //}
 
     //Logic stuff
+    private Dictionary<string, ElementReference> inputElementReferences = new Dictionary<string, ElementReference>();
+    private Dictionary<string, ElementReference> outputElementReferences = new Dictionary<string, ElementReference>();
+
+    void ShowTooltip(ElementReference elementReference, string content)
+    {
+        tooltipService.Open(elementReference, content, new TooltipOptions { Position = TooltipPosition.Top });
+    }
+
+    void HideTooltip()
+    {
+        tooltipService.Close();
+    }
+
     private void Openapi()
     {
         api.Open();

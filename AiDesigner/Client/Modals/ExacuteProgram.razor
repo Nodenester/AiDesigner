@@ -125,7 +125,22 @@
             </div>            
             <!-- Modal footer -->
             <div class="flex items-center justify-center p-6 pt-0 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600 outline-none">
-                <button type="button" class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded border-0" @onclick="@ExecuteProgram">Exacute</button>
+                <button type="button" class="w-44 px-4 py-2 text-sm font-semibold text-white rounded border-0 @(isLoading ? "bg-gray-500 cursor-not-allowed" : isExecutionFailed ? "bg-red-600" : "bg-green-600 hover:bg-green-700") text-white"
+                        @onclick="ExecuteProgram"
+                        disabled="@isLoading">
+                    @if (isLoading)
+                    {
+                        <span>Loading...</span>
+                    }
+                    else if (isExecutionFailed)
+                    {
+                        <span>Failed</span>
+                    }
+                    else
+                    {
+                        <span>Execute Program</span>
+                    }
+                </button>
             </div>
         </div>
     </div>
@@ -148,6 +163,9 @@
     public List<Session> sessions { get; set; } = new List<Session>();
 
     Session currentSession = new Session(); 
+
+    private bool isLoading = false;
+    private bool isExecutionFailed = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -222,6 +240,9 @@
                         url += $"&sessionId={currentSession.SessionId}";
                     }
 
+                    isLoading = true;
+                    isExecutionFailed = false;
+                    StateHasChanged();
                     try
                     {
                         var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
@@ -233,12 +254,22 @@
                         }
                         else
                         {
-                            Console.Error.WriteLine($"Error: {response.StatusCode}");
+                            isExecutionFailed = true;
                         }
                     }
                     catch (Exception ex)
                     {
-                        Console.Error.WriteLine($"Exception: {ex.Message}");
+                        isExecutionFailed = true;
+                    }
+                    finally
+                    {
+                        isLoading = false;
+                        if (isExecutionFailed)
+                        {
+                            StateHasChanged();
+                            await Task.Delay(2000); // Wait for 3 seconds
+                            isExecutionFailed = false; // Reset the error state
+                        }
                     }
                     await GetTokens();
                 }

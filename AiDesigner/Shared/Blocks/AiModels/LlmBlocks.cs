@@ -21,7 +21,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API", IsRequired = true },
                 new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
                 new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
-                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true },
+                new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false }
             };
             Outputs = new List<Output>
             {
@@ -44,7 +45,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API", IsRequired = true },
                 new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
                 new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
-                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true },
+                new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false }
             };
             Outputs = new List<Output>
             {
@@ -67,7 +69,8 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
                 new Input { Name = "Query", Type = Type.String, Description = "The input query for the Llama 2-13b API", IsRequired = true },
                 new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated", IsRequired = true},
                 new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = true },
-                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true }
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = true },
+                new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false }
             };
             Outputs = new List<Output>
             {

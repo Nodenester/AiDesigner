@@ -104,3 +104,8 @@ a, .btn-link {
 .bg-gray-7001 {
     background-color: #2b2b2b;
 }
+
+body {
+    --rz-tooltip-color: white; /* text color */
+    --rz-tooltip-background-color: gray; /* background color */
+}

@@ -5,7 +5,7 @@
 @using NodeExacuteApi.Data.Blocks.AiModels;
 @inject IJSRuntime JSRuntime
 
-<div id="contextMenu" class="context-menu hidden bg-gray-700 w-64 h-64 overflow-auto absolute z-10" style="border-radius: 10px;">
+<div id="contextMenu" class="context-menu hidden overflow-y-scroll overflow-x-visible bg-gray-700 w-64 h-64 absolute z-10" style="border-radius: 10px;">
     <input id="searchInput" type="text" placeholder="Search..." @oninput="UpdateFilter" class="px-1 py-1 w-full border-b-2 border-gray-200 dark:border-gray-600 dark:bg-gray-700 dark:text-white focus:outline-none" />
     <ul class="px-1 py-0 dark:bg-gray-700">
         @RenderItems(FilteredItems)
@@ -38,6 +38,9 @@
                 width: 10px;
             }
 
+    .context-menu ul {
+        padding-left: 14px;
+    }
 </style>
 
 @code {
@@ -45,6 +48,59 @@
     public EventCallback<Item> OnMenuItemClick { get; set; }
 
     private string filter = "";
+
+    private IEnumerable<Item> FilteredItems => GetFilteredAndExpandedItems(Items, filter);
+
+    private bool IsMatch(Item item, string filter)
+    {
+        bool match = !string.IsNullOrWhiteSpace(filter) && item.Name.ToLower().Contains(filter.ToLower());
+        bool anySubItemMatches = item.SubItems?.Any(subItem => IsMatch(subItem, filter)) ?? false;
+
+        // Set IsExpanded only if there is a filter string and it's a match or an ancestor of a matching item.
+        item.IsExpanded = match || anySubItemMatches;
+
+        return match || anySubItemMatches;
+    }
+
+    private IEnumerable<Item> GetFilteredAndExpandedItems(IEnumerable<Item> items, string filter)
+    {
+        var filteredItems = new List<Item>();
+
+        foreach (var item in items)
+        {
+            if (string.IsNullOrWhiteSpace(filter))
+            {
+                // If there's no filter, add all items but make sure they are not expanded.
+                item.IsExpanded = false;
+                filteredItems.Add(item);
+            }
+            else if (IsMatch(item, filter))
+            {
+                // Only add items that are a match or have matching subitems.
+                filteredItems.Add(item);
+            }
+        }
+
+        return filteredItems;
+    }
+
+    private void UpdateFilter(ChangeEventArgs e)
+    {
+        filter = e.Value.ToString();
+        StateHasChanged(); // Re-render the component with the updated filter.
+    }
+
+    private RenderFragment RenderItems(IEnumerable<Item> items) => builder =>
+       {
+       var seq = 0;
+       foreach (var item in items)
+       {
+           builder.OpenComponent<MenuItem>(seq++);
+           builder.AddAttribute(seq++, "Item", item);
+           builder.AddAttribute(seq++, "OnItemClick", OnMenuItemClick);
+           builder.CloseComponent();
+       }
+   };
 
     private List<Item> Items { get; set; } = new List<Item>
     {
@@ -169,7 +225,7 @@
         {
             Name = "Ai models",
             SubItems = new List<Item>
-            {      
+            {
                 new Item
                 {
                     Name = "Text generation",
@@ -226,30 +282,4 @@
             }
         },
     };
-
-
-    private IEnumerable<Item> FilteredItems => Items.Where(i => IsMatch(i, filter));
-
-    private bool IsMatch(Item item, string filter)
-    {
-        return item.Name.ToLower().Contains(filter.ToLower())
-            || (item.SubItems?.Any(subItem => IsMatch(subItem, filter)) ?? false);
-    }
-
-    private void UpdateFilter(ChangeEventArgs e)
-    {
-        filter = e.Value.ToString();
-    }
-
-    private RenderFragment RenderItems(IEnumerable<Item> items) => builder =>
-       {
-       var seq = 0;
-       foreach (var item in items)
-       {
-           builder.OpenComponent<MenuItem>(seq++);
-           builder.AddAttribute(seq++, "Item", item);
-           builder.AddAttribute(seq++, "OnItemClick", OnMenuItemClick);
-           builder.CloseComponent();
-       }
-   };
 }

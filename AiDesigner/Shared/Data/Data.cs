@@ -231,7 +231,24 @@ namespace NodeBaseApi.Version2
 
         public void RemoveConnection(Guid inputId)
         {
-            InputValues.Remove(inputId);
+            bool removed = false;
+            foreach (var block in ProgramBlocks)
+            {
+                if (block.Inputs != null)
+                {
+                    DirectInputValues.Remove(inputId);
+                    InputValues.Remove(inputId);
+                    removed = block.Inputs.Remove(inputId);
+                }
+            }   
+            if (!removed)
+            {
+                var keyToRemove = ProgramEndConnections.FirstOrDefault(pair => pair.Value == inputId).Key;
+                if (keyToRemove != Guid.Empty)
+                {
+                    ProgramEndConnections.Remove(keyToRemove);
+                }
+            }
         }
 
         public async Task<bool> RemoveProgramBlock(Guid blockId)
@@ -256,7 +273,7 @@ namespace NodeBaseApi.Version2
                 // Remove connections to the block's inputs
                 if (blockToRemove.Inputs != null)
                 {
-                    foreach (Guid inputId in blockToRemove.Inputs)
+                    foreach (Guid inputId in blockToRemove.Inputs.ToList())
                     {
                         RemoveConnection(inputId);
                     }
