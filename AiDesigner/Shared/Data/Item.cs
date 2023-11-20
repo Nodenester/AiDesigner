@@ -8,6 +8,7 @@ public class Item
     public List<Item> SubItems { get; set; }
     public bool IsExpanded { get; set; }
     public Block block { get; set; }   
+    public bool IsTooltipVisible { get; set; }
 }
 
 

@@ -68,6 +68,7 @@ $(document).ready(function () {
 
 var currentZoom = 1.0; // initialize a global variable to keep track of zoom level
 var currentGridSize = 5; // initialize a global variable to keep track of grid size
+var hoveredConnection = null;
 
 window.jsPlumbInterop = {
     instance: null, // define instance here
@@ -187,6 +188,21 @@ window.jsPlumbInterop = {
                 updateNodeLocation(refrence, nodeId, newX, newY);
             }
         });
+
+        this.instance.bind("connection", function (info) {
+            // Ensure the connection has a canvas element
+            if (info.connection.canvas) {
+                // Add mouseover and mouseout event listeners to the connection's canvas
+                info.connection.canvas.addEventListener("mouseover", function () {
+                    hoveredConnection = info.connection;
+                    //console.log("Mouse over connection with source:", hoveredConnection.sourceId, "and target:", hoveredConnection.targetId);
+                });
+
+                info.connection.canvas.addEventListener("mouseout", function () {
+                    hoveredConnection = null;
+                });
+            }
+        });
     },
 
     //----------------------------remove   probably
@@ -228,6 +244,34 @@ window.jsPlumbInterop = {
             console.error("Failed to remove single connection:", error);
         }
     },
+    removeConnection: function (sourceId, targetId) {
+        try {
+            // Get the jsPlumb instance
+            var instance = this.instance;
+
+            if (!instance) {
+                console.error("jsPlumb instance is not initialized.");
+                return;
+            }
+
+            // Define the connection query parameters
+            var queryParams = {};
+            if (sourceId) queryParams.source = sourceId;
+            if (targetId) queryParams.target = targetId;
+
+            // Retrieve the connections based on the provided parameters
+            var connections = instance.getConnections(queryParams);
+
+            // Loop over connections and detach them
+            connections.forEach(function (connection) {
+                instance.detach(connection);
+            });
+
+        } catch (error) {
+            console.error("Failed to remove connections:", error);
+        }
+    },
+
     //----------------------------
 
     clearAllConnections: function () {
@@ -283,13 +327,13 @@ window.jsPlumbInterop = {
             this.instance.addEndpoint(sourceEndpoint.id, { anchor: 'Right' });
             this.instance.addEndpoint(targetEndpoint.id, { anchor: 'Left' });
 
-            console.log('Source Position and Dimensions:', source.getBoundingClientRect());
-            console.log('Target Position and Dimensions:', target.getBoundingClientRect());
-            console.log(source);
+            //console.log('Source Position and Dimensions:', source.getBoundingClientRect());
+            //console.log('Target Position and Dimensions:', target.getBoundingClientRect());
+            //console.log(source);
 
             if (color == "#ff0000") {
-                console.log('Source Endpoint Position:', sourceEndpoint.style.left, sourceEndpoint.style.top);
-                console.log('Target Endpoint Position:', targetEndpoint.style.left, targetEndpoint.style.top);
+                //console.log('Source Endpoint Position:', sourceEndpoint.style.left, sourceEndpoint.style.top);
+                //console.log('Target Endpoint Position:', targetEndpoint.style.left, targetEndpoint.style.top);
             }
 
             var sourceTop = (source.getBoundingClientRect().top - offsetY) / zoom;
@@ -299,8 +343,18 @@ window.jsPlumbInterop = {
 
             if (Math.abs(sourceTop - targetTop) < 5) { // 5 is a threshold you can adjust
                 connectorType = "Straight";
-                console.log("connector straight");
+            //    console.log("connector straight");
             }
+
+            // Check for existing connections between the same source and target
+            var existingConnections = this.instance.getConnections({
+                target: targetEndpoint.id
+            });
+
+            // Remove any existing connections
+            existingConnections.forEach(function (connection) {
+                this.instance.deleteConnection(connection);
+            }.bind(this));
 
             this.instance.connect({
                 source: sourceEndpoint.id,
@@ -308,6 +362,7 @@ window.jsPlumbInterop = {
                 paintStyle: { stroke: color, strokeWidth: 5 },
                 connector: connectorType
             });
+
         } else {
             console.error('Unable to connect', sourceId, 'to', targetId);
             if (!source) console.error('Source does not exist');
@@ -458,6 +513,11 @@ window.jsPlumbInterop = {
     },
 };
 
+// Variable to store the current hovered connection
+var hoveredConnection = null;
+
+// Function to add a mouseover listener to a connection
+
 function throttle(func, limit) {
     let lastFunc;
     let lastRan;
@@ -586,8 +646,14 @@ window.createInfiniteCanvas = function (refrence, sx, sy) {
         startY = e.pageY - canvas.offsetTop;
     });
 
-    viewport.addEventListener('mouseup', function () {
-        console.log('Mouseup event triggered');
+    viewport.addEventListener('mouseup', function (event) {
+        //console.log('Mouseup event triggered');
+        //console.log('Element pressed:', event.target);
+
+        if (event.target.id == "whiteboard") {
+            refrence.invokeMethodAsync('DeselectBlock')
+        }
+
         isDown = false;
         var leftValue = parseFloat(canvas.style.left);
         var topValue = parseFloat(canvas.style.top);
@@ -600,10 +666,12 @@ window.createInfiniteCanvas = function (refrence, sx, sy) {
         refrence.invokeMethodAsync('UpdateCameraPosition', leftValue, topValue)
             .catch(err => {
                 console.error(err);
-                console.log(canvas.style.left);
-                console.log(canvas.style.top);
+                console.log('Left:', canvas.style.left);
+                console.log('Top:', canvas.style.top);
+                console.log('Event Target:', event.target); // Logging the target element in case of an error
             });
     });
+
 
     viewport.addEventListener('mousemove', function (e) {
         if (!isDown) return;
@@ -619,6 +687,7 @@ window.createInfiniteCanvas = function (refrence, sx, sy) {
 }
 
 window.updateCameraPos = function (newX, newY, refrence) {
+    console.log("");
     var canvas = document.getElementById("canvas");
     var viewport = document.getElementById("whiteboard"); // get the viewport
     canvas.style.left = newX + 'px';
@@ -658,40 +727,44 @@ window.initializeContextMenu = function () {
         }
     });
 
-    window.showContextMenu = function (refrence, x, y) {
+    window.showContextMenu = function (refrence, pageX, pageY) {
+        whiteBoard = document.getElementById('whiteboard');
         var contextMenu = document.getElementById("contextMenu");
         var canvas = document.getElementById("canvas");
 
         // Calculate the canvas' position
-        var rect = canvas.getBoundingClientRect();
-        var canvasX = rect.left;
-        var canvasY = rect.top;
+        var rectCanvas = canvas.getBoundingClientRect();
+        var canvasX = rectCanvas.left;
+        var canvasY = rectCanvas.top;
 
-        // Now calculate the context menu's position relative to the canvas considering the zoom level
-        var relativeX = (x - canvasX - 50) / currentZoom;
-        var relativeY = (y - canvasY) / currentZoom;
+        // Adjust the coordinates relative to the canvas considering the zoom level
+        var relativeX = (pageX - canvasX - 50) / currentZoom;
+        var relativeY = (pageY - canvasY) / currentZoom;
 
         contextMenu.style.display = "block";
         var width = contextMenu.offsetWidth;
         var height = contextMenu.offsetHeight;
-        var windowWidth = whiteBoard.offsetWidth;
-        var windowHeight = whiteBoard.offsetHeight;
-        if (x + (width * 0.3) > windowWidth) {
-            x -= width;
+
+        var rectWhiteBoard = whiteBoard.getBoundingClientRect();
+        var windowWidth = rectWhiteBoard.width;
+        var windowHeight = rectWhiteBoard.height;
+
+        if (pageX + (width * 1) > windowWidth + rectWhiteBoard.left) {
+            pageX -= width;
         }
-        if (y + (height * 0.3) > windowHeight) {
-            y -= height;
+        if (pageY + (height * 1) > windowHeight + rectWhiteBoard.top) {
+            pageY -= height;
         }
-        contextMenu.style.left = `${x}px`;
-        contextMenu.style.top = `${y}px`;
+
+        contextMenu.style.left = `${pageX}px`;
+        contextMenu.style.top = `${pageY}px`;
 
         if (refrence) {
             refrence.invokeMethodAsync('SetBlockSpawn', relativeX, relativeY)
-                .then(result => console.log(result))
-                .catch(err => console.error(err));
+                .then(result => console.log("Async method result: ", result))
+                .catch(err => console.error("Async method error: ", err));
         }
     };
-
 
     window.hideContextMenu = function () {
         var contextMenu = document.getElementById("contextMenu");
@@ -701,9 +774,27 @@ window.initializeContextMenu = function () {
     window.contextMenuFunctions = {
         showSubMenu: function (subMenuId) {
             var subMenu = document.getElementById(subMenuId);
-            subMenu.classList.remove('hidden');
+            if (subMenu.classList.contains('hidden')) {
+                subMenu.classList.remove('hidden');
+            }
+        },
+        hideSubMenu: function (subMenuId) {
+            var subMenu = document.getElementById(subMenuId);
+            if (!subMenu.classList.contains('hidden')) {
+                subMenu.classList.add('hidden');
+            }
         }
-    }
+    };
+
+    window.toggleSubMenu = function (subMenuId) {
+        var subMenu = document.getElementById(subMenuId);
+        if (subMenu.classList.contains('hidden')) {
+            subMenu.classList.remove('hidden');
+        } else {
+            subMenu.classList.add('hidden');
+        }
+    };
+
 }
 
 window.addClickListener = (dotNetObjRef) => {
@@ -725,5 +816,16 @@ window.addClickListener = (dotNetObjRef) => {
 window.registerGlobalKeyPress = (dotNetObject) => {
     document.addEventListener('keydown', function (event) {
         dotNetObject.invokeMethodAsync('OnGlobalKeyPress', event.key, event.code);
+        if (event.key === 'Delete') {
+            if (hoveredConnection) {
+                // Assuming hoveredConnection has properties like sourceId and targetId
+                var sourceId = hoveredConnection.sourceId;
+                var targetId = hoveredConnection.targetId;
+                console.log("Source ID:", sourceId, "Target ID:", targetId);
+
+                dotNetObject.invokeMethodAsync('OnRemoveConnection', sourceId);
+            }
+        }
     });
 };
+
