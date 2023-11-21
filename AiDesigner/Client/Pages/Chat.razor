@@ -129,18 +129,19 @@
 
                                     if (outputItem != null)
                                     {
-                                        if (outputItem is List<byte[]> byteArrayList)
+                                        if (output.IsList)
                                         {
-                                            foreach (var byteArray in byteArrayList)
+                                            List<Object> collection = new List<Object>((IEnumerable<Object>)outputItem);
+                                            foreach (var byteArray in collection)
                                             {
-                                                var base64String = Convert.ToBase64String(byteArray);
-                                                <img src="@($"data:image/png;base64,{base64String}")" alt="Image" />
+                                                //var base64String = Convert.ToBase64String(byteArray);
+                                                <img src="@($"data:image/png;base64,{byteArray.ToString()}")" alt="Image" />
                                             }
                                         }
-                                        else if (outputItem is byte[] singleByteArray)
+                                        else
                                         {
-                                            var base64String = Convert.ToBase64String(singleByteArray);
-                                            <img src="@($"data:image/png;base64,{base64String}")" alt="Image" />
+                                            //var base64String = Convert.ToBase64String(singleByteArray);
+                                            <img src="@($"data:image/png;base64,{outputItem.ToString()}")" alt="Image" />
                                         }
                                     }
                                 }
@@ -314,6 +315,22 @@
                         if (response.IsSuccessStatusCode)
                         {
                             ProgramOutput = await response.Content.ReadFromJsonAsync<List<object>>();
+                            List<object> hej = ProgramOutput.ToList();
+
+                            // Check if the first item in the list is an array
+                            if (hej[0] is object[] array)
+                            {
+                                // Convert the array to a list
+                                var då = array.ToList();
+
+                                // Now då is a List<object> that you can work with
+                            }
+                            else
+                            {
+                                Console.WriteLine(hej[0]);
+                                // Handle the case where the first item is not an array
+                            }
+
                         }
                         else
                         {
