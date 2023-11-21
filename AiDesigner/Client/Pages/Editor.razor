@@ -339,6 +339,18 @@
                                                     <span class="small-font">@input.Name</span>
                                                 </div>
                                             }
+                                            @if (node.Block.Name == "Select")
+                                            {
+                                                <button @onclick='() => AddSelectInput(node, "Input for case")' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                    Add input
+                                                </button>
+                                            }
+                                            @if (node.Block.Name == "Concatenation")
+                                            {
+                                                <button @onclick='() => AddSelectInput(node, "String" )' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                    Add input
+                                                </button>
+                                            }
                                             <!-- Other content like buttons -->
                                         </div>
                                         <div class="right-part">
@@ -356,7 +368,14 @@
                                                     </div>
                                                 </div>
                                             }
-                                            <!-- Other content like buttons -->
+                                            @if (node.Block.Name == "Switch")
+                                            {
+                                                <div class="node-output d-flex">
+                                                    <button @onclick="() => AddSwitchOutput(node)" class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                        Add case
+                                                    </button>
+                                                </div>
+                                            }
                                         </div>
                                     </div>
                                 </div>

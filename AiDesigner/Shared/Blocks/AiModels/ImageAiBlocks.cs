@@ -97,7 +97,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public TextToImage()
         {
             Id = Guid.NewGuid();
-            Name = "Text to image";
+            Name = "Text To Image";
             Description = "Generates an image from text using Stable Diffusion v1.5 model.";
             Inputs = new List<Input>
         {

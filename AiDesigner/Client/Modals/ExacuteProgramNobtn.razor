@@ -62,9 +62,13 @@
                                         {
                                             case NodeBaseApi.Version2.Type.Picture:
                                                 <p class="font-semibold">Type: Picture</p>
-                                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
+                                                if (ProgramOutput.Count() > 0)
                                                 {
-                                                    <img src="@($"data:image/png;base64,{Convert.ToBase64String((byte[])ProgramOutput.ToArray()[index])}")" alt="@output.Name" />
+                                                    var outputItem = ProgramOutput.ToArray()[index];
+                                                    if (outputItem != null)
+                                                    {
+                                                        <img src="@($"data:image/png;base64,{outputItem.ToString()}")" alt="@output.Name" />
+                                                    }
                                                 }
                                                 break;
                                             case NodeBaseApi.Version2.Type.String:

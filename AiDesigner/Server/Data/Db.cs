@@ -1001,6 +1001,196 @@ namespace AiDesigner.Server.Data
                 return null;
             }
         }
+        public async Task<IEnumerable<AggregatedData>> GetAggregatedDataAsync(string userId, string timeFrame, string programId)
+        {
+            var query = new StringBuilder();
+
+            // Add common part of the query
+            query.AppendLine(@"
+                DECLARE @CurrentYear INT = YEAR(GETDATE());
+                DECLARE @CurrentMonth INT = MONTH(GETDATE());
+                DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+                DECLARE @FirstDayOfYear DATE = DATEFROMPARTS(@CurrentYear, 1, 1);
+                DECLARE @FirstDayOfMonth DATE = DATEFROMPARTS(@CurrentYear, @CurrentMonth, 1);
+                DECLARE @LastDayOfMonth DATE = EOMONTH(@FirstDayOfMonth);
+                DECLARE @StartOfWeek DATE = DATEADD(DAY, 1 - DATEPART(WEEKDAY, @Today), @Today);
+                DECLARE @EndOfWeek DATE = DATEADD(DAY, 7 - DATEPART(WEEKDAY, @Today), @Today);
+            ");
+
+            // Add specific parts based on the time frame
+            if (timeFrame == "Month")
+                    {
+                        query.AppendLine(@"
+                ;WITH DateSeries AS (
+                    SELECT @FirstDayOfMonth AS DateValue
+                    UNION ALL
+                    SELECT DATEADD(DAY, 1, DateValue)
+                    FROM DateSeries
+                    WHERE DateValue < @LastDayOfMonth
+                ),
+                GroupedCalls AS (
+                    SELECT
+                        DATEPART(DAY, c.StartTime) AS Day,
+                        COUNT(*) AS CallCount,
+                        SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
+                    FROM
+                        Ludde.Calls c
+                    WHERE
+                        c.[Api/UserId] = @UserId
+                        AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
+                        AND c.StartTime >= @FirstDayOfMonth AND c.StartTime < DATEADD(DAY, 1, @LastDayOfMonth)
+                    GROUP BY
+                        DATEPART(DAY, c.StartTime)
+                )
+                SELECT
+                    @CurrentYear AS Year,
+                    @CurrentMonth AS Month,
+                    DATEPART(DAY, ds.DateValue) AS Day,  -- Extract day part as integer
+                    ISNULL(gc.CallCount, 0) AS CallCount,
+                    ISNULL(gc.TotalRevenue, 0) AS TotalRevenue
+                FROM
+                    DateSeries ds
+                    LEFT JOIN GroupedCalls gc ON DATEPART(DAY, ds.DateValue) = gc.Day
+                ORDER BY
+                    ds.DateValue;
+            ");
+            }
+            else if (timeFrame == "Day")
+            {
+                query.AppendLine(@"
+        ;WITH HourSeries AS (
+            SELECT 0 AS HourValue
+            UNION ALL
+            SELECT HourValue + 1
+            FROM HourSeries
+            WHERE HourValue < 23
+        ),
+        GroupedCalls AS (
+            SELECT
+                DATEPART(HOUR, c.StartTime) AS Hour,
+                COUNT(*) AS CallCount,
+                SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
+            FROM
+                Ludde.Calls c
+            WHERE
+                c.[Api/UserId] = @UserId
+                AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
+                AND c.StartTime >= @Today AND c.StartTime < DATEADD(DAY, 1, @Today)
+            GROUP BY
+                DATEPART(HOUR, c.StartTime)
+        )
+        SELECT
+            @CurrentYear AS Year,
+            @CurrentMonth AS Month,
+            NULL AS Day, 
+            hs.HourValue AS Hour, 
+            ISNULL(gc.CallCount, 0) AS CallCount,
+            ISNULL(gc.TotalRevenue, 0) AS TotalRevenue
+        FROM
+            HourSeries hs
+            LEFT JOIN GroupedCalls gc ON hs.HourValue = gc.Hour
+        ORDER BY
+            hs.HourValue;
+    ");
+            }
+
+            else if (timeFrame == "Year")
+            {
+                // Year-specific query
+                query.AppendLine(@"
+            ;WITH MonthSeries AS (
+                SELECT 1 AS MonthValue
+                UNION ALL
+                SELECT MonthValue + 1
+                FROM MonthSeries
+                WHERE MonthValue < 12
+            ),
+            GroupedCalls AS (
+                SELECT
+                    DATEPART(MONTH, c.StartTime) AS Month,
+                    COUNT(*) AS CallCount,
+                    SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
+                FROM
+                    Ludde.Calls c
+                WHERE
+                    c.[Api/UserId] = @UserId
+                    AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
+                    AND c.StartTime >= @FirstDayOfYear AND c.StartTime < DATEADD(YEAR, 1, @FirstDayOfYear)
+                GROUP BY
+                    DATEPART(MONTH, c.StartTime)
+            )
+            SELECT
+                @CurrentYear AS Year,
+                ms.MonthValue AS Month,
+                NULL AS Day,
+                NULL AS Hour,
+                ISNULL(gc.CallCount, 0) AS CallCount,
+                ISNULL(gc.TotalRevenue, 0) AS TotalRevenue
+            FROM
+                MonthSeries ms
+                LEFT JOIN GroupedCalls gc ON ms.MonthValue = gc.Month
+            ORDER BY
+                ms.MonthValue;
+        ");
+            }
+            else if (timeFrame == "Week")
+            {
+                // Week-specific query
+                query.AppendLine(@"
+            ;WITH DateSeries AS (
+                SELECT @StartOfWeek AS DateValue
+                UNION ALL
+                SELECT DATEADD(DAY, 1, DateValue)
+                FROM DateSeries
+                WHERE DateValue < @EndOfWeek
+            ),
+            GroupedCalls AS (
+                SELECT
+                    DATEPART(DAY, c.StartTime) AS Day,
+                    COUNT(*) AS CallCount,
+                    SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
+                FROM
+                    Ludde.Calls c
+                WHERE
+                    c.[Api/UserId] = @UserId
+                    AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
+                    AND c.StartTime >= @StartOfWeek AND c.StartTime < @EndOfWeek
+                GROUP BY
+                    DATEPART(DAY, c.StartTime)
+            )
+            SELECT
+                @CurrentYear AS Year,
+                @CurrentMonth AS Month,
+                DATEPART(DAY, ds.DateValue) AS Day,
+                ISNULL(gc.CallCount, 0) AS CallCount,
+                ISNULL(gc.TotalRevenue, 0) AS TotalRevenue
+            FROM
+                DateSeries ds
+                LEFT JOIN GroupedCalls gc ON DATEPART(DAY, ds.DateValue) = gc.Day
+            ORDER BY
+                ds.DateValue;
+        ");
+            }
+            else
+            {
+                throw new ArgumentException("Invalid time frame");
+            }
+
+            // query.AppendLine("OPTION (MAXRECURSION 0);");
+
+            // Execute the query
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+
+            try
+            {
+                return await connection.QueryAsync<AggregatedData>(query.ToString(), new { UserId = userId, ProgramId = programId });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return null;
+            }
+        }
 
         //Session stuff
         public async Task<Guid> CreateSessionAsync(Session session)
