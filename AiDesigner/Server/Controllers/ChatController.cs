@@ -157,6 +157,23 @@ namespace NodeBaseApi.Controllers
             }
         }
 
+        // GET api/Chat/Call/GetAggregatedData/{userId}/{timeFrame}/{programId}
+        [HttpGet("Call/GetAggregatedData/{userId}/{timeFrame}/{programId}")]
+        public async Task<ActionResult<IEnumerable<AggregatedData>>> GetAggregatedData(string userId, string timeFrame, string programId)
+        {
+            try
+            {
+                var aggregatedData = await _dbConnection.GetAggregatedDataAsync(userId, timeFrame, programId);
+                return Ok(aggregatedData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+
         // GET api/Chat/Call/GetByUserId/{userId}
         [HttpGet("Call/GetByUserId/{userId}")]
         public async Task<ActionResult<IEnumerable<Call>>> GetLatest100Calls(string userId)
@@ -172,6 +189,7 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+
         // GET api/Chat/Call/Getlatest/{numCalls}
         [HttpGet("Call/Getlatest/{numCalls}")]
         public async Task<ActionResult<IEnumerable<Call>>> GetLatest100Calls(int numCalls)

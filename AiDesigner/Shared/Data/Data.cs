@@ -602,6 +602,15 @@ namespace NodeBaseApi.Version2
 
 
     //.netStuuff
+    public class AggregatedData
+    {
+        public int Year { get; set; }
+        public int Month { get; set; }
+        public int? Day { get; set; } // Optional, based on grouping
+        public int? Hour { get; set; } // Optional, based on grouping
+        public int CallCount { get; set; }
+        public decimal TotalRevenue { get; set; }
+    }
 
 
 
