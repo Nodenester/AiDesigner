@@ -6,6 +6,7 @@
 @using Newtonsoft.Json;
 @using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2;
+@using System.Text
 @using static AiDesigner.Client.Components.InputList;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http
@@ -110,84 +111,11 @@
         <p class="text-lg font-semibold mb-2">Program Outputs</p>
         @if (selectedProgram != null)
         {
-            <div class="flex justify-end items-end w-full">
-                @foreach (var output in selectedProgram.ProgramStructure.ProgramEnd)
+            <div class="flex flex-col justify-end items-end w-full">
+                @foreach (var output in ProgramOutput)
                 {
-                    if (output.Name == "End")
-                    {
-                        continue;
-                    }
-                    var index = selectedProgram.ProgramStructure.ProgramEnd.IndexOf(output) - 1;
-                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition max-w-2xl w-full">
-                        @switch (output.Type)
-                        {
-                            case NodeBaseApi.Version2.Type.Picture:
-                                <p class="font-semibold">Type: Picture</p>
-                                @if (ProgramOutput != null && ProgramOutput.Count > 0)
-                                {
-                                    var outputItem = ProgramOutput[index];
-
-                                    if (outputItem != null)
-                                    {
-                                        if (output.IsList)
-                                        {
-                                            List<Object> collection = new List<Object>((IEnumerable<Object>)outputItem);
-                                            foreach (var byteArray in collection)
-                                            {
-                                                //var base64String = Convert.ToBase64String(byteArray);
-                                                <img src="@($"data:image/png;base64,{byteArray.ToString()}")" alt="Image" />
-                                            }
-                                        }
-                                        else
-                                        {
-                                            //var base64String = Convert.ToBase64String(singleByteArray);
-                                            <img src="@($"data:image/png;base64,{outputItem.ToString()}")" alt="Image" />
-                                        }
-                                    }
-                                }
-                                break;
-                            case NodeBaseApi.Version2.Type.String:
-                                <p class="font-semibold">Type: Text</p>
-                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                {
-                                    <p class="break-words">@ProgramOutput.ToArray()[index]</p>
-                                }
-                                break;
-                            case NodeBaseApi.Version2.Type.Number:
-                                <p class="font-semibold">Type: Number</p>
-                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                {
-                                    <p>@ProgramOutput.ToArray()[index]</p>
-                                }
-                                break;
-                            case NodeBaseApi.Version2.Type.Boolean:
-                                <p class="font-semibold">Type: Boolean</p>
-                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                {
-                                    if (ProgramOutput.ToArray()[index].ToString() == "True")
-                                    {
-                                        <p>True</p>
-                                    }
-                                    else
-                                    {
-                                        <p>False</p>
-                                    }
-                                }
-                                break;
-                            case NodeBaseApi.Version2.Type.Audio:
-                                <p class="font-semibold">Type: Audio</p>
-                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                {
-                                    <audio controls>
-                                        <source src="@($"data:audio/wav;base64,{Convert.ToBase64String((byte[])ProgramOutput.ToArray()[index])}")" type="audio/wav">
-                                        Your browser does not support the audio element.
-                                    </audio>
-                                }
-                                break;
-                            default:
-                                <p>Unknown output type</p>
-                                break;
-                        }
+                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition" style="min-width: 100%;">
+                        <OutputDisplay OutputItem="@output" />
                     </div>
                 }
             </div>
@@ -310,32 +238,21 @@
                     isExecutionFailed = false;
                     try
                     {
-                        var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
+
+                        var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(nonNullInputValues), Encoding.UTF8, "application/json");
+                        var response = await Http.PostAsync(url, requestContent);
+                        var content = await response.Content.ReadAsStringAsync();
+
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
 
                         if (response.IsSuccessStatusCode)
                         {
-                            ProgramOutput = await response.Content.ReadFromJsonAsync<List<object>>();
-                            List<object> hej = ProgramOutput.ToList();
-
-                            // Check if the first item in the list is an array
-                            if (hej[0] is object[] array)
-                            {
-                                // Convert the array to a list
-                                var då = array.ToList();
-
-                                // Now då is a List<object> that you can work with
-                            }
-                            else
-                            {
-                                Console.WriteLine(hej[0]);
-                                // Handle the case where the first item is not an array
-                            }
-
+                            ProgramOutput = JsonConvert.DeserializeObject<List<object>>(responseContent);
                         }
                         else
                         {
                             isExecutionFailed = true;
-                            Console.WriteLine($"Error executing program: {response.StatusCode}");
                         }
                     }
                     catch (Exception ex)
@@ -349,8 +266,8 @@
                         if (isExecutionFailed)
                         {
                             StateHasChanged();
-                            await Task.Delay(2000); // Wait for 3 seconds
-                            isExecutionFailed = false; // Reset the error state
+                            await Task.Delay(2000);
+                            isExecutionFailed = false;
                         }
                     }
                     await GetTokens();

@@ -195,8 +195,14 @@ namespace NodeBaseApi.Version2
                     {
                         inputProgramBlock.Inputs = new List<Guid>(new Guid[inputProgramBlock.Block.Inputs.Count]);
                     }
-
-                    inputProgramBlock.Inputs[index] = outputId;
+                    if (inputProgramBlock.Inputs.Count() -1 >= index )
+                    {
+                        inputProgramBlock.Inputs[index] = outputId;
+                    }
+                    else
+                    {
+                        inputProgramBlock.Inputs.Add(outputId);
+                    }
                 }
                 else
                 {

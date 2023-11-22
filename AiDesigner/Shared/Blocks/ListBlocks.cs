@@ -134,4 +134,24 @@ namespace NodeExacuteApi.Data.Blocks
         }
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
+
+    public class LastItem : Block
+    {
+        public LastItem()
+        {
+            Id = Guid.NewGuid();
+            Name = "Last Item";
+            Description = "Finds the index of an item in a list.";
+            Inputs = new List<Input>
+            {
+                new Input { Id = Guid.NewGuid(), Name = "List", Description = "The list to search in.", Type = Type.Object, IsRequired = true, IsList = true }
+            };
+            Outputs = new List<Output>
+            {
+                new Output { Id = Guid.NewGuid(), Name = "LastItem", Description = "The Last Item of that list.", Type = Type.Object }
+            };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
 }

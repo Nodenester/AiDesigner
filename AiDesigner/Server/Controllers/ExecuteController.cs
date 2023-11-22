@@ -18,7 +18,7 @@ namespace AiDesigner.Server.Controllers
         }
 
         [HttpPost("")]
-        public async Task<ActionResult<List<object>>> ExecuteProgramAsync(
+        public async Task<ActionResult<string>> ExecuteProgramAsync(
             [FromQuery] Guid programKey,
             [FromBody] Dictionary<Guid, object> inputValues,
             [FromQuery] string apiKey,
@@ -59,9 +59,9 @@ namespace AiDesigner.Server.Controllers
 
                 // Parse and return the response
                 var responseContent = await response.Content.ReadAsStringAsync();
-                var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
+                //var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
 
-                return Ok(outputValues);
+                return Content(responseContent, "application/json");
             }
             catch (Exception ex)
             {
