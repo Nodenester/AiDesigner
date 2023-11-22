@@ -1,0 +1,82 @@
+﻿@using System.Text.RegularExpressions
+@using Newtonsoft.Json.Linq
+@code {
+    [Parameter]
+    public object OutputItem { get; set; }
+
+    private RenderFragment RenderOutput() => builder =>
+    {
+        switch (OutputItem)
+        {
+            case JArray jArray:
+                int seq = 0; // Initialize a sequence number
+                foreach (var token in jArray)
+                {
+                    var value = token as JValue; // Cast the token to JValue
+                    object actualValue = value?.Value; // Get the underlying value
+
+                    builder.OpenComponent(seq++, typeof(OutputDisplay));
+                    builder.AddAttribute(seq++, "OutputItem", actualValue); // Pass the actual value
+                    builder.CloseComponent();
+                }
+                break;
+            case string text when IsBase64String(text) && IsImage(text):
+                // Render as an image with inline styling to center it
+                builder.OpenElement(2, "img");
+                builder.AddAttribute(3, "src", $"data:image/png;base64,{text}");
+                builder.AddAttribute(4, "alt", "Image");
+                builder.AddAttribute(5, "style", "display: block; margin: auto;"); // Inline CSS to center the image
+                builder.CloseElement();
+                break;
+            case string text when IsBase64String(text) && IsAudio(text):
+                // Render as audio
+                builder.OpenElement(5, "audio");
+                builder.AddAttribute(6, "controls", true);
+                builder.OpenElement(7, "source");
+                builder.AddAttribute(8, "src", $"data:audio/wav;base64,{text}");
+                builder.AddAttribute(9, "type", "audio/wav");
+                builder.CloseElement();
+                builder.CloseElement();
+                break;
+            case string text:
+                // Render as text
+                builder.AddContent(10, text);
+                break;
+            case int number:
+                builder.AddContent(11, number.ToString());
+                break;
+            case bool boolean:
+                builder.AddContent(12, boolean ? "True" : "False");
+                break;
+            // ... other cases as needed
+            default:
+                builder.AddContent(13, "Unknown output type");
+                //builder.AddContent(14, OutputItem.ToString());
+                break;
+        }
+    };
+
+    private bool IsBase64String(string s)
+    {
+        // Check if the string is likely a base64 string
+        return s.Length % 4 == 0 && Regex.IsMatch(s, @"^[a-zA-Z0-9\+/]*={0,3}$");
+    }
+
+    private bool IsImage(string base64)
+    {
+        if (base64.StartsWith("iVBOR")) return true; // PNG
+        if (base64.StartsWith("/9j/")) return true;  // JPEG
+        if (base64.StartsWith("R0lGOD") || base64.StartsWith("Qk02U")) return true;
+        return false;
+    }
+
+    private bool IsAudio(string base64)
+    {
+        // Implement based on known patterns for your audio format
+        // Example pattern check (this is just an example and might not be accurate for your case)
+        if (base64.StartsWith("UklGR")) return true;                                             
+        return false;
+    }
+}
+
+@RenderOutput()

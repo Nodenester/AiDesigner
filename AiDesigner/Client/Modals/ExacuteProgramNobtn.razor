@@ -4,6 +4,7 @@
 @using NodeBaseApi.Version2;
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
+@using System.Text
 @using static AiDesigner.Client.Components.InputList;
 @inject HttpClient Http
 
@@ -50,69 +51,10 @@
                         @if (AP != null)
                         {
                             <div style="margin-top: 0rem;">
-                                @foreach (var output in AP.ProgramStructure.ProgramEnd)
+                                @foreach (var output in ProgramOutput)
                                 {
-                                    if (output.Name == "End")
-                                    {
-                                        continue;
-                                    }
-                                    var index = AP.ProgramStructure.ProgramEnd.IndexOf(output) - 1;
-                                    <div class="bg-white dark:!bg-gray-800 px-4 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                                        @switch (output.Type)
-                                        {
-                                            case NodeBaseApi.Version2.Type.Picture:
-                                                <p class="font-semibold">Type: Picture</p>
-                                                if (ProgramOutput.Count() > 0)
-                                                {
-                                                    var outputItem = ProgramOutput.ToArray()[index];
-                                                    if (outputItem != null)
-                                                    {
-                                                        <img src="@($"data:image/png;base64,{outputItem.ToString()}")" alt="@output.Name" />
-                                                    }
-                                                }
-                                                break;
-                                            case NodeBaseApi.Version2.Type.String:
-                                                <p class="font-semibold">Type: Text</p>
-                                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                                {
-                                                    <p class="break-words">@ProgramOutput.ToArray()[index]</p>
-                                                }
-                                                break;
-                                            case NodeBaseApi.Version2.Type.Number:
-                                                <p class="font-semibold">Type: Number</p>
-                                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                                {
-                                                    <p>@ProgramOutput.ToArray()[index]</p>
-                                                }
-                                                break;
-                                            case NodeBaseApi.Version2.Type.Boolean:
-                                                <p class="font-semibold">Type: Boolean</p>
-                                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                                {
-                                                    if (ProgramOutput.ToArray()[index].ToString() == "True")
-                                                    {
-                                                        <p>True</p>
-                                                    }
-                                                    else
-                                                    {
-                                                        <p>False</p>
-                                                    }
-                                                }
-                                                break;
-                                            case NodeBaseApi.Version2.Type.Audio:
-                                                <p class="font-semibold">Type: Audio</p>
-                                                if (ProgramOutput.Count() > 0 && ProgramOutput.ToArray()[index] != null)
-                                                {
-                                                    <audio controls>
-                                                        <source src="@($"data:audio/wav;base64,{Convert.ToBase64String((byte[])ProgramOutput.ToArray()[index])}")" type="audio/wav">
-                                                        Your browser does not support the audio element.
-                                                    </audio>
-                                                }
-                                                break;
-                                            default:
-                                                <p>Unknown output type</p>
-                                                break;
-                                        }
+                                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition" style="min-width: 100%;">
+                                        <OutputDisplay OutputItem="@output" />
                                     </div>
                                 }
                             </div>
@@ -242,11 +184,13 @@
                     StateHasChanged();
                     try
                     {
-                        var response = await Http.PostAsJsonAsync(url, nonNullInputValues);
+                        var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(nonNullInputValues), Encoding.UTF8, "application/json");
+                        var response = await Http.PostAsync(url, requestContent);
+                        var responseContent = await response.Content.ReadAsStringAsync();
 
                         if (response.IsSuccessStatusCode)
                         {
-                            ProgramOutput = await response.Content.ReadFromJsonAsync<List<object>>();
+                            ProgramOutput = JsonConvert.DeserializeObject<List<object>>(responseContent);
                         }
                         else
                         {
