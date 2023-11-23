@@ -363,6 +363,7 @@
 
     protected override async Task OnInitializedAsync()
     {
+        Http.Timeout = TimeSpan.FromMinutes(10);
         // NavigationManagers.LocationChanged += HandleLocationChanged;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await UpdatePrograms();

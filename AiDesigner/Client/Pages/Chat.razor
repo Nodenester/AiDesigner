@@ -161,6 +161,7 @@
 
     Session currentSession = new Session();
 
+
     private bool isLoading = false;
     private bool isExecutionFailed = false;
 
@@ -179,7 +180,9 @@
                 tooltipService.Open(elementReference, content, new TooltipOptions
                     {
                         Position = TooltipPosition.Top,
-                        Style = "max-width: 240px; white-space: normal; word-wrap: break-word;" // Set your desired max width and include wrapping properties
+                        Style = "max-width: 240px; white-space: normal; word-wrap: break-word;",          
+                        Duration = 10000,
+                        Delay = 500
                     });
             }
         }

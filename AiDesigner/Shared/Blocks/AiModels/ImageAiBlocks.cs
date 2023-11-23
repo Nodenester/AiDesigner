@@ -98,7 +98,27 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         {
             Id = Guid.NewGuid();
             Name = "Text To Image";
-            Description = "Generates an image from text using Stable Diffusion v1.5 model.";
+            Description = "Generates an image from text using Stable Diffusion v1.5 model. (very fast)";
+            Inputs = new List<Input>
+        {
+            new Input { Name = "TextPrompt", Type = Type.String, IsList = false, Description = "Text prompt for generating the image" }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Name = "GeneratedImage", Type = Type.Picture, IsList = false, Description = "Generated image data" }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class Dalle3 : Block
+    {
+        public Dalle3()
+        {
+            Id = Guid.NewGuid();
+            Name = "Dalle 3";
+            Description = "Generates an image from text using Dalle-3 model. (slow but very good)";
             Inputs = new List<Input>
         {
             new Input { Name = "TextPrompt", Type = Type.String, IsList = false, Description = "Text prompt for generating the image" }

@@ -152,7 +152,7 @@ else
                 <div class="mt-2 w-full flex justify-center">
                     <div class="w-72 cursor-pointer flex items-center justify-center">
                         <label for="@Id" class="flex items-center justify-center h-12 w-full">
-                            <input type="checkbox" id="@Id" @onchange="eventArgs => HandleInput(eventArgs)" checked="@(Value is bool)"
+                            <input type="checkbox" id="@Id" @onchange="eventArgs => HandleInput(eventArgs)" checked="@(Value ?? false)"
                             class="w-6 h-6 accent-green-600 text-gray-600 bg-gray-100 border-gray-300 rounded focus:ring-gray-500 dark:focus:ring-gray-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600" />
                         </label>
                     </div>
