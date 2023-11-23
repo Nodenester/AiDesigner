@@ -330,7 +330,7 @@
                                             {
                                                 <div class="node-input d-flex"
                                                      @ref="inputElementReferences[input.Id.ToString()]"
-                                                     @onmouseenter="() => ShowTooltip(inputElementReferences[input.Id.ToString()], input.Description)"
+                                                     @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(input.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), input.Description ?? "huh")'
                                                      @onmouseleave="HideTooltip">
                                                     <div id="@input.Id"
                                                          class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection"
@@ -351,6 +351,12 @@
                                                     Add input
                                                 </button>
                                             }
+                                            @if (node.Block.Name == "And Block")
+                                            {
+                                                <button @onclick='() => AddSelectInput(node, "Input")' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                    Add input
+                                                </button>
+                                            }
                                             <!-- Other content like buttons -->
                                         </div>
                                         <div class="right-part">
@@ -359,7 +365,7 @@
                                             {
                                                 <div class="node-output d-flex"
                                                      @ref="outputElementReferences[output.Id.ToString()]"
-                                                     @onmouseenter="() => ShowTooltip(outputElementReferences[output.Id.ToString()], output.Description)"
+                                                     @onmouseenter='() => ShowTooltip(outputElementReferences.TryGetValue(output.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), output.Description ?? "huh")'
                                                      @onmouseleave="HideTooltip">
                                                     <span class="small-font">@output.Name</span>
                                                     <div id="@output.Id"
@@ -711,6 +717,8 @@
     public ProgramBlock SelectedBlock { get; set; }
 
     public Output SelectedOutput { get; set; }
+
+    ElementReference defaultReference = new ElementReference();
 
     public Tuple<double, double> LastMouseLocation { get; set; } = new Tuple<double, double>(0, 0);
 
@@ -1405,7 +1413,12 @@
 
     void ShowTooltip(ElementReference elementReference, string content)
     {
-        tooltipService.Open(elementReference, content, new TooltipOptions { Position = TooltipPosition.Top });
+        tooltipService.Open(elementReference, content, new TooltipOptions
+            {
+                Position = TooltipPosition.Top,
+                Duration = 10000,
+                Delay = 500
+            });
     }
 
     void HideTooltip()

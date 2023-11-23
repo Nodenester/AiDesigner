@@ -508,6 +508,40 @@ window.jsPlumbInterop = {
                     var nodeId = params.el.id;
 
                     updateNodeLocation(refrence, nodeId, newX, newY);
+
+                    associatedConnections = jsPlumbInterop.instance.getConnections({ element: params.el });
+                    var repaintNeeded = false;
+
+                    // Iterate over each connection
+                    associatedConnections.forEach(function (connection) {
+                        var sourceTop = connection.source.offsetTop;
+                        var targetTop = connection.target.offsetTop;
+                        var sourceLeft = connection.source.offsetLeft;
+                        var targetLeft = connection.target.offsetLeft;
+
+                        // Calculate vertical and overall distances
+                        var verticalDistance = Math.abs(sourceTop - targetTop);
+                        var horizontalDistance = Math.abs(sourceLeft - targetLeft);
+                        var overallDistance = Math.sqrt(Math.pow(horizontalDistance, 2) + Math.pow(verticalDistance, 2));
+
+                        // Determine the connector type based on the vertical and overall distances
+                        var connectorType = ["Bezier", { curviness: 100 }];
+                        if (verticalDistance < 10 || overallDistance < 50) {
+                            connectorType = "Straight";
+                        }
+
+                        // Check if the connector type is different from the current one
+                        if (connection.getConnector().type !== connectorType[0]) {
+                            // Set the connector type for the connection
+                            connection.setConnector(connectorType);
+                            repaintNeeded = true;
+                        }
+                    });
+
+                    // Repaint everything only if needed
+                    if (repaintNeeded) {
+                        jsPlumbInterop.instance.repaintEverything();
+                    }
                 }
 
             });

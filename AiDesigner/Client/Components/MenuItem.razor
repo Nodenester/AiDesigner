@@ -50,7 +50,8 @@
         tooltipService.Open(elementReference, content, new TooltipOptions
             {
                 Position = TooltipPosition.Top,
-                Duration = Int32.MaxValue // Set a very long duration
+                Duration = 10000,
+                Delay = 500
             });
     }
 

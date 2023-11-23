@@ -34,6 +34,32 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    public class Zephyr7b : Block
+    {
+        public Zephyr7b()
+        {
+            Id = Guid.NewGuid();
+            Name = "Zephyr 7b";
+            Description = "Zephyr 7b API, <|system|>\r\nYou are a pirate chatbot who always responds with Arr!</s>\r\n<|user|>\r\nThere's a bear on my lawn, what should i do?</s>\r\n<|assistant|>";
+            Inputs = new List<Input>
+            {
+                new Input { Name = "Query", Type = Type.String, Description = "The input query for the Zephyr 7b API", IsRequired = true },
+                new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated (Max tokens 8000)", IsRequired = false},
+                new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = false },
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = false },
+                new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false },
+                new Input { Name = "ReturnFullText", Type = Type.Boolean, Description = "Whether to include the input prompt in the API response", IsRequired = false }
+            };
+            Outputs = new List<Output>
+            {
+                new Output { Name = "ApiResponse", Type = Type.String, Description = "The API response from Zephyr 7b" }
+            };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+
     public class Llama213b : Block
     {
         public Llama213b()

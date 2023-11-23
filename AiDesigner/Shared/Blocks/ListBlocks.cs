@@ -135,6 +135,26 @@ namespace NodeExacuteApi.Data.Blocks
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    public class CountList : Block
+    {
+        public CountList()
+        {
+            Id = Guid.NewGuid();
+            Name = "Count List";
+            Description = "Get the amount of items in the list.";
+            Inputs = new List<Input>
+            {
+                new Input { Id = Guid.NewGuid(), Name = "List", Description = "The list to search in.", Type = Type.Object, IsRequired = true, IsList = true }
+            };
+            Outputs = new List<Output>
+            {
+                new Output { Id = Guid.NewGuid(), Name = "Count", Description = "The list count.", Type = Type.Number }
+            };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
     public class LastItem : Block
     {
         public LastItem()
