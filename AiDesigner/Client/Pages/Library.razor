@@ -128,46 +128,43 @@
     {
         @foreach (var article in workshopArticles.OrderBy(a => !a.IsPublic))
         {
-            <div class="relative h-40 p-2 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex items-center custom-button" style="width: 17rem;">
+            <div class="relative rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex" style="width: 18rem; height: 9.84rem;">
+
                 <!-- Remove Button -->
-                <button @onclick="(() => RemoveArticle(article.Id.ToString()))"
-                        class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white close-button">
+                <button @onclick="(() => RemoveArticle(article.Id.ToString()))" class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white close-button">
                     X
                 </button>
 
                 <!-- Image Container -->
-                <div style="width: 130px; height: 130px; position: relative; padding-left: 8rem;">
-                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")"
-                         alt="@article.Name"
-                         style="min-width: 120px; min-height: 120px; max-width: 120px; max-height: 120px; object-fit: cover; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
+                <div style="width: 9.75rem; height: 9.75rem; position: relative; padding-left: 9.6rem;">
+                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="min-width: 9rem; min-height: 9rem; max-width: 9rem; max-height: 9rem; object-fit: cover; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);" />
                 </div>
 
                 <!-- Text and Clone Button -->
-                <div class="flex flex-col ml-3 flex-grow justify-between">
+                <div class="flex flex-col ml-4" style="height: 100%;">
                     <!-- Name -->
-                    <div class="self-start" style="margin-left: 0.2rem;">
-                        <h3 class="dark:text-white text-xl">@article.Name</h3>
+                    <div class="overflow-hidden" style="max-height: 55%; margin-left: 0.24rem; word-wrap: break-word;">
+                        <h3 class="dark:text-white text-2xl">@article.Name</h3>
                     </div>
-                    @if(article.ApiKey == "xxx")
-                    {
-                        <div class="self-start" style="margin-left: 0.2rem;">
-                            <p class="dark:text-white text-lg">CustomBlock</p>
-                        </div>
-                    }
-                    else
-                    {
-                        <div class="self-start" style="margin-left: 0.2rem;">
-                            <p class="dark:text-white text-lg">Program</p>
-                        </div>
-                    }
 
-                    <!-- Clone Button -->
-                    <div class="self-end">
+                    <!-- Program/CustomBlock Label and Clone Button -->
+                    <div class="mt-auto pb-5" style="max-height: 45%;">
+                        <!-- Program/CustomBlock Label -->
+                        @if (article.ApiKey == "xxx")
+                        {
+                            <p class="dark:text-white text-xl">CustomBlock</p>
+                        }
+                        else
+                        {
+                            <p class="dark:text-white text-xl">Program</p>
+                        }
+
+                        <!-- Clone Button -->
                         @if (article.IsPublic)
                         {
-                        <button @onclick="(() => CloneArticle(article.ProgramId))" class="py-1 bg-green-600 hover:bg-green-700 text-white rounded" style="margin-right: 2rem; padding-left: 1.5rem; padding-right: 1.5rem; margin-top: 2rem;">
-                            Clone
-                        </button>
+                            <button @onclick="(() => CloneArticle(article.ProgramId))" class="py-1 bg-green-600 hover:bg-green-700 text-white rounded" style="padding-left: 1.8rem; padding-right: 1.8rem;">
+                                Clone
+                            </button>
                         }
                     </div>
                 </div>

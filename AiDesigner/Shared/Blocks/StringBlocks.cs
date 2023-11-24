@@ -288,6 +288,65 @@ namespace AiDesigner.Shared.Blocks
 
     }
 
+    public class StringCleaner : Block
+    {
+        public StringCleaner()
+        {
+            Id = Guid.NewGuid();
+            Name = "StringCleaner";
+            Description = "A block that removes substrings between two specified delimiters from a given string.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The main string from which substrings will be removed.", Type = Type.String, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Start Delimiter", Description = "The start delimiter.", Type = Type.String, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "End Delimiter", Description = "The end delimiter.", Type = Type.String, IsRequired = true }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Cleaned String", Description = "The string after removal of specified substrings.", Type = Type.String, IsList = false }
+        };
+        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class IntParser : Block
+    {
+        public IntParser()
+        {
+            Id = Guid.NewGuid();
+            Name = "IntParser";
+            Description = "A block that parses a string into an integer.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The string to be parsed into an integer.", Type = Type.String, IsRequired = true }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Parsed Integer", Description = "The parsed integer value.", Type = Type.Number, IsList = false }
+        };
+        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class BoolParser : Block
+    {
+        public BoolParser()
+        {
+            Id = Guid.NewGuid();
+            Name = "BoolParser";
+            Description = "A block that parses a string into a boolean.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Input String", Description = "The string to be parsed into a boolean.", Type = Type.String, IsRequired = true }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Parsed Boolean", Description = "The parsed boolean value.", Type = Type.Boolean, IsList = false }
+        };
+        }
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
     //math logic
     public class Equal : Block
     {
