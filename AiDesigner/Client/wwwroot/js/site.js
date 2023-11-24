@@ -154,7 +154,7 @@ window.jsPlumbInterop = {
                     });
 
                 }
-            }, 16),
+            }, 8),
 
             stop: function (params) {
                 var zoom = currentZoom;
@@ -167,7 +167,7 @@ window.jsPlumbInterop = {
                 associatedConnections = jsPlumbInterop.instance.getConnections({ element: params.el });
                 var repaintNeeded = false;
 
-                // Iterate over each connection
+                //Iterate over each connection
                 associatedConnections.forEach(function (connection) {
                     var sourceTop = connection.source.offsetTop;
                     var targetTop = connection.target.offsetTop;
@@ -389,26 +389,34 @@ window.jsPlumbInterop = {
     },
 
     addZoom: function (zoomValue) {
-        currentZoom = zoomValue;
+        if (zoomValue != null) {
+            currentZoom = zoomValue;
 
-        var canvas = document.getElementById("canvas");
-        var transformOrigin = [0, 0];
-        var el = canvas;
+            var canvas = document.getElementById("canvas");
 
-        var p = ["webkit", "moz", "ms", "o"],
-            s = "scale(" + zoomValue + ")",
-            oString = (transformOrigin[0] * 100) + "% " + (transformOrigin[1] * 100) + "%";
+            if (!canvas) {
+                console.error("Canvas element not found");
+                return;
+            }
 
-        for (var i = 0; i < p.length; i++) {
-            el.style[p[i] + "Transform"] = s;
-            el.style[p[i] + "TransformOrigin"] = oString;
+            var transformOrigin = [0, 0];
+            var el = canvas;
+
+            var p = ["webkit", "moz", "ms", "o"],
+                s = "scale(" + zoomValue + ")",
+                oString = (transformOrigin[0] * 100) + "% " + (transformOrigin[1] * 100) + "%";
+
+            for (var i = 0; i < p.length; i++) {
+                el.style[p[i] + "Transform"] = s;
+                el.style[p[i] + "TransformOrigin"] = oString;
+            }
+            if (zoomValue != null && this.instance != null) {
+                this.instance.setZoom(zoomValue)
+            }
+
+            el.style["transform"] = s;
+            el.style["transformOrigin"] = oString;
         }
-        if (zoomValue != null && this.instance != null) {
-            this.instance.setZoom(zoomValue)
-        }
-
-        el.style["transform"] = s;
-        el.style["transformOrigin"] = oString;
     },
 
     addNode: function (nodeId) {
@@ -499,7 +507,7 @@ window.jsPlumbInterop = {
                             jsPlumbInterop.instance.repaintEverything();
                         });
                     }
-                }, 16),
+                }, 8),
 
                 stop: function (params) {
                     var zoom = currentZoom;
@@ -512,7 +520,7 @@ window.jsPlumbInterop = {
                     associatedConnections = jsPlumbInterop.instance.getConnections({ element: params.el });
                     var repaintNeeded = false;
 
-                    // Iterate over each connection
+                    //Iterate over each connection
                     associatedConnections.forEach(function (connection) {
                         var sourceTop = connection.source.offsetTop;
                         var targetTop = connection.target.offsetTop;
@@ -733,18 +741,21 @@ window.createInfiniteCanvas = function (refrence, sx, sy) {
 }
 
 window.updateCameraPos = function (newX, newY, refrence) {
-    console.log("");
     var canvas = document.getElementById("canvas");
-    var viewport = document.getElementById("whiteboard"); // get the viewport
-    canvas.style.left = newX + 'px';
-    canvas.style.top = newY + 'px';
+    var viewport = document.getElementById("whiteboard");
 
-    viewport.style.backgroundPositionX = newX + 'px'; // adjust the X position
-    viewport.style.backgroundPositionY = newY + 'px'; // adjust the Y position
+    if (canvas && viewport) {
+        canvas.style.left = newX + 'px';
+        canvas.style.top = newY + 'px';
+        viewport.style.backgroundPositionX = newX + 'px';
+        viewport.style.backgroundPositionY = newY + 'px';
 
-    if (refrence) {
-        refrence.invokeMethodAsync('UpdateCameraPosition', newX, newY)
-            .catch(err => console.error(err));
+        if (refrence) {
+            refrence.invokeMethodAsync('UpdateCameraPosition', newX, newY)
+                .catch(err => console.error(err));
+        }
+    } else {
+        console.error("Canvas or viewport element is null");
     }
 };
 
@@ -777,6 +788,20 @@ window.initializeContextMenu = function () {
         whiteBoard = document.getElementById('whiteboard');
         var contextMenu = document.getElementById("contextMenu");
         var canvas = document.getElementById("canvas");
+
+        // test for mini context menu
+        var zoomLevel = ((window.outerWidth)
+            / window.innerWidth);
+
+        var elementUnderCursor = document.elementFromPoint(pageX, pageY);
+
+        console.log("Element under cursor:", elementUnderCursor);
+
+        if (elementUnderCursor.classList.contains('small-font')) {
+            hideContextMenu();
+            return; // Exit the function without showing the context menu
+        }
+        //----------------
 
         // Calculate the canvas' position
         var rectCanvas = canvas.getBoundingClientRect();

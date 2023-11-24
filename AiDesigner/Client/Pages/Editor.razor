@@ -17,6 +17,7 @@
 @using System.Diagnostics;
 @using static AiDesigner.Client.Components.InputList;
 @inject TooltipService tooltipService
+@inject NavigationManager MyNavigationManager
 
 @if (localProgram != null)
 {
@@ -55,8 +56,8 @@
 
     <!-- Main Content -->
     <div class="main-content flex flex-grow">
-        <div id="left-side" class="resizable-x left-side bg-gray-200 dark:bg-gray-700 overflow-auto" style="width: 16.666667%;">
-            <div class="config-box p-0 border-b border-gray-300 dark:border-gray-600">
+        <div id="left-side" class="resizable-x left-side bg-gray-200 dark:bg-gray-700 overflow-auto" style="width: 16.666667%; max-height: 78.4vh;">
+            <div class="config-box p-0 border-b border-gray-300 dark:border-gray-600" style="overflow-y: auto;">
                 <!-- Program configs -->
                 <p class="dark:bg-gray-700 border-gray-700 w-full align-top px-1">Settings</p>
                 @if(localProgram != null)
@@ -94,7 +95,7 @@
                 </div>
                 }
             </div>
-            <div class="variable-list p-0 border-b border-gray-300 dark:border-gray-600">
+            <div class="variable-list p-0 border-b border-gray-300 dark:border-gray-600" style="overflow-y: auto;">
                 <!-- The Variables -->
                 <div class="flex justify-between items-center px-1 dark:bg-gray-700 border-gray-700 w-full align-top">
                     <p>Variables</p>
@@ -142,9 +143,9 @@
                     <div id="canvas" class="canvas">
                         <div id="connection-layer" style="position: relative; z-index: 22; ">
                         </div>
-                        @if(_localProgram != null)
+                        @if (localProgram != null)
                         {
-                            <div id="Input" class="node" style="left: @(_localProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(_localProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
+                            <div id="Input" class="node" style="left: @(localProgram.ProgramStructure.ProgramStartLocation.Item1.ToString()+"px"); top: @(localProgram.ProgramStructure.ProgramStartLocation.Item2.ToString()+"px");">
                                 <div class="top-part dark:bg-gray-600">
                                     <span style="margin-left: 10px;">Input</span>
                                 </div>
@@ -153,7 +154,7 @@
                                          <!--Left side content-->
                                     </div>
                                     <div class="right-part">
-                                        @foreach (var output in _localProgram.ProgramStructure.ProgramStart)
+                                        @foreach (var output in localProgram.ProgramStructure.ProgramStart)
                                         {
                                             <!--make a componenet  or something so it show the right input / output type-->
                                             <div class="node-output d-flex ">
@@ -161,7 +162,7 @@
                                                 <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
                                             </div>
                                         }
-                                        @if (_localProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        @if (localProgram.ProgramStructure.ProgramStart.Count() == 0)
                                         {
                                             <hr style="border-top: none; height: 10px; background-color: transparent;" />
                                         }
@@ -173,13 +174,13 @@
                                     </div>
                                 </div>
                             </div>
-                            <div id="Output" class="node" style="left: @(_localProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(_localProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
+                            <div id="Output" class="node" style="left: @(localProgram.ProgramStructure.ProgramEndLocation.Item1.ToString()+"px"); top: @(localProgram.ProgramStructure.ProgramEndLocation.Item2.ToString()+"px");">
                                 <div class="top-part dark:bg-gray-600">
                                         <span style="margin-left: 10px;">Output</span>
                                 </div>
                                 <div class="main-part dark:bg-gray-700">
                                     <div class="left-part">
-                                        @foreach (var input in _localProgram.ProgramStructure.ProgramEnd)
+                                        @foreach (var input in localProgram.ProgramStructure.ProgramEnd)
                                         {
                                             <!--make a componenet  or something so it show the right input / output type-->
                                             <div class="node-input d-flex ">
@@ -187,7 +188,7 @@
                                                 <span class="small-font">@input.Name</span>
                                             </div>
                                         }
-                                        @if (_localProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        @if (localProgram.ProgramStructure.ProgramStart.Count() == 0)
                                         {
                                             <hr style="border-top: none; height: 10px; background-color: transparent;" />
                                         }
@@ -200,7 +201,7 @@
                                     </div>
                                 </div>
                             </div>
-                            @foreach (var node in _localProgram.ProgramStructure.ProgramBlocks)
+                            @foreach (var node in localProgram.ProgramStructure.ProgramBlocks)
                             {
                                 <div id="@node.Id" class="node" style="left: @(node.X.ToString() + "px"); top: @(node.Y.ToString() + "px");" @onclick="(() => SelectNode(node))">
                                     <div class="top-part dark:bg-gray-600">
@@ -275,9 +276,9 @@
                                             @if (node.Block.Name == "Custom Block")
                                             {
                                                 <div style="width: calc(100%); margin-left: -0.6rem; padding-right: 0.03rem;">
-                                                    @if (APO != null && APO.ProgramStructure.CustomPrograms.ContainsKey(node.Id))
+                                                    @if (localProgram != null && localProgram.ProgramStructure.CustomPrograms.ContainsKey(node.Id))
                                                     {
-                                                        <select @bind-value="APO.ProgramStructure.CustomPrograms[node.Id].Id"
+                                                        <select @bind-value="localProgram.ProgramStructure.CustomPrograms[node.Id].Id"
                                                                 @bind-value:event="oninput"
                                                                 @onchange="((ChangeEventArgs e) => SelectCustomBlock(node, e.Value.ToString()))"
                                                                 class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
@@ -288,7 +289,7 @@
                                                             }
                                                         </select>
                                                     }
-                                                    else if (APO != null)
+                                                    else if (localProgram != null)
                                                     {
                                                         <select @onchange="((ChangeEventArgs e) => SelectCustomBlock(node, e.Value.ToString()))"
                                                                 class="w-full p-2 border dark:bg-gray-700 dark:text-white outline-none border-0">
@@ -737,6 +738,7 @@
             if (value != _localProgram)
             {
                 _localProgram = value;
+                APO = value;
                 //AddToHistory(value);
             }
         }
@@ -765,7 +767,7 @@
     {
         if (APO != null)
         {
-            if(localProgram != APO)
+            if (localProgram != APO)
             {
                 localProgram = APO;
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
@@ -842,7 +844,7 @@
     {
         Console.WriteLine("Connection removed: " + connectionId.Replace("-endpoint", ""));
         await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
-        APO.ProgramStructure.RemoveConnection(Guid.Parse(connectionId.Replace("-endpoint", "")));
+        localProgram.ProgramStructure.RemoveConnection(Guid.Parse(connectionId.Replace("-endpoint", "")));
         await DrawConnections(localProgram.ProgramStructure);
         StateHasChanged();
     }
@@ -893,7 +895,7 @@
 
     private async Task ShowContextMenu(MouseEventArgs e)
     {
-        if(APO != null)
+        if (localProgram != null)
         {
             await JSRuntime.InvokeVoidAsync("showContextMenu", DotNetObjectReference.Create(this), e.ClientX, e.ClientY);
         }
@@ -943,7 +945,7 @@
         if (SelectedOutput != null)
         {
         //Console.WriteLine("input id: " + input.Id);
-            if (APO.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
+            if (localProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
             {
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
                 SelectedOutput = null;
@@ -977,7 +979,7 @@
             programBlock.Block.Inputs = customBlockProgram.ProgramStructure.ProgramStart.Select(output => ConvertOutputToInput(output)).ToList();
             programBlock.Block.Inputs.ForEach(input =>
             {
-                APO.ProgramStructure.RemoveConnection(input.Id);
+                localProgram.ProgramStructure.RemoveConnection(input.Id);
                 input.Id = Guid.NewGuid();
             });
 
@@ -985,19 +987,19 @@
             programBlock.Block.Outputs = customBlockProgram.ProgramStructure.ProgramEnd.Select(input => ConvertInputToOutput(input)).ToList();
             programBlock.Outputs = programBlock.Block.Outputs.Select(output =>
             {
-                APO.ProgramStructure.RemoveConnection(output.Id);
+                localProgram.ProgramStructure.RemoveConnection(output.Id);
                 return Guid.NewGuid();
             }).ToList();
 
             programBlock.VariableId = Guid.Parse(customBlockId);
             Guid customBlockGuid = Guid.Parse(customBlockId);
-            if (APO.ProgramStructure.CustomPrograms.ContainsKey(programBlock.Id))
+            if (localProgram.ProgramStructure.CustomPrograms.ContainsKey(programBlock.Id))
             {
-                APO.ProgramStructure.CustomPrograms[programBlock.Id] = new CustomBlockProgram { Name = customBlockProgram.Name, Id = Guid.Parse(customBlockId) };
+                localProgram.ProgramStructure.CustomPrograms[programBlock.Id] = new CustomBlockProgram { Name = customBlockProgram.Name, Id = Guid.Parse(customBlockId) };
             }
             else
             {
-                APO.ProgramStructure.CustomPrograms.Add(programBlock.Id, new CustomBlockProgram { Name = customBlockProgram.Name, Id = Guid.Parse(customBlockId) });
+                localProgram.ProgramStructure.CustomPrograms.Add(programBlock.Id, new CustomBlockProgram { Name = customBlockProgram.Name, Id = Guid.Parse(customBlockId) });
             }
         }
     }
