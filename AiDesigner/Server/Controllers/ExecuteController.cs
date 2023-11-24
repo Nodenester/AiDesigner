@@ -51,15 +51,13 @@ namespace AiDesigner.Server.Controllers
                 catch (Exception ex)
                 {
                     return Ok(response);
-                    //Console.WriteLine(ex.Message);
-                    // Consider logging the exception for further analysis if needed.
                 }
 
-                response.EnsureSuccessStatusCode();  // Throw an exception if the response is not successful.
+                response.EnsureSuccessStatusCode(); 
 
                 // Parse and return the response
                 var responseContent = await response.Content.ReadAsStringAsync();
-                //var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
+                var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
 
                 return Content(responseContent, "application/json");
             }
