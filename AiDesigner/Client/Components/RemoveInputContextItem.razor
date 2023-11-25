@@ -1,0 +1,24 @@
+﻿@using AiDesigner.Shared.Blocks;
+@using Microsoft.JSInterop
+@using AiDesigner.Shared
+@using NodeBaseApi.Version2
+@using NodeExacuteApi.Data.Blocks;
+@using NodeExacuteApi.Data.Blocks.AiModels;
+@inject IJSRuntime JSRuntime
+
+<div id="inputContextMenu" class="context-menu hidden bg-gray-600 absolute z-10" style="border-radius: 0.625rem; height: 1.5rem; display: flex; align-items: center;">
+    <span class="text-sm" style="display: inline; margin-left: 0.3125rem;">Remove</span>
+    <button style="margin-left: 0.3125rem; padding-right: 0.3125rem;" @onclick="OnMenuItemClick">X</button>
+
+</div>
+
+<style>
+    .context-menu ul {
+        padding-left: 14px;
+    }
+</style>
+
+@code{
+    [Parameter]
+    public EventCallback OnMenuItemClick { get; set; }
+}

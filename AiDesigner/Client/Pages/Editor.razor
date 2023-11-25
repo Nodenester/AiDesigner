@@ -106,32 +106,20 @@
                 </div>
                 @if (localProgram != null)
                 {
-                    if(localProgram is CustomProgram customProgram1)
+                    foreach (var Variable in localProgram.ProgramStructure.Variables)
                     {
-                        foreach (var Variable in customProgram1.ProgramStructure.Variables)
-                        {
-                            <div class="mx-8">
-                                <button @onclick="() => SelectVariable(Variable.Value)" class="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 py-2 rounded w-full flex justify-between items-center border-b border-gray-600">
-                                    <span class="overflow-hidden ml-2 text-start w-50 text-lg">@Variable.Value.Name</span>
-                                    <div class="flex overflow-hidden items-end mr-1 w-50">
-                                        @if(Variable.Value.IsList)
-                                        {
-                                            <p>List of: </p>
-                                        }
-                                        <p>@Variable.Value.Type</p>
-                                    </div>
-                                </button>
-                            </div>
-                        }
-                    }
-                    else if(localProgram is CustomBlockProgram customBlockProgram1)
-                    {
-                        foreach (var Variable in customBlockProgram1.ProgramStructure.Variables)
-                        {
-                            <div class="mx-2">
-                                <button @onclick="() => SelectVariable(Variable.Value)" class="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 px-4 py-2 rounded mx-2 w-full">@Variable.Value.Name</button>
-                            </div>
-                        }
+                        <div class="mx-8">
+                            <button @onclick="() => SelectVariable(Variable.Value)" class="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 py-2 rounded w-full flex justify-between items-center border-b border-gray-600">
+                                <span class="overflow-hidden ml-2 text-start w-50 text-lg">@Variable.Value.Name</span>
+                                <div class="flex overflow-hidden items-end mr-1 w-50">
+                                    @if(Variable.Value.IsList)
+                                    {
+                                        <p>List of: </p>
+                                    }
+                                    <p>@Variable.Value.Type</p>
+                                </div>
+                            </button>
+                        </div>
                     }
                 }
             </div>
@@ -154,12 +142,18 @@
                                          <!--Left side content-->
                                     </div>
                                     <div class="right-part">
-                                        @foreach (var output in localProgram.ProgramStructure.ProgramStart)
+                                        @foreach (var output in localProgram.ProgramStructure.ProgramStart.Select((value, index) => new { Value = value, Index = index }))
                                         {
-                                            <!--make a componenet  or something so it show the right input / output type-->
-                                            <div class="node-output d-flex ">
-                                                <span class="small-font">@output.Name</span>
-                                                <div id="@output.Id" class="@GetShape(output.Type.ToString(), output.IsList) @GetColor(output.Type.ToString()) Connection" @onclick="() => SelectOutput(output)"></div>
+                                            <div class="node-output d-flex"
+                                                 @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(output.Value.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), null, output.Value)'>
+                                                <span class="small-font">
+                                                    @output.Value.Name
+                                                    @if (output.Index != 0) // Adding the character for all but the first item
+                                                    {
+                                                        <text>‎</text> <!-- Replace 'YourCharacter' with the desired character -->
+                                                    }
+                                                </span>
+                                                <div id="@output.Value.Id" class="@GetShape(output.Value.Type.ToString(), output.Value.IsList) @GetColor(output.Value.Type.ToString()) Connection" @onclick="() => SelectOutput(output.Value)"></div>
                                             </div>
                                         }
                                         @if (localProgram.ProgramStructure.ProgramStart.Count() == 0)
@@ -180,15 +174,21 @@
                                 </div>
                                 <div class="main-part dark:bg-gray-700">
                                     <div class="left-part">
-                                        @foreach (var input in localProgram.ProgramStructure.ProgramEnd)
+                                        @foreach (var input in localProgram.ProgramStructure.ProgramEnd.Select((value, index) => new { Value = value, Index = index }))
                                         {
-                                            <!--make a componenet  or something so it show the right input / output type-->
-                                            <div class="node-input d-flex ">
-                                                <div id="@input.Id" class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection" @onclick="() => TryConnect(input)"></div>
-                                                <span class="small-font">@input.Name</span>
+                                            <div class="node-input d-flex"
+                                                @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(input.Value.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), input.Value )'>
+                                                <div id="@input.Value.Id" class="@GetShape(input.Value.Type.ToString(), input.Value.IsList) @GetColor(input.Value.Type.ToString()) Connection" @onclick="() => TryConnect(input.Value)"></div>
+                                                <span class="small-font">
+                                                    @input.Value.Name
+                                                    @if (input.Index != 0) // Adding the character for all but the first item
+                                                    {
+                                                        <text>‎</text> <!-- Replace 'YourCharacter' with the desired character -->
+                                                    }
+                                                </span>
                                             </div>
                                         }
-                                        @if (localProgram.ProgramStructure.ProgramStart.Count() == 0)
+                                        @if (localProgram.ProgramStructure.ProgramEnd.Count() == 0)
                                         {
                                             <hr style="border-top: none; height: 10px; background-color: transparent;" />
                                         }
@@ -331,7 +331,7 @@
                                             {
                                                 <div class="node-input d-flex"
                                                      @ref="inputElementReferences[input.Id.ToString()]"
-                                                     @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(input.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), input.Description ?? "huh")'
+                                                     @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(input.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), input)'
                                                      @onmouseleave="HideTooltip">
                                                     <div id="@input.Id"
                                                          class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection"
@@ -358,7 +358,13 @@
                                                     Add input
                                                 </button>
                                             }
-                                            <!-- Other content like buttons -->
+                                            @if (node.Block.Name == "Combine Objects")
+                                            {
+                                                <button @onclick='() => AddSelectInput(node, "Object")' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                    Add input
+                                                </button>
+                                            }
+                                            
                                         </div>
                                         <div class="right-part">
                                             <!-- Right part content goes here -->
@@ -366,7 +372,7 @@
                                             {
                                                 <div class="node-output d-flex"
                                                      @ref="outputElementReferences[output.Id.ToString()]"
-                                                     @onmouseenter='() => ShowTooltip(outputElementReferences.TryGetValue(output.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), output.Description ?? "huh")'
+                                                     @onmouseenter='() => ShowTooltip(outputElementReferences.TryGetValue(output.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), null, output)'
                                                      @onmouseleave="HideTooltip">
                                                     <span class="small-font">@output.Name</span>
                                                     <div id="@output.Id"
@@ -501,6 +507,7 @@
 </div>
 
 <ContextMenu OnMenuItemClick="AddBlockToWhiteboard" />
+<RemoveInputContextItem OnMenuItemClick="RemovePort" />
 
 <style>
     .whiteboard {
@@ -729,6 +736,8 @@
     private AddOutput apo { get; set; }
     private AddVariable apv { get; set; }
 
+    private object SelectedPort { get; set; }
+
     public ProgramObject localProgram
     {
         get { return _localProgram; }
@@ -792,25 +801,27 @@
         Console.WriteLine("Drawing blocks: " + programStructure.ProgramBlocks.Count());
         foreach (var block in programStructure.ProgramBlocks)
         {
-            // Draw connections for block inputs
-            if (block.Inputs != null)
+            try
             {
-                for (int i = 0; i < block.Inputs.Count; i++)
+                if (block.Inputs != null)
                 {
-                    var output = block.Inputs[i];
-                    var input = block.Block.Inputs[i];
-
-                    if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
+                    int inputsCount = Math.Min(block.Inputs.Count, block.Block.Inputs.Count);
+                    for (int i = 0; i < inputsCount; i++)
                     {
-                        // Console.WriteLine("---------------------");
-                        // Console.WriteLine($"Node id: {block.Id}");
-                        // Console.WriteLine("-                   -");
-                        // Console.WriteLine($"Index: {i}, Value: {output}");
-                        // Console.WriteLine($"Index: {i}, Value: {input.Id}");
-                        // Console.WriteLine("---------------------");
-                        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
+                        var output = block.Inputs[i];
+                        var input = block.Block.Inputs[i];
+
+                        if (output != null && input != null && output.ToString() != "00000000-0000-0000-0000-000000000000")
+                        {
+                            await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", output, input.Id, GetLineColor(input.Type.ToString()));
+                        }
                     }
                 }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Error drawing connections: " + ex.Message);
+                // Optionally log more details or handle the exception as needed.
             }
         }
 
@@ -818,10 +829,6 @@
         {
             if (programStructure.ProgramEndConnections.TryGetValue(input.Id, out Guid outputId))
             {
-                // Console.WriteLine("---------------------");
-                // Console.WriteLine($"Input Id: {input.Id}");
-                // Console.WriteLine($"Connected Output Id: {outputId}");
-                // Console.WriteLine("---------------------");
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", outputId, input.Id, GetLineColor(input.Type.ToString()));
             }
         }
@@ -842,7 +849,7 @@
     [JSInvokable]
     public async void OnRemoveConnection(string connectionId)
     {
-        Console.WriteLine("Connection removed: " + connectionId.Replace("-endpoint", ""));
+        //Console.WriteLine("Connection removed: " + connectionId.Replace("-endpoint", ""));
         await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
         localProgram.ProgramStructure.RemoveConnection(Guid.Parse(connectionId.Replace("-endpoint", "")));
         await DrawConnections(localProgram.ProgramStructure);
@@ -868,6 +875,46 @@
     {
         byte[] imageBytes = Convert.FromBase64String(dataUrl.Split(',')[1]);
         localProgram.Image = imageBytes;
+    }
+
+    public async Task RemovePort()
+    {
+        if (SelectedPort is Input input)
+        {
+            localProgram.ProgramStructure.RemoveConnection(input.Id);
+
+            if (localProgram.ProgramStructure.ProgramEnd.Contains(input))
+            {
+                localProgram.ProgramStructure.ProgramEnd.Remove(input);
+            }
+
+            var blockContainingInput = localProgram.ProgramStructure.ProgramBlocks
+                                       .FirstOrDefault(block => block.Block.Inputs.Contains(input));
+
+            if (blockContainingInput != null)
+            {
+                blockContainingInput.Block.Inputs.Remove(input);
+            }
+        }
+        else if (SelectedPort is Output output)
+        {
+            localProgram.ProgramStructure.RemoveConnection(output.Id);
+
+            if (localProgram.ProgramStructure.ProgramStart.Contains(output))
+            {
+                localProgram.ProgramStructure.ProgramStart.Remove(output);
+            }
+
+            var blockContainingInput = localProgram.ProgramStructure.ProgramBlocks
+                                       .FirstOrDefault(block => block.Block.Outputs.Contains(output));
+
+            if (blockContainingInput != null)
+            {
+                blockContainingInput.Block.Outputs.Remove(output);
+            }
+        }
+        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+        await DrawConnections(localProgram.ProgramStructure);
     }
 
     //Whiteboard logic
@@ -944,7 +991,7 @@
     {
         if (SelectedOutput != null)
         {
-        //Console.WriteLine("input id: " + input.Id);
+            //Console.WriteLine("input id: " + input.Id);
             if (localProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
             {
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
@@ -1003,7 +1050,6 @@
             }
         }
     }
-
 
     string GetShape(string type, bool isList)
     {
@@ -1115,22 +1161,20 @@
     {
         try
         {
-            // Check if inputItem.Data is a List<object>
-            if (inputItem.Data is List<object> dataList)
-            {
-                // Iterate over the list and print each value
-                foreach (var value in dataList)
-                {
-                    Console.WriteLine(value);
-                }
-                localProgram.ProgramStructure.DirectInputValues[inputItem.Id] = inputItem.Data;
+            // var programblock = localProgram.ProgramStructure.ProgramBlocks
+            //     .FirstOrDefault(programBlock => programBlock.Block.Inputs.Any(input => input.Id == inputItem.Id));
 
-            }
-            else
-            {
-                Console.WriteLine(inputItem.Data);
-                localProgram.ProgramStructure.DirectInputValues[inputItem.Id] = inputItem.Data;
-            }
+            // foreach(var input in programblock.Block.Inputs)
+            // {
+            //     if(input.Id == inputItem.Id){ break; }
+            //     if (!localProgram.ProgramStructure.DirectInputValues.ContainsKey(input.Id) &&
+            //         !localProgram.ProgramStructure.InputValues.ContainsKey(input.Id))
+            //     {
+            //         localProgram.ProgramStructure.DirectInputValues[input.Id] = new object();
+            //         Console.WriteLine(input.Name);
+            //     }
+            // }
+            localProgram.ProgramStructure.DirectInputValues[inputItem.Id] = inputItem.Data;
         }
         catch (Exception e)
         {
@@ -1234,7 +1278,7 @@
         int idx = node.Block.Outputs.Count();
         node.Block.Outputs.Add(new Output
         {
-            Name = $"Case {idx}",
+            Name = $"Case‎ {idx}",
             Type = NodeBaseApi.Version2.Type.Trigger,
             Description = $"Triggered for case {idx}.",
         });
@@ -1251,7 +1295,7 @@
         node.Block.Inputs.Add(new Input
             {
                 Id = Guid.NewGuid(),
-                Name = $"{text.Split(' ')[0]} {idx}",
+                Name = $"{text.Split(' ')[0]}‎ {idx}",
                 Type = node.Block.Inputs[1].Type,
                 Description = $"{text} {idx}.",
             });
@@ -1297,32 +1341,32 @@
         // }
         // else
         // {
-            //Also Exacute program after
-            if (localProgram is CustomProgram customProgram)
+        //Also Exacute program after
+        if (localProgram is CustomProgram customProgram)
+        {
+            if (customProgram.ProgramStructure.ProgramBlocks.Count() != 0)
             {
-                if (customProgram.ProgramStructure.ProgramBlocks.Count() != 0)
-                {
-                    await UpdateDb(localProgram);
-                    epnb.Open();
-                }
-                else
-                {
-                    //Dont run if there are no blocks
+                await UpdateDb(localProgram);
+                epnb.Open();
+            }
+            else
+            {
+                //Dont run if there are no blocks
 
-                }
             }
-            else if (localProgram is CustomBlockProgram customBlockProgram)
+        }
+        else if (localProgram is CustomBlockProgram customBlockProgram)
+        {
+            if (customBlockProgram.ProgramStructure.ProgramBlocks != null)
             {
-                if (customBlockProgram.ProgramStructure.ProgramBlocks != null)
-                {
-                    await UpdateDb(localProgram);
-                    epnb.Open();
-                }
-                else
-                {
-                    //Dont run if there are no blocks
-                }
+                await UpdateDb(localProgram);
+                epnb.Open();
             }
+            else
+            {
+                //Dont run if there are no blocks
+            }
+        }
         // }
     }
 
@@ -1340,7 +1384,7 @@
                 // }
                 // else
                 // {
-                    await UpdateDb(localProgram);
+                await UpdateDb(localProgram);
                 // }
             }
             else
@@ -1413,14 +1457,36 @@
     private Dictionary<string, ElementReference> inputElementReferences = new Dictionary<string, ElementReference>();
     private Dictionary<string, ElementReference> outputElementReferences = new Dictionary<string, ElementReference>();
 
-    void ShowTooltip(ElementReference elementReference, string content)
+    void ShowTooltip(ElementReference elementReference, Input input = null, Output output = null)
     {
-        tooltipService.Open(elementReference, content, new TooltipOptions
+        if (input != null)
+        {
+            SelectedPort = input;
+            try
             {
-                Position = TooltipPosition.Top,
-                Duration = 10000,
-                Delay = 500
-            });
+                tooltipService.Open(elementReference, input.Description, new TooltipOptions
+                {
+                    Position = TooltipPosition.Top,
+                    Duration = 5000,
+                    Delay = 500
+                });
+            }
+            catch (Exception e){}
+        }
+        else if (output != null)
+        {
+            SelectedPort = output;
+            try
+            {
+                tooltipService.Open(elementReference, output.Description, new TooltipOptions
+                {
+                    Position = TooltipPosition.Top,
+                    Duration = 5000,
+                    Delay = 500
+                });
+            }
+            catch(Exception e){}
+        }
     }
 
     void HideTooltip()

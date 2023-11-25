@@ -195,6 +195,7 @@
                 new Item { Name = "Object To List", block = new ObjectToList() },
                 new Item { Name = "Count List", block = new CountList() },
                 new Item { Name = "Last Item", block = new LastItem() },
+                new Item { Name = "Combine Objects", block = new CombineObjects() },
             }
         },
         new Item
@@ -252,6 +253,7 @@
                new Item { Name = "Concatenation", block = new Concatenation() },
                new Item { Name = "Length", block = new Length() },
                new Item { Name = "Substring", block = new Substring() },
+               new Item { Name = "Find closest", block = new FindClosestStrings() },
                new Item { Name = "To Lowercase", block = new Lowercase() },
                new Item { Name = "To Uppercase", block = new Uppercase() },
                new Item { Name = "Contains", block = new Contains() },
@@ -262,7 +264,8 @@
                new Item { Name = "IndexOf", block = new IndexOf() },
                new Item { Name = "RegularExpressionMatch", block = new RegularExpressionMatch() },
                new Item { Name = "Format", block = new Format() },
-               new Item { Name = "String Cleaner", block = new StringCleaner() },
+               new Item { Name = "String Cleaner", block = new StringCleaner() },               
+               new Item { Name = "Remove stopwords", block = new StopwordRemoval() },
                new Item { Name = "Int Parser", block = new IntParser() },
                new Item { Name = "Bool Parser", block = new BoolParser() },
             }
