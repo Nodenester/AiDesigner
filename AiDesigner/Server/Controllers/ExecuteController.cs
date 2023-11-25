@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using System.Text;
 using Newtonsoft.Json;
+using OtpNet;
 
 namespace AiDesigner.Server.Controllers
 {
@@ -23,7 +24,8 @@ namespace AiDesigner.Server.Controllers
             [FromBody] Dictionary<Guid, object> inputValues,
             [FromQuery] string apiKey,
             [FromQuery] Guid? sessionId = null,
-            [FromQuery] bool isTest = false)
+            [FromQuery] bool isTest = false,            
+            [FromQuery] bool isCustomBlock = false)
             {
             try
             {
@@ -41,6 +43,13 @@ namespace AiDesigner.Server.Controllers
                 {
                     url += $"&isTest=true";
                 }
+
+                if (isCustomBlock)
+                {
+                    url += $"&isCustomBlock=true";
+                }
+
+                url += $"&testToken={GenerateTOTP()}";
 
                 // Make the API call
                 var response = new HttpResponseMessage();
@@ -66,6 +75,17 @@ namespace AiDesigner.Server.Controllers
                 // Log the exception if needed
                 return StatusCode(500, $"Internal server error: {ex.Message}");
             }
+        }
+        public string GenerateTOTP()
+        {
+            //byte[] secretKey = KeyGeneration.GenerateRandomKey(20);
+            string secretKeyBase64 = "YOUR_TOTP_SECRET_HERE";
+            byte[] secretKey = Convert.FromBase64String(secretKeyBase64);
+
+            var totp = new Totp(secretKey);
+
+            // Generate a TOTP token
+            return totp.ComputeTotp();
         }
     }
 }

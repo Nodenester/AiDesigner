@@ -309,6 +309,49 @@ namespace AiDesigner.Shared.Blocks
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    public class FindClosestStrings : Block
+    {
+        public FindClosestStrings()
+        {
+            Id = Guid.NewGuid();
+            Name = "Find Closest Strings";
+            Description = "Finds the closest strings to a given search string within a list. (could be used for memory, only english)";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "StringList", Description = "List of strings to search through.", Type = Type.String, IsList = true },
+            new Input { Id = Guid.NewGuid(), Name = "SearchString", Description = "The string to search for.", Type = Type.String },
+            new Input { Id = Guid.NewGuid(), Name = "Number", Description = "Number of closest strings to return.", Type = Type.Number }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "ClosestStrings", Description = "The closest strings found.", Type = Type.String, IsList = true }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class StopwordRemoval : Block
+    {
+        public StopwordRemoval()
+        {
+            Id = Guid.NewGuid();
+            Name = "Stopword Removal";
+            Description = "Removes stopwords from a given text.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Text", Description = "The text to remove stopwords from.", Type = Type.String }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "ProcessedText", Description = "The text after removing stopwords.", Type = Type.String }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+
     public class IntParser : Block
     {
         public IntParser()

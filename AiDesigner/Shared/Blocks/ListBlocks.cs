@@ -174,4 +174,26 @@ namespace NodeExacuteApi.Data.Blocks
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
+
+    public class CombineObjects : Block
+    {
+        public CombineObjects()
+        {
+            Id = Guid.NewGuid();
+            Name = "Combine Objects";
+            Description = "Combines multiple objects into a list. (Could be used ass a class)";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Object 1", Description = "The first object to combine.", Type = Type.Object, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Object 2", Description = "The second object to combine.", Type = Type.Object, IsRequired = true }
+        }; 
+        Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "CombinedList", Description = "The combined list of objects.", Type = Type.Object, IsList = true }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
 }

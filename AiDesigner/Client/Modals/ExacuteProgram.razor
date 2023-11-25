@@ -157,74 +157,69 @@
 
     private async Task ExecuteProgram()
     {
-        if (AP is CustomProgram customProgram)
+
+        var nonNullInputValues = AP.ProgramStructure.InputValues
+            .Where(kvp => kvp.Value != null)
+            .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        if (CascAuth != null)
         {
-            var nonNullInputValues = customProgram.ProgramStructure.InputValues
-                .Where(kvp => kvp.Value != null)
-                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
-            //ProgramOutput = await apiService.ExecuteProgramAsync(customProgram.ApiKey, nonNullInputValues, "56a2d82a-5595-4a8f-b1fd-9a1482e02d20", null, true);
-
-            if (CascAuth != null)
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
             {
-                var user = CascAuth.User;
-                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-                if (Guid.TryParse(userIdClaim, out Guid userId))
+                var url = "";
+                if(AP is CustomProgram customProgram2)
                 {
-                    var url = "";
-                    if(AP is CustomProgram customProgram2)
-                    {
-                        url = $"Execute?programKey={customProgram2.ApiKey}&apiKey={userId}";
-                    }
+                    url = $"Execute?programKey={customProgram2.ApiKey}&apiKey={userId}";
+                }
+                else if (AP is CustomBlockProgram customBlockProgram)
+                {
+                    url = $"Execute?programKey={customBlockProgram.Id}&apiKey={userId}&isCustomBlock=true";
+                }
+                if (true)
+                {
+                    url += $"&isTest=true";
+                }
+                if(AP.SupportsSessions)
+                {
+                    url += $"&sessionId={currentSession.SessionId}";
+                }
 
-                    if (true)
-                    {
-                        url += $"&isTest=true";
-                    }
+                isLoading = true;
+                isExecutionFailed = false;
+                StateHasChanged();
+                try
+                {
+                    var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(nonNullInputValues), Encoding.UTF8, "application/json");
+                    var response = await Http.PostAsync(url, requestContent);
+                    var responseContent = await response.Content.ReadAsStringAsync();
 
-                    if(AP.SupportsSessions)
+                    if (response.IsSuccessStatusCode)
                     {
-                        url += $"&sessionId={currentSession.SessionId}";
+                        ProgramOutput = JsonConvert.DeserializeObject<List<object>>(responseContent);
                     }
-
-                    isLoading = true;
-                    isExecutionFailed = false;
-                    StateHasChanged();
-                    try
-                    {
-                        var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(nonNullInputValues), Encoding.UTF8, "application/json");
-                        var response = await Http.PostAsync(url, requestContent);
-                        var responseContent = await response.Content.ReadAsStringAsync();
-
-                        if (response.IsSuccessStatusCode)
-                        {
-                            ProgramOutput = JsonConvert.DeserializeObject<List<object>>(responseContent);
-                        }
-                        else
-                        {
-                            isExecutionFailed = true;
-                        }
-                    }
-                    catch (Exception ex)
+                    else
                     {
                         isExecutionFailed = true;
                     }
-                    finally
-                    {
-                        isLoading = false;
-                        if (isExecutionFailed)
-                        {
-                            StateHasChanged();
-                            await Task.Delay(2000); // Wait for 3 seconds
-                            isExecutionFailed = false; // Reset the error state
-                        }
-                    }
-                    await GetTokens();
                 }
+                catch (Exception ex)
+                {
+                    isExecutionFailed = true;
+                }
+                finally
+                {
+                    isLoading = false;
+                    if (isExecutionFailed)
+                    {
+                        StateHasChanged();
+                        await Task.Delay(2000); // Wait for 3 seconds
+                        isExecutionFailed = false; // Reset the error state
+                    }
+                }
+                await GetTokens();
             }
-        }
-        else if (AP is CustomBlockProgram customBlockProgram)
-        {
-
         }
     }
 

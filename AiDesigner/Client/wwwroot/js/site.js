@@ -781,12 +781,14 @@ window.initializeContextMenu = function () {
         // if the clicked element is not the context menu and not a descendant of the context menu
         if (!contextMenu.contains(event.target)) {
             contextMenu.style.display = "none";
+            inputContextMenu.style.display = "none";
         }
     });
 
     window.showContextMenu = function (refrence, pageX, pageY) {
         whiteBoard = document.getElementById('whiteboard');
         var contextMenu = document.getElementById("contextMenu");
+        var inputContextMenu = document.getElementById("inputContextMenu");
         var canvas = document.getElementById("canvas");
 
         // test for mini context menu
@@ -794,14 +796,6 @@ window.initializeContextMenu = function () {
             / window.innerWidth);
 
         var elementUnderCursor = document.elementFromPoint(pageX, pageY);
-
-        console.log("Element under cursor:", elementUnderCursor);
-
-        if (elementUnderCursor.classList.contains('small-font')) {
-            hideContextMenu();
-            return; // Exit the function without showing the context menu
-        }
-        //----------------
 
         // Calculate the canvas' position
         var rectCanvas = canvas.getBoundingClientRect();
@@ -812,7 +806,17 @@ window.initializeContextMenu = function () {
         var relativeX = (pageX - canvasX - 50) / currentZoom;
         var relativeY = (pageY - canvasY) / currentZoom;
 
+        if (elementUnderCursor.textContent.includes("‎") && elementUnderCursor.classList.contains('small-font')) {
+            inputContextMenu.style.display = "block";
+            inputContextMenu.style.left = `${pageX}px`;
+            inputContextMenu.style.top = `${pageY}px`;
+            hideContextMenu();
+            return; // Exit the function without showing the context menu
+        }
+        //----------------
+
         contextMenu.style.display = "block";
+        hideInputContextMenu();
         var width = contextMenu.offsetWidth;
         var height = contextMenu.offsetHeight;
 
@@ -839,6 +843,11 @@ window.initializeContextMenu = function () {
 
     window.hideContextMenu = function () {
         var contextMenu = document.getElementById("contextMenu");
+        contextMenu.style.display = "none";
+    }
+
+    window.hideInputContextMenu = function () {
+        var contextMenu = document.getElementById("inputContextMenu");
         contextMenu.style.display = "none";
     }
 
@@ -892,7 +901,7 @@ window.registerGlobalKeyPress = (dotNetObject) => {
                 // Assuming hoveredConnection has properties like sourceId and targetId
                 var sourceId = hoveredConnection.sourceId;
                 var targetId = hoveredConnection.targetId;
-                console.log("Source ID:", sourceId, "Target ID:", targetId);
+                //console.log("Source ID:", sourceId, "Target ID:", targetId);
 
                 dotNetObject.invokeMethodAsync('OnRemoveConnection', sourceId);
             }
