@@ -57,6 +57,7 @@
                 <h2 class="text-xl font-semibold mb-2">Code</h2>
             <div class="relative inline-block w-full mb-4">
                     <select @bind="SelectedLanguage" class="block appearance-none w-full w-full rounded dark:bg-gray-600 dark:text-white outline-none border-0 py-2 px-4 pr-8 rounded leading-tight focus:outline-none focus:border-gray-500 dark:focus:border-gray-400">
+                    <option value="curl">Curl</option>
                     <option value="csharp">C#</option>
                     <option value="python">Python</option>
                     <option value="javascript">JavaScript</option>
@@ -75,11 +76,11 @@
 }
 
 @code {
-    [Parameter]
-    public ProgramObject SelectedProgram { get; set; }
+        [Parameter]
+        public ProgramObject SelectedProgram { get; set; }
 
-    [Parameter]
-    public EventCallback<ProgramObject> SelectedProgramChanged { get; set; }
+        [Parameter]
+        public EventCallback<ProgramObject> SelectedProgramChanged { get; set; }
 
     public ProgramObject localProgram { get; set; }
 
@@ -87,13 +88,38 @@
     {
         get
         {
-            string code;
+            CustomProgram program = localProgram as CustomProgram ?? null;
+            // Define the variables that are missing
+            string baseUrl = "http://apiurl"; // Placeholder for base URL
+            string programKey = "";
+            if(program != null)
+            {
+                programKey = program.ApiKey.ToString(); // Placeholder for program key
+            }
+            string apiKey = "your_api_key"; // Placeholder for API key
+            string sessionId = "your_session_id"; // Placeholder for session ID
+            string jsonInputValues = "{}"; // Placeholder for JSON input values
+
+            string code = "";
             switch (SelectedLanguage)
             {
+                case "curl":
+                    // cURL variant
+                    code = $"# cURL command for {(SelectedProgram?.Name ?? "Untitled")}\n";
+                    string curlUrl = $"{baseUrl}/api/Program/execute?programKey={programKey}&apiKey={apiKey}";
+
+                    if (SelectedProgram.SupportsSessions)
+                    {
+                        curlUrl += $"&sessionId={sessionId}";
+                    }
+
+                    code += $"curl -X POST \"{curlUrl}\" \\\n"; // Break line here
+                    code += $"  -H 'Content-Type: application/json' \\\n"; // Break line here
+                    code += $"  -d '{jsonInputValues}'\n"; // Assuming jsonInputValues is a JSON string
+                    break;
                 case "csharp":
-                    code = $"// C# Code for {(SelectedProgram?.Name ?? "Untitled")}\n " +
-    @"
-//Put this at the top of your file
+                    code = code = $"// C# Code for {(SelectedProgram?.Name ?? "Untitled")}\n " +
+    $@"
 using System;
 using System.Net.Http;
 using System.Text;
@@ -101,116 +127,127 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 
-//The function for calling the api
-public async Task<List<object>> ExecuteProgram(Guid programKey, Guid apiKey, Dictionary<Guid, object> inputValues, Guid sessionId)
-{
+public async Task<List<object>> ExecuteProgram(Guid programKey, Guid apiKey, Dictionary<Guid, object> inputValues, Guid? sessionId)
+{{
     using (var client = new HttpClient())
-    {
-        client.BaseAddress = new Uri(""http://apiurl""); // replace with the actual API URL
+    {{
+        client.BaseAddress = new Uri(""{baseUrl}"");
         var content = new StringContent(JsonConvert.SerializeObject(inputValues), Encoding.UTF8, ""application/json"");
+        var url = $""api/Program/execute?programKey={programKey}&apiKey={apiKey}"";
+
+        if (sessionId.HasValue)
+        {{
+            url += $""&sessionId=sessionId.Value"";
+        }}
         try
-        {
-                var response = await client.PostAsync($""api/Program/execute?programKey={{programKey}}&apiKey={{apiKey}}&sessionId={{sessionId}}"", content);
-                var responseString = await response.Content.ReadAsStringAsync();
-                return JsonConvert.DeserializeObject<List<object>>(responseString);
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine( $""Request failed: {ex.Message}"");
-            return null;
-        }
-    }
-}
-"
-    + @"
-//To use the function
+        var response = await client.PostAsync(url, content);
+        var responseString = await response.Content.ReadAsStringAsync();
+        return JsonConvert.DeserializeObject<List<object>>(responseString);
+    }}
+}}
+// Usage
 Guid programKey = Guid.Parse(""{{programKey}}"");
 Guid apiKey = Guid.Parse(""{{apiKey}}"");
-Guid sessionId = Guid.Parse(""{{sessionId}}""); //optional
+Guid? sessionId = // Conditional assignment based on whether session ID is available
 Dictionary<Guid, object> inputValues = new Dictionary<Guid, object>();
 ";
-                    if (SelectedProgram?.ProgramStructure?.ProgramStart != null)
-                {
-                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-                    {
-                        if (input.Type.ToString() != "Trigger")
-                        {
-                            code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //value is {input.Type}\n";
-                        }
+if (SelectedProgram?.ProgramStructure?.ProgramStart != null)
+{
+    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+    {
+        if (input.Type.ToString() != "Trigger")
+        {
+            code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //value is {input.Type}\n";
+        }
 
-                    }
-                }
+    }
+}
 code += @"
 var result = await ExecuteProgram(programKey, apiKey, inputValues, sessionId);
 ";
-
                     break;
                 case "python":
-                    code = $"# Python Code for {(SelectedProgram?.Name ?? "Untitled")}\n";
-                    code += @"
+                    code = $"# Python Code for {(SelectedProgram?.Name ?? "Untitled")}\n" +
+    $@"
 import requests
 import json
 
 def execute_program(program_key, api_key, input_values, session_id):
-    url = 'http://apiurl/api/Program/execute'
-    params = {
-        'programKey': program_key,
-        'apiKey': api_key,
-        'sessionId': session_id,
-    }
-    response = requests.post(url, json=input_values, params=params)
+    url = '{baseUrl}/api/Program/execute?programKey=' + program_key + '&apiKey=' + api_key
+    if session_id is not None:
+        url += '&sessionId=' + session_id
+
+    response = requests.post(url, json=input_values)
 
     if response.status_code == 200:
         return json.loads(response.text)
     else:
-        print(f'Request failed with status code {response.status_code}')
+        print(f'Request failed with status code response.status_code')
         return None
 
 program_key = 'your_program_key'
 api_key = 'your_api_key'
-session_id = 'your_session_id'  # optional
+session_id = 'your_session_id' # or None if not available
+";
+code += @"
 input_values = {}
 ";
-                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-                    {
-                        if (input.Type.ToString() != "Trigger")
-                        {
-                            code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
-                        }
-                    }
-                    code += @"
+foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+{
+    if (input.Type.ToString() != "Trigger")
+    {
+        code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
+    }
+}
+code += @"
+result = execute_program(program_key, api_key, input_values, session_id)
+";
+foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+{
+    if (input.Type.ToString() != "Trigger")
+    {
+        code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
+    }
+}
+code += @"
 result = execute_program(program_key, api_key, input_values, session_id)
 ";
                     break;
                 case "javascript":
-                    code = $"// JavaScript Code for {(SelectedProgram?.Name ?? "Untitled")}\n";
-                    code += @"
+                    code = $"// JavaScript Code for {(SelectedProgram?.Name ?? "Untitled")}\n" +
+            $@"
 const axios = require('axios');
 
-async function executeProgram(programKey, apiKey, inputValues, sessionId) {
-    const url = `http://apiurl/api/Program/execute?programKey=${programKey}&apiKey=${apiKey}&sessionId=${sessionId}`;
-    try {
+async function executeProgram(programKey, apiKey, inputValues, sessionId) {{
+    let url = `{baseUrl}/api/Program/execute?programKey=${programKey}&apiKey=${apiKey}`;
+
+    if (sessionId) {{
+        url += `&sessionId=${sessionId}`;
+    }}
+
+    try {{
         const response = await axios.post(url, inputValues);
         return response.data;
-    } catch (error) {
-        console.error(`Request failed: ${error}`);
+    }} catch (error) {{
+        console.error(`Request failed: error`);
         return null;
-    }
-}
+    }}
+}}
 
 const programKey = 'your_program_key';
 const apiKey = 'your_api_key';
-const sessionId = 'your_session_id';  // optional
-const inputValues = {};
-";
-                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-                    {
-                        if (input.Type.ToString() != "Trigger")
-                        {
-                            code += $"inputValues['{input.Id}'] = value;  // value is {input.Type}\n";
-                        }
-                    }
-                    code += @"
+const sessionId = 'your_session_id'; // or null if not available
+const inputValues =";
+code += @"
+{}";
+    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+    {
+        if (input.Type.ToString() != "Trigger")
+        {
+            code += $"inputValues['{input.Id}'] = value;  // value is {input.Type}\n";
+        }
+    }
+    code += @"
 const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
 ";
                     break;

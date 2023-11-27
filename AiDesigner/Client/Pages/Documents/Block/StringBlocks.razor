@@ -198,6 +198,81 @@
             </ul>
         </div>
 
+        <!-- StringCleaner Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">StringCleaner</h3>
+            <p>A block that removes substrings between two specified delimiters from a given string.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The main string from which substrings will be removed. (Type: String) <span class="text-red-500">*</span></li>
+                <li>Start Delimiter: The start delimiter. (Type: String) <span class="text-red-500">*</span></li>
+                <li>End Delimiter: The end delimiter. (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Cleaned String: The string after removal of specified substrings. (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- FindClosestStrings Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Find Closest Strings</h3>
+            <p>Finds the closest strings to a given search string within a list. (could be used for memory, only English)</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>StringList: List of strings to search through. (Type: String) [List]</li>
+                <li>SearchString: The string to search for. (Type: String)</li>
+                <li>Number: Number of closest strings to return. (Type: Number)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ClosestStrings: The closest strings found. (Type: String) [List]</li>
+            </ul>
+        </div>
+
+        <!-- StopwordRemoval Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Stopword Removal</h3>
+            <p>Removes stopwords from a given text.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Text: The text to remove stopwords from. (Type: String)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ProcessedText: The text after removing stopwords. (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- IntParser Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">IntParser</h3>
+            <p>A block that parses a string into an integer.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The string to be parsed into an integer. (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Parsed Integer: The parsed integer value. (Type: Number)</li>
+            </ul>
+        </div>
+
+        <!-- BoolParser Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">BoolParser</h3>
+            <p>A block that parses a string into a boolean.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Input String: The string to be parsed into a boolean. (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Parsed Boolean: The parsed boolean value. (Type: Boolean)</li>
+            </ul>
+        </div>
+
+
     </section>
 </div>
 

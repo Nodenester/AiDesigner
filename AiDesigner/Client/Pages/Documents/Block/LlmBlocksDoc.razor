@@ -3,33 +3,57 @@
 <div class="container mx-auto p-6 font-mono">
     <section class="mb-8">
         <h2 class="text-2xl font-bold mb-4">AI Model Blocks</h2>
-        @* Llama27b *@
+
+        <!-- Llama27b Block -->
         <div class="mb-4 bg-gray-700 p-4 rounded">
             <h3 class="text-xl font-bold mb-2">Llama27b Block</h3>
             <p>Llama-2 7b API integration block.</p>
             <h4 class="font-bold mt-2">Inputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
                 <li>Query: The input query for the Llama-2 7b API (Type: String) <span class="text-red-500">*</span></li>
-                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number) <span class="text-red-500">*</span></li>
-                <li>TopP: Top P value for controlling randomness (Type: Number) <span class="text-red-500">*</span></li>
-                <li>Temperature: Temperature value for controlling creativity (Type: Number) <span class="text-red-500">*</span></li>
+                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number)</li>
+                <li>TopP: Top P value for controlling randomness (Type: Number)</li>
+                <li>Temperature: Temperature value for controlling creativity (Type: Number)</li>
+                <li>StopWords: List of words where the AI should stop generating text (Type: String) [List]</li>
+                <li>ReturnFullText: Whether to include the input prompt in the API response (Type: Boolean)</li>
             </ul>
             <h4 class="font-bold">Outputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
-                <li>ApiResponse: The API response from Llama 2-7b (Type: String)</li>
+                <li>ApiResponse: The API response from Llama-2 7b (Type: String)</li>
             </ul>
         </div>
 
-        @* Llama213b *@
+        <!-- Zephyr7b Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Zephyr7b Block</h3>
+            <p>Zephyr 7b API integration block.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Query: The input query for the Zephyr 7b API (Type: String) <span class="text-red-500">*</span></li>
+                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number)</li>
+                <li>TopP: Top P value for controlling randomness (Type: Number)</li>
+                <li>Temperature: Temperature value for controlling creativity (Type: Number)</li>
+                <li>StopWords: List of words where the AI should stop generating text (Type: String) [List]</li>
+                <li>ReturnFullText: Whether to include the input prompt in the API response (Type: Boolean)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ApiResponse: The API response from Zephyr 7b (Type: String)</li>
+            </ul>
+        </div>
+
+        <!-- Llama213b Block -->
         <div class="mb-4 bg-gray-700 p-4 rounded">
             <h3 class="text-xl font-bold mb-2">Llama213b Block</h3>
             <p>Llama-2 13b API integration block.</p>
             <h4 class="font-bold mt-2">Inputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
                 <li>Query: The input query for the Llama-2 13b API (Type: String) <span class="text-red-500">*</span></li>
-                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number) <span class="text-red-500">*</span></li>
-                <li>TopP: Top P value for controlling randomness (Type: Number) <span class="text-red-500">*</span></li>
-                <li>Temperature: Temperature value for controlling creativity (Type: Number) <span class="text-red-500">*</span></li>
+                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number)</li>
+                <li>TopP: Top P value for controlling randomness (Type: Number)</li>
+                <li>Temperature: Temperature value for controlling creativity (Type: Number)</li>
+                <li>StopWords: List of words where the AI should stop generating text (Type: String) [List]</li>
+                <li>ReturnFullText: Whether to include the input prompt in the API response (Type: Boolean)</li>
             </ul>
             <h4 class="font-bold">Outputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
@@ -37,25 +61,37 @@
             </ul>
         </div>
 
-        @* Llama270b *@
+        <!-- Llama270b Block -->
         <div class="mb-4 bg-gray-700 p-4 rounded">
             <h3 class="text-xl font-bold mb-2">Llama270b Block</h3>
             <p>Llama-2 70b API integration block.</p>
             <h4 class="font-bold mt-2">Inputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
                 <li>Query: The input query for the Llama-2 70b API (Type: String) <span class="text-red-500">*</span></li>
-                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number) <span class="text-red-500">*</span></li>
-                <li>TopP: Top P value for controlling randomness (Type: Number) <span class="text-red-500">*</span></li>
-                <li>Temperature: Temperature value for controlling creativity (Type: Number) <span class="text-red-500">*</span></li>
+                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number)</li>
+                <li>TopP: Top P value for controlling randomness (Type: Number)</li>
+                <li>Temperature: Temperature value for controlling creativity (Type: Number)</li>
+                <li>StopWords: List of words where the AI should stop generating text (Type: String) [List]</li>
+                <li>ReturnFullText: Whether to include the input prompt in the API response (Type: Boolean)</li>
             </ul>
             <h4 class="font-bold">Outputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
                 <li>ApiResponse: The API response from Llama-2 70b (Type: String)</li>
             </ul>
         </div>
+
+        <!-- CodeLlama34b Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">CodeLlama34b Block</h3>
+            <p>CodeLlama 34b API Integration.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Query: The input query for the CodeLlama 34b API (Type: String) <span class="text-red-500">*</span></li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ApiResponse: The API response from CodeLlama 34b (Type: String)</li>
+            </ul>
+        </div>
     </section>
 </div>
-@code {
-
-}
-

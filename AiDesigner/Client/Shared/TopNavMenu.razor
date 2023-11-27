@@ -31,8 +31,28 @@
             </NavLink>
         </div>
     </div>
+
+@*     <div class="md:hidden">
+        <button @onclick="ToggleMenu" class="p-4">Menu</button>
+        <div class="@menuClass">
+            <!-- Navigation items for the dropdown -->
+            <NavLink class="block py-2 px-4 text-sm" href="chat">Chat</NavLink>
+            <NavLink class="block py-2 px-4 text-sm" href="pricing">Pricing</NavLink>
+            <NavLink class="block py-2 px-4 text-sm" href="documentation/introduction/overview">Docs</NavLink>
+            <NavLink class="block py-2 px-4 text-sm" href="aboutus">About</NavLink>
+        </div>
+    </div> *@
 </div>
 
 @code {
+    private bool isMenuOpen = false;
 
+    private string menuClass => isMenuOpen ? "block" : "hidden";
+
+    private void ToggleMenu()
+    {
+        isMenuOpen = !isMenuOpen;
+    }
 }
+
+

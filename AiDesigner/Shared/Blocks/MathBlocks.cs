@@ -193,4 +193,120 @@ namespace AiDesigner.Shared.Blocks
 
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
+
+    //math logic
+    public class Equal : Block
+    {
+        public Equal()
+        {
+            Id = Guid.NewGuid();
+            Name = "Equal";
+            Description = "Checks if two numbers are equal.";
+
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Number1", Description = "First number for comparison.", Type = Type.Number, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Number2", Description = "Second number for comparison.", Type = Type.Number, IsRequired = true }
+        };
+
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Result", Description = "True if numbers are equal, else false.", Type = Type.Boolean }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class LessThan : Block
+    {
+        public LessThan()
+        {
+            Id = Guid.NewGuid();
+            Name = "LessThan";
+            Description = "Checks if the first number is less than the second number.";
+
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Number1", Description = "First number for comparison.", Type = Type.Number, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Number2", Description = "Second number for comparison.", Type = Type.Number, IsRequired = true }
+        };
+
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Result", Description = "True if the first number is less than the second, else false.", Type = Type.Boolean }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class MoreThan : Block
+    {
+        public MoreThan()
+        {
+            Id = Guid.NewGuid();
+            Name = "MoreThan";
+            Description = "Checks if the first number is greater than the second number.";
+
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Number1", Description = "First number for comparison.", Type = Type.Number, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Number2", Description = "Second number for comparison.", Type = Type.Number, IsRequired = true }
+        };
+
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Result", Description = "True if the first number is greater than the second, else false.", Type = Type.Boolean }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class LessThanOrEqual : Block
+    {
+        public LessThanOrEqual()
+        {
+            Id = Guid.NewGuid();
+            Name = "LessThanOrEqual";
+            Description = "Checks if the first number is less than or equal to the second number.";
+
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Number1", Description = "First number for comparison.", Type = Type.Number, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Number2", Description = "Second number for comparison.", Type = Type.Number, IsRequired = true }
+        };
+
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Result", Description = "True if the first number is less than or equal to the second, else false.", Type = Type.Boolean }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class MoreThanOrEqual : Block
+    {
+        public MoreThanOrEqual()
+        {
+            Id = Guid.NewGuid();
+            Name = "MoreThanOrEqual";
+            Description = "Checks if the first number is greater than or equal to the second number.";
+
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Number1", Description = "First number for comparison.", Type = Type.Number, IsRequired = true },
+            new Input { Id = Guid.NewGuid(), Name = "Number2", Description = "Second number for comparison.", Type = Type.Number, IsRequired = true }
+        };
+
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Result", Description = "True if the first number is greater than or equal to the second, else false.", Type = Type.Boolean }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
 }

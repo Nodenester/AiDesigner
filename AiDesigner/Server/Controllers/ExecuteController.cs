@@ -16,6 +16,7 @@ namespace AiDesigner.Server.Controllers
         public ExecuteController()
         {
             _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:44313/") };// You can configure the HttpClient instance here if needed.
+            _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
         [HttpPost("")]
