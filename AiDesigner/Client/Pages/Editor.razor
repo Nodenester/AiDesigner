@@ -42,7 +42,7 @@
 @*            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="CopyBlock">Copy</button>
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="CutBlock">Cut</button>
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="PasteBlock">Paste</button>*@
-            <a class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" href="/documentation">Help</a>
+            <a class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" href="/documentation/help/troubleshooting">Help</a>
             <div class="w-full content-end py-1">
                 <input type="number"
                        class="w-10 p-1 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"
@@ -99,25 +99,33 @@
                 <!-- The Variables -->
                 <div class="flex justify-between items-center px-1 dark:bg-gray-700 border-gray-700 w-full align-top">
                     <p>Variables</p>
-                    @if(localProgram != null)
+                    @if (localProgram != null)
                     {
                         <button @onclick="Openapv" class="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 px-4 rounded text-2xl">+</button>
                     }
                 </div>
                 @if (localProgram != null)
                 {
-                    foreach (var Variable in localProgram.ProgramStructure.Variables)
+                    @foreach (var Variable in localProgram.ProgramStructure.Variables)
                     {
-                        <div class="mx-8">
+                        <div class="mx-8 relative button-hover">
+                            <!-- Add the hover class here -->
+                            <!-- Main Button -->
                             <button @onclick="() => SelectVariable(Variable.Value)" class="dark:bg-gray-700 dark:text-white dark:hover:bg-gray-600 py-2 rounded w-full flex justify-between items-center border-b border-gray-600">
                                 <span class="overflow-hidden ml-2 text-start w-50 text-lg">@Variable.Value.Name</span>
                                 <div class="flex overflow-hidden items-end mr-1 w-50">
-                                    @if(Variable.Value.IsList)
+                                    @if (Variable.Value.IsList)
                                     {
                                         <p>List of: </p>
                                     }
                                     <p>@Variable.Value.Type</p>
                                 </div>
+
+                                <!-- Remove Button - Initially Hidden, Shown on Hover -->
+                                <button @onclick="() => RemoveVariable(Variable.Key)"
+                                class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white close-button">
+                                    X
+                                </button>
                             </button>
                         </div>
                     }
@@ -510,6 +518,13 @@
 <RemoveInputContextItem OnMenuItemClick="RemovePort" />
 
 <style>
+    .close-button {
+        display: none;
+    }
+
+    .button-hover:hover .close-button {
+        display: block;
+    }
     .whiteboard {
         position: relative;
         width: 100%;
@@ -915,6 +930,16 @@
         }
         await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
         await DrawConnections(localProgram.ProgramStructure);
+    }
+
+    public async Task RemoveVariable(Guid id)
+    {
+        var variableToRemove = localProgram.ProgramStructure.Variables.FirstOrDefault(kv => kv.Key == id);
+
+        if (variableToRemove.Key != Guid.Empty)
+        {
+            localProgram.ProgramStructure.Variables.Remove(variableToRemove.Key);
+        }
     }
 
     //Whiteboard logic
