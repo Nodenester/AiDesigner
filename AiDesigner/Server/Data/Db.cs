@@ -515,6 +515,89 @@ namespace AiDesigner.Server.Data
             return await connection.QueryAsync<WorkshopArticle>(query, new { Start = start, End = end });
         }
 
+        //Article home page
+        public async Task<IEnumerable<WorkshopArticle>> GetMostPopularArticlesAsync()
+        {
+            const string query = @"
+            SELECT TOP 5 a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating, COUNT(u.ArticleId) as ReviewCount
+            FROM Ludde.Workshop_Article a
+            LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+            LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+            WHERE a.Status = 'Accepted'
+            GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
+            ORDER BY (DATEDIFF(day, a.Created, GETDATE()) * 0.1) + (a.Downloads * 0.4) + (AVG(ISNULL(u.Rating, 0)) * 0.5) DESC
+            ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<WorkshopArticle>(query);
+        }
+
+        public async Task<IEnumerable<WorkshopArticle>> GetTopDownloadedArticlesAsync()
+        {
+            const string query = @"
+    SELECT TOP 5 a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
+    FROM Ludde.Workshop_Article a
+    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+    WHERE a.Status = 'Accepted'  -- Assuming you want to filter by status
+    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
+    ORDER BY a.Downloads DESC
+    ";
+
+            try
+            {
+                await using SqlConnection connection = new SqlConnection(_connectionString);
+                return await connection.QueryAsync<WorkshopArticle>(query);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in GetTopDownloadedArticlesAsync: {e.Message}");
+                return new List<WorkshopArticle>();
+            }
+        }
+
+        public async Task<IEnumerable<WorkshopArticle>> GetNewestArticlesAsync()
+        {
+            const string query = @"
+    SELECT TOP 5 a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
+    FROM Ludde.Workshop_Article a
+    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+    WHERE a.Status = 'Accepted'  -- Assuming you want to filter by status
+    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
+    ORDER BY a.Created DESC
+    ";
+
+            try
+            {
+                await using SqlConnection connection = new SqlConnection(_connectionString);
+                return await connection.QueryAsync<WorkshopArticle>(query);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in GetNewestArticlesAsync: {e.Message}");
+                return new List<WorkshopArticle>();
+            }
+        }
+
+        public async Task<IEnumerable<WorkshopArticle>> Get5ArticlesByAuthorAsync(string authorId)
+        {
+            StringBuilder query = new StringBuilder(@"
+            SELECT TOP 5 a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating
+            FROM Ludde.Workshop_Article a
+            LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+            LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+            WHERE a.AuthorId = @AuthorId
+            GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
+            ORDER BY a.Created DESC
+            ");
+
+            var parameters = new DynamicParameters();
+            parameters.Add("AuthorId", authorId);
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            return await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters);
+        }
+        //----------------------------------------------------------------------------------------------------------
+
         //Get article for admin
         public async Task<IEnumerable<WorkshopArticle>> GetPendingArticlesAsync()
         {

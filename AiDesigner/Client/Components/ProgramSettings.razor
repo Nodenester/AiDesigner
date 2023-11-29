@@ -375,6 +375,7 @@ const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
                     Image = localProgram.Image ?? new byte[0],
                     Description = "Temporary description", // Temporary placeholder
                     Status = "",
+                    IsPublic = localProgram.IsPublic,
                 };
         }
 

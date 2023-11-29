@@ -1,0 +1,239 @@
+﻿@using Microsoft.AspNetCore.Authorization
+@using NodeBaseApi.Version2;
+@inject HttpClient Http;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@attribute [Authorize]
+
+<div class="flex justify-center items-center mt-4">
+    <div style="width: 83%;" class="content-center">
+        <span class="text-2xl font-bold mt-2">Popular</span>
+        <div class="flex flex-wrap gap-4 mt-2 ml-0">
+            @if (PopularArticles != null && PopularArticles.Count > 0)
+            {
+                @foreach (var article in PopularArticles)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
+                        <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+                        <div class="w-full flex items-start">
+                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                        </div>
+                        <br />
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+                        <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                            <p class="text-left dark:text-white text-lg m-1 ml-3">@article.SearchClass</p>
+                        </div>
+                        <br />
+                    </button>
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center">
+                        <!-- Placeholder for Image -->
+                        <div style="width: 100%; height: 16.25rem; border-radius: 0.25rem; margin-bottom: 0.5rem;" class="bg-gray-700"></div>
+
+                        <!-- Placeholder for Title -->
+                        <div class="w-1/3 bg-gray-300 dark:bg-gray-600 h-6 mb-2 ml-4 self-start"></div>
+
+                        <!-- Placeholder for Author Name -->
+                        <div class="w-2/3 bg-gray-300 dark:bg-gray-600 h-5 ml-4 self-start"></div>
+
+                        <br />
+
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+
+                        <br />
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="flex justify-center items-center mt-4">
+    <div style="width: 83%;" class="content-center">
+        <span class="text-2xl font-bold mt-2">Made by NodeNestor</span>
+        <div class="flex flex-wrap gap-4 mt-2 ml-0">
+            @if (NodeNestorArticles != null && NodeNestorArticles.Count > 0)
+            {
+                @foreach (var article in NodeNestorArticles)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
+                        <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+                        <div class="w-full flex items-start">
+                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                        </div>
+                        <br />
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+                        <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                            <p class="text-left dark:text-white text-lg m-1 ml-3">@article.SearchClass</p>
+                        </div>
+                        <br />
+                    </button>
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center">
+                        <!-- Placeholder for Image -->
+                        <div style="width: 100%; height: 16.25rem; border-radius: 0.25rem; margin-bottom: 0.5rem;" class="bg-gray-700"></div>
+
+                        <!-- Placeholder for Title -->
+                        <div class="w-1/3 bg-gray-300 dark:bg-gray-600 h-6 mb-2 ml-4 self-start"></div>
+
+                        <!-- Placeholder for Author Name -->
+                        <div class="w-2/3 bg-gray-300 dark:bg-gray-600 h-5 ml-4 self-start"></div>
+
+                        <br />
+
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+
+                        <br />
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="flex justify-center items-center mt-4">
+    <div style="width: 83%;" class="content-center">
+        <span class="text-2xl font-bold mt-2">New releases</span>
+        <div class="flex flex-wrap gap-4 mt-2 ml-0">
+            @if (NewArticles != null && NewArticles.Count > 0)
+            {
+                @foreach (var article in NewArticles)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
+                        <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+                        <div class="w-full flex items-start">
+                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                        </div>
+                        <br />
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+                        <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                            <p class="text-left dark:text-white text-lg m-1 ml-3">@article.SearchClass</p>
+                        </div>
+                        <br />
+                    </button>
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center">
+                        <!-- Placeholder for Image -->
+                        <div style="width: 100%; height: 16.25rem; border-radius: 0.25rem; margin-bottom: 0.5rem;" class="bg-gray-700"></div>
+
+                        <!-- Placeholder for Title -->
+                        <div class="w-1/3 bg-gray-300 dark:bg-gray-600 h-6 mb-2 ml-4 self-start"></div>
+
+                        <!-- Placeholder for Author Name -->
+                        <div class="w-2/3 bg-gray-300 dark:bg-gray-600 h-5 ml-4 self-start"></div>
+
+                        <br />
+
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+
+                        <br />
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+<div class="flex justify-center items-center mt-4">
+    <div style="width: 83%;" class="content-center">
+        <span class="text-2xl font-bold mt-2">Most downloaded</span>
+        <div class="flex flex-wrap gap-4 mt-2 ml-0">
+            @if (MostDownloadedArticles != null && MostDownloadedArticles.Count > 0)
+            {
+                @foreach (var article in MostDownloadedArticles)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
+                        <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+                        <div class="w-full flex items-start">
+                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                        </div>
+                        <br />
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+                        <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
+                            <p class="text-left dark:text-white text-lg m-1 ml-3">@article.SearchClass</p>
+                        </div>
+                        <br />
+                    </button>
+                }
+            }
+            else
+            {
+                for (int i = 0; i < 5; i++)
+                {
+                    <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center">
+                        <!-- Placeholder for Image -->
+                        <div style="width: 100%; height: 16.25rem; border-radius: 0.25rem; margin-bottom: 0.5rem;" class="bg-gray-700"></div>
+
+                        <!-- Placeholder for Title -->
+                        <div class="w-1/3 bg-gray-300 dark:bg-gray-600 h-6 mb-2 ml-4 self-start"></div>
+
+                        <!-- Placeholder for Author Name -->
+                        <div class="w-2/3 bg-gray-300 dark:bg-gray-600 h-5 ml-4 self-start"></div>
+
+                        <br />
+
+                        <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+
+                        <br />
+                    </button>
+                }
+            }
+        </div>
+    </div>
+</div>
+
+
+@code {
+    public List<WorkshopArticle> PopularArticles { get; set; }
+    public List<WorkshopArticle> NodeNestorArticles { get; set; }
+    public List<WorkshopArticle> NewArticles { get; set; }
+    public List<WorkshopArticle> MostDownloadedArticles { get; set; }
+
+    [Parameter]
+    public WorkshopArticle SelectedArticle { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectAuthor { get; set; }
+
+    [Parameter]
+    public EventCallback<WorkshopArticle> OnSelectedArticle { get; set; }
+
+    private bool IsLoading { get; set; } = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if(IsLoading)
+        {
+            IsLoading = false;
+            PopularArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-popular");
+            NodeNestorArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/author");
+            NewArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/newest");
+            MostDownloadedArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-downloaded/top");
+            StateHasChanged();
+        }
+    }
+
+    private void SetSelectedArticle(WorkshopArticle article)
+    {
+        SelectedArticle = article;
+        OnSelectedArticle.InvokeAsync(SelectedArticle);
+    }
+}
