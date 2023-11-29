@@ -1,0 +1,149 @@
+﻿@page "/myworkshop/"
+@using AiDesigner.Client.Pages.Marketplace;
+@using AiDesigner.Client.Components;
+@using Microsoft.AspNetCore.Authorization;
+@using NodeBaseApi.Version2;
+@inject AuthenticationStateProvider AuthenticationStateProvider;
+@inject HttpClient Http
+@attribute [Authorize]
+
+<div class="flex justify-center items-center">
+    <div style="width:83%;">
+        <div class="flex items-center justify-between bg-gray-200 dark:bg-gray-600 p-1">
+            <div class="flex items-center space-x-1 pl-1">
+                @if (isSelected)
+                {
+                    <button @onclick="GoBack" class="px-3 py-2 rounded-md text-sm font-medium text-white bg-gray-700 hover:bg-gray-700 mr-2">Back</button>
+                }
+
+                <span class="text-3xl font-bold">My Workshop</span>
+            </div>
+
+            <div class="relative pr-1">
+                <input @bind-value="SearchQuery" @bind-value:event="oninput" type="text" class="rounded-md px-2 py-2 bg-white dark:!bg-gray-700 text-black dark:!text-white border-0 outline-none" placeholder="Search">
+            </div>
+        </div>
+    </div>
+</div>
+
+<br />
+<hr style="width: 83%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
+
+@if (isSelected)
+{
+    <ArticleEditor SelectedArticle="selectedArticle"></ArticleEditor>
+}
+else
+{
+    <MyWorkshopList OnSelectedArticle="SetSelectedArticle" OnPageChanged="OnPageChanged" Articles="queridArticles" CurrentPage="currentPage"></MyWorkshopList>
+}
+
+@code{
+    [CascadingParameter(Name = "passingArticle")]
+    public WorkshopArticle passingArticle { get; set; }
+
+    [CascadingParameter(Name = "SetPassingArticle")]
+    protected EventCallback<WorkshopArticle> SetPassingArticle { get; set; }
+
+    bool isSelected {get;set;} = false;
+    private Timer _searchTimer;
+    private const int SearchDelay = 500;
+
+    public List<WorkshopArticle> articles { get; set; }
+    public List<WorkshopArticle> queridArticles { get; set; } = new List<WorkshopArticle>();
+    private WorkshopArticle selectedArticle { get; set; }
+
+    public AuthenticationState AuthState { get; set; }
+
+    private string _searchQuery = "";
+    private string SearchQuery
+    {
+        get { return _searchQuery; }
+        set
+        {
+            if (_searchQuery != value)
+            {
+                _searchQuery = value;
+
+                // Dispose of the existing timer if it exists
+                _searchTimer?.Dispose();
+
+                // Initialize a new timer
+                _searchTimer = new Timer(PerformSearch, null, SearchDelay, Timeout.Infinite);
+            }
+        }
+    }
+    public int currentPage { get; set; } = 1;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (passingArticle != null)
+        {
+            SetSelectedArticle(passingArticle);
+            SetPassingArticle.InvokeAsync(null);
+            await GetArticles();
+        }
+        else if (articles == null)
+        {
+            await GetArticles();
+        }
+    }
+
+    private async Task GetArticles()
+    {
+        AuthState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+
+        var user = AuthState.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    var response = await Http.GetAsync($"Workshop/author-articles?userId={userId.ToString()}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        articles = await response.Content.ReadFromJsonAsync<List<WorkshopArticle>>();
+                        queridArticles = articles;
+                    }
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine($"An HttpRequestException occurred while getting articles: {e.Message}");
+                }
+                catch (TimeoutException e)
+                {
+                    Console.WriteLine($"A TimeoutException occurred while getting articles: {e.Message}");
+                }
+                catch (Exception e)
+                {
+                    // Log the exception for debugging and review
+                    Console.WriteLine($"An unknown exception occurred while getting articles: {e.Message}");
+                }
+            }
+        }
+    }
+
+    private void SetSelectedArticle(WorkshopArticle article)
+    {
+        selectedArticle = article;
+        isSelected = true;
+    }
+
+    private void PerformSearch(object state)
+    {
+        queridArticles = articles.Where(a => a.Name.ToLower().Contains(_searchQuery.ToLower())).ToList();
+    }
+
+    private void GoBack()
+    {
+        isSelected = false;
+    }
+
+    private void OnPageChanged(int page)
+    {
+        currentPage = page;
+    }
+}

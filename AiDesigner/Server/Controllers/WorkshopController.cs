@@ -1,15 +1,19 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using AiDesigner.Server.Data;
 using AiDesigner.Shared.Blocks;
 using AiDesigner.Shared.Data;
+using IdentityModel.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NodeBaseApi.Version2;
+using OtpNet;
 
 namespace AiDesigner.Server.Controllers
 {
@@ -38,6 +42,13 @@ namespace AiDesigner.Server.Controllers
         public async Task<IActionResult> SearchArticles(string searchTerm = null, string searchClass = null, string type = null, int start = 0, int end = 10)
         {
             var articles = await _dbConnection.SearchArticlesAsync(start, end, searchTerm, searchClass, type);
+            return Ok(articles);
+        }
+
+        [HttpGet("author-articles")]
+        public async Task<IActionResult> GetArticleCountForSearch(string userId)
+        {
+            var articles = await _dbConnection.GetArticlesByAuthorIdAsync(userId);
             return Ok(articles);
         }
 
@@ -182,51 +193,6 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
-
-        //Article image handling
-        [HttpPost("add-article-image")]
-        public async Task<IActionResult> InsertArticleImage([FromBody] ArticleImages articleImage)
-        {
-            // Log to check if articleImage is correctly populated
-            Console.WriteLine($"Received articleImage: {JsonConvert.SerializeObject(articleImage)}");
-
-            if (articleImage == null)
-            {
-                return BadRequest(new { Message = "articleImage is null" });
-            }
-
-            try
-            {
-                var result = await _dbConnection.InsertArticleImageAsync(articleImage);
-
-                // Log to check if database operation was successful
-                Console.WriteLine($"Database operation result: {result}");
-
-                return Ok(new { Message = result });
-            }
-            catch (Exception ex)
-            {
-                // Log the exception details
-                Console.WriteLine($"Exception: {ex}");
-
-                return StatusCode(500, new { Message = "Internal Server Error" });
-            }
-        }
-
-        [HttpGet("article-images/{articleId}")]
-        public async Task<IActionResult> GetArticleImages(string articleId)
-        {
-            var articleImages = await _dbConnection.GetArticleImagesAsync(articleId);
-            return Ok(articleImages);
-        }
-
-        [HttpDelete("article-images/{articleId}")]
-        public async Task<IActionResult> DeleteArticleImages(string articleId)
-        {
-            var articleImages = await _dbConnection.DeleteArticleImagesAsync(articleId);
-            return Ok(articleImages);
-        }
-
         [HttpPost("connect-article-to-user")]
         public async Task<IActionResult> ConnectArticleToUser([FromBody] UserArticle userArticle)
         {
@@ -288,6 +254,129 @@ namespace AiDesigner.Server.Controllers
             {
                 // Log the exception (e.g., _logger.LogError(ex, "An error occurred while removing user-article."));
                 return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+        //article ai generation
+        [HttpPost("generate-article-image")]
+        public async Task<IActionResult> GenerateArticleImage([FromBody] WorkshopArticle article)
+        {
+            try
+            {
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
+
+                var program = await _dbConnection.LoadProgramAsync(Guid.Parse(article.ProgramId)); // Ensure this is awaited
+
+                string prompt = $"Create a logo for the program named '{program.Name}' described as: {program.Description}";
+
+                var content = new StringContent(
+                    System.Text.Json.JsonSerializer.Serialize(new { inputs = prompt }),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await client.PostAsync("https://api-inference.huggingface.co/models/openskyml/dalle-3-xl", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return BadRequest("Failed to generate image");
+                }
+
+                byte[] imageBytes = await response.Content.ReadAsByteArrayAsync();
+
+                // Convert the byte array to a Base64 string
+                string base64Image = Convert.ToBase64String(imageBytes);
+
+                return Ok(base64Image);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                // For example: _logger.LogError(ex, "An error occurred while generating the article image.");
+                return StatusCode(500, new { Message = "An error occurred while processing your request" });
+            }
+        }
+
+
+        [HttpPost("generate-article-description")]
+        public async Task<IActionResult> GenerateArticleDescription([FromBody] WorkshopArticle article)
+        {
+            try
+            {
+                var client = new HttpClient();
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
+
+                ProgramObject program = _dbConnection.LoadProgramAsync(Guid.Parse(article.ProgramId)).Result;
+
+                StringBuilder promptBuilder = new StringBuilder();
+                promptBuilder.AppendLine("Generate a concise and informative description of the following program:");
+                promptBuilder.AppendLine();
+
+                // Program Information
+                promptBuilder.AppendLine($"Program Name: {program.Name}");
+                promptBuilder.AppendLine($"Program Description: {program.Description}");
+                promptBuilder.AppendLine();
+
+                // Program Inputs
+                promptBuilder.AppendLine("Program Inputs:");
+                foreach (var input in program.ProgramStructure.ProgramStart)
+                {
+                    promptBuilder.AppendLine($"- {input.Name}: {input.Description}");
+                }
+                promptBuilder.AppendLine();
+
+                // Program Outputs
+                promptBuilder.AppendLine("Program Outputs:");
+                foreach (var output in program.ProgramStructure.ProgramEnd) // Assuming ProgramEnd contains outputs
+                {
+                    promptBuilder.AppendLine($"- {output.Name}: {output.Description}");
+                }
+
+                // Adding a tag to indicate where the generated description should start
+                promptBuilder.AppendLine();
+                promptBuilder.AppendLine("<!-- Generated Description Start -->");
+
+                string prompt = promptBuilder.ToString();
+
+                var parameters = new
+                {
+                    max_new_tokens = 1024,
+                    top_p = 0.8,
+                    temperature = 0.6,
+                    return_full_text = false,
+                    stop = new string[] { "<!-- Generated Description End -->" }
+                };
+
+                var payload = new
+                {
+                    inputs = prompt,
+                    parameters
+                };
+
+                var content = new StringContent(
+                    JsonConvert.SerializeObject(payload),
+                    Encoding.UTF8,
+                    "application/json"
+                );
+
+                var response = await client.PostAsync("https://api-inference.huggingface.co/models/meta-llama/Llama-2-70b-chat-hf", content);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    return BadRequest("Failed to generate description");
+                }
+
+                var responseContent = await response.Content.ReadAsStringAsync();
+
+                // Process the response to extract the generated description
+                // Assuming the response is JSON and contains a key for the generated text
+
+                return Ok(responseContent);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
             }
         }
     }

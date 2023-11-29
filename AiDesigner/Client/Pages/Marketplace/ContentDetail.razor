@@ -5,88 +5,24 @@
 @inject HttpClient Http;
 @attribute [Authorize]
 
-<div style="width: 83%; margin: auto; box-sizing: border-box;">
-    <div class="flex flex-row mt-8">
-    <!-- Left section: Single image display -->
-        <div class="w-3/5 flex flex-col items-center gap-4 flex-shrink-0 flex-grow-0 ml-5">
-            @if (SelectedArticle != null)
-                {
-                    @if (SelectedArticle.ArticleImages != null && SelectedArticle.ArticleImages.Any() && SelectedImageIndex >= 0 && SelectedImageIndex < SelectedArticle.ArticleImages.Count)
-                    {
-                        var image = SelectedArticle.ArticleImages[SelectedImageIndex];
-                        if (image != null)
-                        {
-                            <div class="rounded overflow-hidden bg-white">
-                                <img src="@($"data:image/png;base64,{Convert.ToBase64String(image.ImageData)}")" alt="@image.Description" style="width: 900px; height: 500px; object-fit: cover; border-radius: 0px;" />
-                            </div>
+<div style="width: 83%; margin: auto; box-sizing: border-box; display: flex; justify-content: space-between;">
+    <div class="flex flex-row mt-8 w-full">
+        <div class="flex flex-col items-start gap-4" style="margin-bottom: 3rem; text-align: left; flex-grow: 1; margin-left: 4rem;">
+            <h1 class="text-4xl font-extrabold mb-2 text-white dark:text-gray-100 leading-none">@SelectedArticle.Name</h1>
 
-                            <!-- Thumbnail and Navigation Wrapper -->
-                            <div class="flex gap-2 items-center w-128 justify-between" style="margin-top: -0.8rem;">
-                                <!-- Previous Button -->
-                                <button class="dark:bg-gray-700 h-100 w-24" @onclick="() => PreviousImage()">Previous</button>
+            @if (SelectedArticle.IsPublic)
+            {
+                <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.Image)}")" alt="@SelectedArticle.Name" style="width: 55.687rem; height: 31rem; object-fit: cover; border-radius: 0px;" />
+            }
 
-                                <!-- Thumbnail Selector -->
-                                <div class="flex gap-3" style="width: 400px;">
-                                    @if (SelectedImageIndex > 0)
-                                    {
-                                        var prevImage = SelectedArticle.ArticleImages[SelectedImageIndex - 1];
-                                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(prevImage.ImageData)}")" alt="@prevImage.Description"
-                                             style="width: 120px; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer; margin-left: 3px;"
-                                        @onclick="() => SetSelectedImage(SelectedImageIndex - 1)" loading="lazy" />
-                                    }
-                                    else
-                                    {
-                                        <div style="width: 120px; height: 100px; margin-left: 3px;"></div>
-                                    }
-
-                                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(image.ImageData)}")" alt="@image.Description"
-                                         style="width: 120px; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;"
-                                    @onclick="() => SetSelectedImage(SelectedImageIndex)" />
-
-                                    @if (SelectedImageIndex < SelectedArticle.ArticleImages.Count - 1)
-                                    {
-                                        var nextImage = SelectedArticle.ArticleImages[SelectedImageIndex + 1];
-                                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(nextImage.ImageData)}")" alt="@nextImage.Description"
-                                             style="width: 120px; height: 100px; object-fit: cover; border-radius: 4px; cursor: pointer;"
-                                        @onclick="() => SetSelectedImage(SelectedImageIndex + 1)" />
-                                    }
-                                </div>
-
-                                <!-- Next Button -->
-                                <button class="dark:bg-gray-700 h-100 w-24" @onclick="() => NextImage()">Next</button>
-                            </div>
-                        }
-                    }
-                }
+            <p class="text-lg mb-2 text-gray-600 dark:text-gray-300 mb-4" style="width: 55.687rem;">@SelectedArticle.Description</p>
         </div>
 
         <!-- Right section: Article details -->
-        <div class="flex flex-col justify-between p-4 dark:!bg-gray-600 rounded-lg shadow-lg flex-shrink-0 flex-grow-0" style="width: 37rem; margin-bottom: 3rem;">
+        <div class="flex flex-col justify-between p-2 dark:!bg-gray-600 rounded-lg shadow-lg" style="width: 27rem; margin-bottom: 3rem; align-self: flex-start; margin-right: 4em;">
             @if (SelectedArticle != null)
             {
-                <!-- Title -->
-                <h1 class="text-4xl font-extrabold mb-2 text-white dark:text-gray-100 leading-none">@SelectedArticle.Name</h1>
-
-                <!-- Author Name -->
-                <p class="text-lg mb-2 text-gray-600 dark:text-gray-300">@SelectedArticle.AuthorName</p>
-
-                <!-- Rating Section -->
-                <div class="rating mb-2">
-                    @if (SelectedArticle.Rating == 0)
-                    {
-                        <span class="text-gray-500 dark:text-gray-300">Not Yet Rated</span>
-                    }
-                    else
-                    {
-                        @for (var i = 1; i <= 5; i++)
-                        {
-                            var starClass = i <= SelectedArticle.Rating ? "fas fa-star text-yellow-400" : "far fa-star text-gray-300";
-                            <span class="@starClass cursor-pointer" @onclick="() => SetRating(i)"></span>
-                        }
-                    }
-                </div>
-
-                <p class="text-lg mb-2 text-gray-600 dark:text-gray-300 mb-4">@SelectedArticle.Description</p>
+                <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.ProgramImage)}")" alt="@SelectedArticle.Name" class="mb-2" style="width: 26rem; height: 26rem; object-fit: cover; border-radius: 0px;" />
 
                 <div class="dark:!bg-gray-800 p-4 rounded mt-auto">
                     <!-- Additional Details -->
@@ -124,15 +60,13 @@
     </div>
 </div>
 
-<!-- Reviews -->
+@* <!-- Reviews -->
 <div class="mt-8">
     <h2 class="text-2xl font-semibold mb-2">Reviews</h2>
-    @* Implement reviews section here. You might loop through a list of UserArticle related to this article *@
-</div>
+    Implement reviews section here. You might loop through a list of UserArticle related to this article
+</div> *@
 
 @code {
-    private int SelectedImageIndex { get; set; } = 0;
-
     [Parameter]
     public WorkshopArticle SelectedArticle { get; set; }
 
@@ -144,22 +78,7 @@
 
     protected override async Task OnParametersSetAsync()
     {
-        string requestUri = $"Workshop/article-images/{SelectedArticle.Id}";
 
-        // Make the HTTP GET request
-        HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
-
-        // Check if the request is successful
-        if (httpResponse.IsSuccessStatusCode)
-        {
-            // Deserialize the response content to List<ArticleImages>
-            List<ArticleImages> articleImages = await httpResponse.Content.ReadFromJsonAsync<List<ArticleImages>>();
-            SelectedArticle.ArticleImages = articleImages;
-        }
-        else
-        {
-            Console.WriteLine($"Failed to fetch article images. Status code: {httpResponse.StatusCode}");
-        }
     }
 
     private async Task Addtovault()
@@ -183,27 +102,6 @@
             {
                 VaultedArticles.Add(SelectedArticle);
             }
-        }
-    }
-
-    private void SetSelectedImage(int index)
-    {
-        SelectedImageIndex = index;
-    }
-
-    private void PreviousImage()
-    {
-        if (SelectedImageIndex > 0)
-        {
-            SelectedImageIndex--;
-        }
-    }
-
-    private void NextImage()
-    {
-        if (SelectedArticle?.ArticleImages != null && SelectedImageIndex < SelectedArticle.ArticleImages.Count - 1)
-        {
-            SelectedImageIndex++;
         }
     }
 

@@ -170,9 +170,7 @@
                 workshopArticle.Rating = 0;
             }
 
-            workshopArticle.ArticleImages = new List<ArticleImages>();
-
-            if(false)
+            if (false)
             {
                 Console.WriteLine("------------------------------------------------------------");
                 Console.WriteLine($"Name: {workshopArticle.Name}");
@@ -229,42 +227,6 @@
 
             // Handle success
             var result = await response.Content.ReadFromJsonAsync<WorkshopArticle>();
-            Console.WriteLine($"Article saved with Id: {workshopArticle.Id}");
-
-            foreach (var fileContent in multipleFileContents)
-            {
-                ArticleImages articleImage = new ArticleImages
-                {
-                    ImageId = Guid.NewGuid().ToString(),
-                    ArticleId = workshopArticle.Id,
-                    Description = "SlideShowImage",
-                    ImageData = fileContent,
-                    WorkshopArticle = workshopArticle
-                };
-
-                if (false)
-                {
-                    Console.WriteLine("------------------------------------------------------------");
-                    Console.WriteLine($"ImageId: {articleImage.ImageId}");
-                    Console.WriteLine($"ArticleId: {articleImage.ArticleId}");
-                    Console.WriteLine($"Description: {articleImage.Description}");
-                    Console.WriteLine($"ImageData: {string.Join(", ", articleImage.ImageData)}");
-                    Console.WriteLine("------------------------------------------------------------");
-                }
-
-                var imageResponse = await Http.PostAsJsonAsync("Workshop/add-article-image", articleImage);
-
-                if (!imageResponse.IsSuccessStatusCode)
-                {
-                    // Handle failure
-                    Console.WriteLine($"Failed to save article image: {imageResponse.StatusCode} and {imageResponse.RequestMessage}");
-                    continue;
-                }
-
-                // Handle success
-                var imageResult = await imageResponse.Content.ReadFromJsonAsync<dynamic>();
-                Console.WriteLine($"Image saved with Id: {articleImage.ImageId}");
-            }
         }
         catch (Exception ex)
         {

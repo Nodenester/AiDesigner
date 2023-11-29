@@ -1,4 +1,4 @@
-﻿@page "/marketplace/"
+﻿@page "/workshop/"
 @using AiDesigner.Client.Pages.Marketplace;
 @using AiDesigner.Client.Components;
 @using Microsoft.AspNetCore.Authorization;
@@ -87,6 +87,9 @@ else
     [CascadingParameter(Name = "passingArticle")]
     public WorkshopArticle passingArticle { get; set; }
 
+    [CascadingParameter(Name = "SetPassingArticle")]
+    protected EventCallback<WorkshopArticle> SetPassingArticle { get; set; }
+
     private Stack<string> PreviousOptions = new Stack<string>();
 
     public List<WorkshopArticle> VaultedArticles { get; set; } = new List<WorkshopArticle>();
@@ -125,7 +128,7 @@ else
     }
 
     private Timer _searchTimer; // System.Threading.Timer
-    private const int SearchDelay = 300; // Time delay in milliseconds
+    private const int SearchDelay = 500; // Time delay in milliseconds
 
     private bool ShowTypeDropdown { get; set; } = false;
     private bool ShowOptionDropdown { get; set; } = false;
@@ -173,6 +176,7 @@ else
         if (passingArticle != null)
         {
             SetSelectedArticle(passingArticle);
+            SetPassingArticle.InvokeAsync(null);
         }
         else
         {
@@ -191,6 +195,13 @@ else
     {
         // Dispose of the timer
         _searchTimer.Dispose();
+
+        if(SelectedOption == "Content Detail")
+        {
+            var lastOption = PreviousOptions.Pop() ?? "";
+
+            _selectedOption = lastOption; ;
+        }
 
         // Run on UI thread
         InvokeAsync(() =>
@@ -283,15 +294,26 @@ else
         Console.WriteLine("RefreshArticles");
     }
 
-
     public void SetType(string type)
     {
+        if (SelectedOption == "Content Detail")
+        {
+            var lastOption = PreviousOptions.Pop() ?? "";
+
+            _selectedOption = lastOption; ;
+        }
         ProgramType = type;
         ShowTypeDropdown = false; // Hide dropdown after selection
     }
 
     public void SetOption(string option)
     {
+        if (SelectedOption == "Content Detail")
+        {
+            var lastOption = PreviousOptions.Pop() ?? "";
+
+            _selectedOption = lastOption; ;
+        }
         SelectedOption = option;
         ShowOptionDropdown = false; // Hide dropdown after selection
     }
