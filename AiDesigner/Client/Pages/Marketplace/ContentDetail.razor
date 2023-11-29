@@ -15,7 +15,7 @@
                 <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.Image)}")" alt="@SelectedArticle.Name" style="width: 55.687rem; height: 31rem; object-fit: cover; border-radius: 0px;" />
             }
 
-            <p class="text-lg mb-2 text-gray-600 dark:text-gray-300 mb-4" style="width: 55.687rem;">@SelectedArticle.Description</p>
+            <p class="text-lg mb-2 text-gray-600 dark:text-gray-300 mb-4" style="width: 55.687rem; white-space: pre-wrap;">@SelectedArticle.Description</p>
         </div>
 
         <!-- Right section: Article details -->
@@ -28,7 +28,9 @@
                     <!-- Additional Details -->
                     <h2 class="text-2xl font-semibold mb-2 text-white dark:text-gray-100">Additional Details</h2>
                     <ul class="list-disc list-inside text-gray-600 dark:text-gray-300">
-                        <li><strong>Author:</strong> @SelectedArticle.AuthorName</li>
+                        <li style="cursor: pointer;" @onclick="() => SelectAuthor.InvokeAsync(SelectedArticle.AuthorId)">
+                            <strong>Author:</strong> @SelectedArticle.AuthorName
+                        </li>
                         <li><strong>Type:</strong> @SelectedArticle.Type</li>
                         <li><strong>Public:</strong> @SelectedArticle.IsPublic</li>
                         <li><strong>Created:</strong> @SelectedArticle.Created.ToShortDateString() </li>
@@ -76,6 +78,9 @@
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
 
+    [Parameter]
+    public EventCallback<string> SelectAuthor { get; set; }
+
     protected override async Task OnParametersSetAsync()
     {
 
@@ -111,4 +116,3 @@
         SelectedArticle.Rating = newRating;
     }
 }
-

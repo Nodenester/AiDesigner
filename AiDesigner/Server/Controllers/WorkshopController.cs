@@ -379,5 +379,32 @@ namespace AiDesigner.Server.Controllers
                 return BadRequest(ex.Message);
             }
         }
+
+        //Home page
+        [HttpGet("most-popular")]
+        public async Task<IActionResult> GetMostPopularArticles()
+        {
+            var articles = await _dbConnection.GetMostPopularArticlesAsync();
+            return Ok(articles);
+        }
+        [HttpGet("most-downloaded/top")]
+        public async Task<IActionResult> GetTopDownloadedArticles()
+        {
+            var articles = await _dbConnection.GetTopDownloadedArticlesAsync();
+            return Ok(articles);
+        }
+        [HttpGet("newest")]
+        public async Task<IActionResult> GetNewestArticles()
+        {
+            var articles = await _dbConnection.GetNewestArticlesAsync();
+            return Ok(articles);
+        }
+        [HttpGet("author")]
+        public async Task<IActionResult> Get4ArticlesByAuthor()
+        {
+            var articles = await _dbConnection.Get5ArticlesByAuthorAsync("14fa5960-cfeb-4cb5-8718-0df2fe41b071");
+            return Ok(articles);
+        }
+
     }
 }

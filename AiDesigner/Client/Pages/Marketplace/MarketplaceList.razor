@@ -17,11 +17,11 @@
                         isVaulted = VaultedArticles.Any(x => x.Id == article.Id);
                     }
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
-                        <!-- Add Image Here -->
-@*                         <AiDesigner.Client.Components.ShowImage ImageData="article.ProgramImage"></AiDesigner.Client.Components.ShowImage>
-*@                      <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
-                     <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
-                        <p class="w-full text-left dark:text-white ml-4">@article.AuthorName</p>
+                        <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
+                        <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
+                        <div class="w-full flex items-start">
+                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                        </div>
                         <br />
                         <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
                         <div class="flex justify-between w-full" style="margin-bottom: -1.5rem;">
@@ -111,6 +111,9 @@
 
     [Parameter]
     public EventCallback<WorkshopArticle> OnSelectedArticle { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectAuthor { get; set; }
 
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }

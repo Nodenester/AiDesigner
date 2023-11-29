@@ -73,11 +73,15 @@
 
 @if(SelectedOption == "Content Detail")
 {
-    <ContentDetail SelectedArticle="SelectedArticle" VaultedArticles="VaultedArticles" />
+    <ContentDetail SelectAuthor="SelectAuthor" SelectedArticle="SelectedArticle" VaultedArticles="VaultedArticles" />
+}
+else if(SelectedOption == "Home" && ProgramType == "Any")
+{
+    <WorkshopHome SelectAuthor="SelectAuthor" OnSelectedArticle="SetSelectedArticle" SelectedArticle="SelectedArticle"></WorkshopHome>
 }
 else
 {
-    <MarketplaceList OnPageChanged="RefreshArticles" OnSelectedArticle="SetSelectedArticle" VaultedArticles="VaultedArticles" Articles="FilteredArticles" CurrentPage="CurrentPage" TotalPages="TotalPages" SelectedArticle="SelectedArticle" />
+    <MarketplaceList SelectAuthor="SelectAuthor" OnPageChanged="RefreshArticles" OnSelectedArticle="SetSelectedArticle" VaultedArticles="VaultedArticles" Articles="FilteredArticles" CurrentPage="CurrentPage" TotalPages="TotalPages" SelectedArticle="SelectedArticle" />
 }
 
 @code {
@@ -106,7 +110,7 @@ else
                 PreviousOptions.Push(_selectedOption);
 
                 _selectedOption = value;
-                RefreshData();
+                //RefreshData();
             }
         }
     }
@@ -135,6 +139,7 @@ else
     private int CurrentPage { get; set; } = 1;
     private int ItemsPerPage { get; set; } = 20; // Number of items you want to display per page
     private int TotalPages;
+    private int CurrentOldPage { get; set; } = 1;
 
     private string _searchQuery = "";
     private string SearchQuery
@@ -159,15 +164,29 @@ else
 
     private int TotalCount { get; set; }
     private List<WorkshopArticle> FilteredArticles { get; set; }
+    private List<WorkshopArticle> AuthorArticles { get; set; }
 
     // Add a method to handle the "Back" button click
     private void GoBack()
     {
         if (PreviousOptions.Count > 0)
         {
-            var lastOption = PreviousOptions.Pop();
-            _selectedOption = lastOption;  // Set it directly to bypass adding to stack
-            RefreshData();
+            if (SelectedOption == "Author Articles")
+            {
+                FilteredArticles = new List<WorkshopArticle>();
+                var lastOption = PreviousOptions.Pop();
+                _selectedOption = lastOption;
+                SelectedOption = _selectedOption;
+                RefreshArticles(CurrentOldPage);
+                RefreshData();
+            }
+            else
+            {
+                var lastOption = PreviousOptions.Pop();
+                _selectedOption = lastOption;  
+                SelectedOption = _selectedOption;
+                RefreshData();
+            }
         }
     }
 
@@ -180,7 +199,7 @@ else
         }
         else
         {
-            await RefreshData();
+            // await RefreshData();
         }
     }
 
@@ -254,7 +273,7 @@ else
             if (response.IsSuccessStatusCode)
             {
                 FilteredArticles = await response.Content.ReadFromJsonAsync<List<WorkshopArticle>>();
-                Console.WriteLine("deserialized workshop--------------------------------------------");
+                //Console.WriteLine("deserialized workshop--------------------------------------------");
             }
             else
             {
@@ -277,26 +296,77 @@ else
         }
     }
 
-    // Call these methods whenever you need to refresh the filtered articles or the total count.
-    private async Task RefreshData()
+    private async Task GetArticles(string authorId)
     {
-        await GetTotalCount();
-        await GetFilteredArticles();
-        StateHasChanged();
-        Console.WriteLine("RefreshData");
+        try
+        {
+            SelectedOption = "Author Articles";
+            var response = await Http.GetAsync($"Workshop/author-articles?userId={authorId}");
+
+            if (response.IsSuccessStatusCode)
+            {
+                AuthorArticles = await response.Content.ReadFromJsonAsync<List<WorkshopArticle>>();
+                FilteredArticles = AuthorArticles.Take(20).ToList(); 
+                // We assume here that we have fetched all the articles at once
+                TotalPages = (int)Math.Ceiling((double)AuthorArticles.Count / ItemsPerPage);
+                StateHasChanged(); // Update the UI
+            }
+            else
+            {
+                Console.WriteLine($"Error fetching articles for author. Status code: {response.StatusCode}");
+            }
+        }
+        catch (Exception e)
+        {
+            SelectedOption = "Home";
+            Console.WriteLine($"Exception occurred while fetching articles for author: {e.Message}");
+        }
+    }
+
+    // You may need an additional method to set the author's ID and refresh the articles when an author name is clicked.
+    public async Task SelectAuthor(string authorId)
+    {
+        FilteredArticles = new List<WorkshopArticle>();
+        CurrentPage = 1; // Reset to the first page
+        await GetArticles(authorId); // Fetch the articles for the selected author
     }
 
     private async Task RefreshArticles(int currentPage)
     {
         CurrentPage = currentPage;
-        await GetFilteredArticles();
-        StateHasChanged();
-        Console.WriteLine("RefreshArticles");
+        if (SelectedOption == "Author Articles")
+        {
+            // Calculate the number of articles to skip
+            int skipAmount = (CurrentPage - 1) * ItemsPerPage;
+
+            // Skip the appropriate number of articles and then take the next 20 articles
+            FilteredArticles = AuthorArticles.Skip(skipAmount).Take(ItemsPerPage).ToList();
+            Console.WriteLine(AuthorArticles.Count);
+            StateHasChanged();
+        }
+        else
+        {
+            CurrentOldPage = currentPage;
+            await GetFilteredArticles();
+            StateHasChanged();
+        }
+    }
+
+    // Call these methods whenever you need to refresh the filtered articles or the total count.
+    private async Task RefreshData()
+    {
+        if (SelectedOption != "Author Articles")
+        {
+            await GetTotalCount();
+            await GetFilteredArticles();
+            StateHasChanged();
+            Console.WriteLine("RefreshData");
+        }
     }
 
     public void SetType(string type)
     {
-        if (SelectedOption == "Content Detail")
+        if (SelectedOption == "Content Detail" || SelectedOption == "Author Articles")
         {
             var lastOption = PreviousOptions.Pop() ?? "";
 
@@ -308,7 +378,7 @@ else
 
     public void SetOption(string option)
     {
-        if (SelectedOption == "Content Detail")
+        if (SelectedOption == "Content Detail" || SelectedOption == "Author Articles")
         {
             var lastOption = PreviousOptions.Pop() ?? "";
 
@@ -316,6 +386,7 @@ else
         }
         SelectedOption = option;
         ShowOptionDropdown = false; // Hide dropdown after selection
+        RefreshArticles(1);
     }
 
     public void ToggleTypeDropdown()

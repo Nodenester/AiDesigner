@@ -8,54 +8,69 @@
 
 <div style="width: 83%; margin: auto; box-sizing: border-box; display: flex; justify-content: space-between;">
     <!-- Left section: Article content -->
-    <div class="flex flex-row mt-8 w-full">
-        <div class="flex flex-col items-start gap-4" style="margin-bottom: 3rem; text-align: left; flex-grow: 1; margin-left: 4rem;">
-            <input type="text" @bind="SelectedArticle.Name" placeholder="Name" style="width: 55.687rem;" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0 text-3xl" />
+    <div class="flex flex-col items-start gap-4" style="margin-bottom: 3rem; text-align: left; flex-grow: 1; margin-left: 4rem;">
+        <input type="text" @bind="SelectedArticle.Name" placeholder="Name" style="width: 55.687rem;" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0 text-3xl" />
 
-            @if (SelectedArticle.IsPublic)
+        @if (SelectedArticle.IsPublic)
+        {
+            <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.Image)}")" alt="@SelectedArticle.Name" style="width: 55.687rem; height: 31rem; object-fit: cover; border-radius: 0px;" />
+        }
+
+        @if (gettingDescription && SelectedArticle.Description == "Temporary description")
+        {
+            <div style="width: 55.687rem;" class="flex items-center justify-center">
+                <div class="loader">Loading description...</div> <!-- You can replace this with a spinner or any loading animation -->
+            </div>
+        }
+        else
+        {
+            <textarea @bind="SelectedArticle.Description" placeholder="Description" rows="4" style="width: 55.687rem;" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0 text-lg"></textarea>
+        }
+    </div>
+
+    <!-- Right section: Article details -->
+    <div class="flex flex-col justify-between p-2 dark:!bg-gray-600 rounded-lg shadow-lg" style="width: 27rem; margin-bottom: 3rem; align-self: flex-start; margin-right: 4em;">
+        @if (SelectedArticle != null)
+        {
+            @if (gettingImage && SelectedArticle.ProgramImage.Length == 0)
             {
-                <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.Image)}")" alt="@SelectedArticle.Name" style="width: 55.687rem; height: 31rem; object-fit: cover; border-radius: 0px;" />
+                <div style="width: 26rem; height: 26rem;" class="flex items-center justify-center">
+                    <div class="loader">Loading...</div> <!-- You can replace this with a spinner or any loading animation -->
+                </div>
             }
-
-@*             <textarea class="text-lg mb-2 text-gray-600 dark:text-gray-300 mb-4" @bind="@SelectedArticle.Description"></textarea>
- *@            <textarea @bind="SelectedArticle.Description" placeholder="Description" rows="4" style="width: 55.687rem;" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0 text-lg"></textarea>
-        </div>
-
-        <!-- Right section: Article details -->
-        <div class="flex flex-col justify-between p-2 dark:!bg-gray-600 rounded-lg shadow-lg" style="width: 27rem; margin-bottom: 3rem; align-self: flex-start; margin-right: 4em;">
-            @if (SelectedArticle != null)
+            else
             {
-                @if (SelectedArticle.Image != null)
+                @if (SelectedArticle.ProgramImage != null)
                 {
                     <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.ProgramImage)}")" alt="@SelectedArticle.Name" style="width: 26rem; height: 26rem; object-fit: cover; border-radius: 0px;" />
                 }
-
-                <div class="dark:!bg-gray-800 p-4 rounded mt-auto">
-                    <!-- Additional Details -->
-                    <h2 class="text-2xl font-semibold mb-2 text-white dark:text-gray-100">Additional Details</h2>
-                    <ul class="list-disc list-inside text-gray-600 dark:text-gray-300">
-                        <li><strong>Author:</strong> @SelectedArticle.AuthorName</li>
-                        <li><strong>Type:</strong> @SelectedArticle.Type</li>
-                        <li><strong>Public:</strong> @SelectedArticle.IsPublic</li>
-                        <li><strong>Created:</strong> @SelectedArticle.Created.ToShortDateString() </li>
-                        <li><strong>Downloads:</strong> @SelectedArticle.Downloads</li>
-                    </ul>
-
-                    @if (SelectedArticle.Status == "")
-                    {
-                        <button @onclick="ReleseArticle" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
-                            Release
-                        </button>
-                    }
-                    else
-                    {
-                        <button @onclick="UpdateArticle" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
-                            Update
-                        </button>
-                    }
-                </div>
             }
-        </div>
+
+            <div class="dark:!bg-gray-800 p-4 rounded mt-auto">
+                <!-- Additional Details -->
+                <h2 class="text-2xl font-semibold mb-2 text-white dark:text-gray-100">Additional Details</h2>
+                <ul class="list-disc list-inside text-gray-600 dark:text-gray-300">
+                    <li><strong>Author:</strong> @SelectedArticle.AuthorName</li>
+                    <li><strong>Type:</strong> @SelectedArticle.Type</li>
+                    <li><strong>Public:</strong> @SelectedArticle.IsPublic</li>
+                    <li><strong>Created:</strong> @SelectedArticle.Created.ToShortDateString() </li>
+                    <li><strong>Downloads:</strong> @SelectedArticle.Downloads</li>
+                </ul>
+
+                @if (SelectedArticle.Status == "")
+                {
+                    <button @onclick="ReleseArticle" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
+                        Release
+                    </button>
+                }
+                else
+                {
+                    <button @onclick="UpdateArticle" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
+                        Update
+                    </button>
+                }
+            </div>
+        }
     </div>
 </div>
 
@@ -141,4 +156,10 @@
         }
     }
 }
+
+<style>
+
+
+
+</style>
 
