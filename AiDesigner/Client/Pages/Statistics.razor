@@ -1,4 +1,7 @@
-﻿@page "/statistics"
+﻿@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize]
+
+@page "/statistics"
 
 @* right side *@
 <div class="flex-grow dark:bg-gray-600 rounded-lg w-full">

@@ -30,7 +30,7 @@
                             <p class="font-bold text-lg">@article.Name</p>
                             <p class="text-gray-700 dark:text-gray-300">@article.Description</p>
                         </div>
-                        @if (article.ArticleImages != null && article.ArticleImages.Any())
+                        @if (true)
                         {
                             <!-- Display the main image (assuming the first image is the main image) -->
                             <div class="p-2">
@@ -38,12 +38,12 @@
                             </div>
 
                             <!-- Display the rest of the images in a grid -->
-                            <div class="grid grid-cols-2 gap-2 p-2">
+@*                             <div class="grid grid-cols-2 gap-2 p-2">
                                 @foreach (var image in article.ArticleImages)
                                 {
                                     <img src="data:image/png;base64,@Convert.ToBase64String(image.ImageData)" alt="@image.Description" class="rounded-lg object-cover square-image" />
                                 }
-                            </div>
+                            </div> *@
                         }
                         <div class="p-2 flex justify-between">
                             <button @onclick="() => AcceptArticle(article.Id)" class="bg-green-500 text-white p-2 rounded-lg w-40">Accept</button>

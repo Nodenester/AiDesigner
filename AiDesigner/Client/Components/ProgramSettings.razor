@@ -2,6 +2,8 @@
 @using AiDesigner.Shared
 @using System.ComponentModel.DataAnnotations
 @using AiDesigner.Client.Modals
+@inject HttpClient Http;
+@inject NavigationManager NavigationManager;
 
 <PageTitle>Program Settings and Code</PageTitle>
 
@@ -38,7 +40,10 @@
                 </div>
                 <div class="mt-4 flex justify-center">
                     <AiDesigner.Client.Modals.ExacuteProgram AP="localProgram"></AiDesigner.Client.Modals.ExacuteProgram>
-                    <ReleaseArticle programObject="SelectedProgram" />
+@*                     <ReleaseArticle programObject="SelectedProgram" />
+            *@      <button @onclick="ReleaseProgram" class="ml-4 px-4 py-2 text-white bg-gray-600 hover:bg-gray-500 rounded" type="button">
+                        Release Program
+                    </button>
                     <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
                 </div>
             }
@@ -46,7 +51,10 @@
             {
                 <div class="mt-4 flex justify-center">
                     <AiDesigner.Client.Modals.ExacuteProgram AP="localProgram"></AiDesigner.Client.Modals.ExacuteProgram>
-                    <ReleaseArticle programObject="SelectedProgram" />
+                    @* <ReleaseArticle programObject="SelectedProgram" /> *@
+                    <button @onclick="ReleaseProgram" class="ml-4 px-4 py-2 text-white bg-gray-600 hover:bg-gray-500 rounded" type="button">
+                        Release Program
+                    </button>
                     <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
                 </div>
             }
@@ -76,11 +84,14 @@
 }
 
 @code {
-        [Parameter]
-        public ProgramObject SelectedProgram { get; set; }
+    [CascadingParameter(Name = "SetPassingArticle")]
+    protected EventCallback<WorkshopArticle> SetPassingArticle { get; set; }
 
-        [Parameter]
-        public EventCallback<ProgramObject> SelectedProgramChanged { get; set; }
+    [Parameter]
+    public ProgramObject SelectedProgram { get; set; }
+
+    [Parameter]
+    public EventCallback<ProgramObject> SelectedProgramChanged { get; set; }
 
     public ProgramObject localProgram { get; set; }
 
@@ -151,18 +162,18 @@ Guid apiKey = Guid.Parse(""{{apiKey}}"");
 Guid? sessionId = // Conditional assignment based on whether session ID is available
 Dictionary<Guid, object> inputValues = new Dictionary<Guid, object>();
 ";
-if (SelectedProgram?.ProgramStructure?.ProgramStart != null)
-{
-    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-    {
-        if (input.Type.ToString() != "Trigger")
-        {
-            code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //value is {input.Type}\n";
-        }
+                    if (SelectedProgram?.ProgramStructure?.ProgramStart != null)
+                    {
+                        foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                        {
+                            if (input.Type.ToString() != "Trigger")
+                            {
+                                code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //value is {input.Type}\n";
+                            }
 
-    }
-}
-code += @"
+                        }
+                    }
+                    code += @"
 var result = await ExecuteProgram(programKey, apiKey, inputValues, sessionId);
 ";
                     break;
@@ -189,27 +200,27 @@ program_key = 'your_program_key'
 api_key = 'your_api_key'
 session_id = 'your_session_id' # or None if not available
 ";
-code += @"
+                    code += @"
 input_values = {}
 ";
-foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-{
-    if (input.Type.ToString() != "Trigger")
-    {
-        code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
-    }
-}
-code += @"
+                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                    {
+                        if (input.Type.ToString() != "Trigger")
+                        {
+                            code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
+                        }
+                    }
+                    code += @"
 result = execute_program(program_key, api_key, input_values, session_id)
 ";
-foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-{
-    if (input.Type.ToString() != "Trigger")
-    {
-        code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
-    }
-}
-code += @"
+                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                    {
+                        if (input.Type.ToString() != "Trigger")
+                        {
+                            code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
+                        }
+                    }
+                    code += @"
 result = execute_program(program_key, api_key, input_values, session_id)
 ";
                     break;
@@ -238,16 +249,16 @@ const programKey = 'your_program_key';
 const apiKey = 'your_api_key';
 const sessionId = 'your_session_id'; // or null if not available
 const inputValues =";
-code += @"
+                    code += @"
 {}";
-    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-    {
-        if (input.Type.ToString() != "Trigger")
-        {
-            code += $"inputValues['{input.Id}'] = value;  // value is {input.Type}\n";
-        }
-    }
-    code += @"
+                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                    {
+                        if (input.Type.ToString() != "Trigger")
+                        {
+                            code += $"inputValues['{input.Id}'] = value;  // value is {input.Type}\n";
+                        }
+                    }
+                    code += @"
 const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
 ";
                     break;
@@ -286,7 +297,7 @@ const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
         // Update SelectedProgram with localProgram and notify the parent component
         await UpdateSelectedProgram(Clone(localProgram));
     }
-   
+
     // Clone method
     private ProgramObject Clone(ProgramObject source)
     {
@@ -326,6 +337,66 @@ const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
         {
             throw new ArgumentException($"Cannot clone object of type {source.GetType()}");
         }
+    }
+
+    private async Task ReleaseProgram()
+    {
+        string requestUri = $"Workshop/article/program/{localProgram.Id}";
+
+        // Make the HTTP GET request
+        HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
+
+        WorkshopArticle workshopArticle = null;
+        // Check if the request is successful
+        if (httpResponse.IsSuccessStatusCode)
+        {
+            // Deserialize the response content to List<ArticleImages>
+            workshopArticle = await httpResponse.Content.ReadFromJsonAsync<WorkshopArticle>();
+        }
+        else
+        {
+            Console.WriteLine($"Failed to get article. Status code: {httpResponse.StatusCode}");
+        }
+
+        if(workshopArticle == null)
+        {
+            // Initialize the WorkshopArticle
+            workshopArticle = new WorkshopArticle
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Name = localProgram.Name,
+                    ProgramId = localProgram.Id.ToString(),
+                    AuthorId = localProgram.Author,
+                    AuthorName = localProgram.AuthorName,
+                    Downloads = 0,
+                    Rating = 0,
+                    Created = DateTime.UtcNow,
+                    ProgramImage = new byte[0],
+                    Image = localProgram.Image ?? new byte[0],
+                    Description = "Temporary description", // Temporary placeholder
+                    Status = "",
+                };
+        }
+
+        // Conditional logic to set specific properties
+        if (localProgram is CustomProgram customProgram)
+        {
+            workshopArticle.Type = "Program";
+            workshopArticle.ApiKey = customProgram.ApiKey.ToString();
+
+        }
+        else if (localProgram is CustomBlockProgram customBlockProgram)
+        {
+            workshopArticle.Type = "CustomBlock";
+            workshopArticle.ApiKey = "xxx";
+            // Set other properties specific to CustomBlockProgram
+        }
+
+        // Invoke the method with the prepared article
+        SetPassingArticle.InvokeAsync(workshopArticle);
+
+        // Navigate to the desired page
+        NavigationManager.NavigateTo("/myworkshop");
     }
 
 }

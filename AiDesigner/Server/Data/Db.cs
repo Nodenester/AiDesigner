@@ -379,11 +379,11 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> SearchArticlesAsync(int start, int end, string searchTerm = null, string searchClass = null, string type = null)
         {
             StringBuilder query = new StringBuilder(@"
-        SELECT a.*, p.IsPublic, AVG(ISNULL(u.Rating, 0)) as AverageRating
-        FROM Ludde.Workshop_Article a
-        LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-        Left JOIN Ludde.programs p ON a.ProgramId = p.Id
-        WHERE 1=1 AND Status = 'Accepted'"
+                SELECT a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating
+                FROM Ludde.Workshop_Article a
+                LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                Left JOIN Ludde.programs p ON a.ProgramId = p.Id
+                WHERE 1=1 AND Status = 'Accepted'"
             );
 
             var parameters = new DynamicParameters();
@@ -406,7 +406,7 @@ namespace AiDesigner.Server.Data
             }
 
             query.Append(@"
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, p.IsPublic
+                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
                 ORDER BY a.Created DESC
                 OFFSET @Start ROWS
                 FETCH NEXT (@End - @Start) ROWS ONLY;"
@@ -420,6 +420,35 @@ namespace AiDesigner.Server.Data
             try
             {
                 result = (await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters)).ToList();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
+
+            return result;
+        }
+        public async Task<IEnumerable<WorkshopArticle>> GetArticlesByAuthorIdAsync(string authorId)
+        {
+            StringBuilder query = new StringBuilder(@"
+        SELECT a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating
+        FROM Ludde.Workshop_Article a
+        LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+        LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+        WHERE a.AuthorId = @AuthorId
+        GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
+        ORDER BY a.Created DESC;"
+            );
+
+            var parameters = new DynamicParameters();
+            parameters.Add("AuthorId", authorId);
+
+            IEnumerable<WorkshopArticle> result = new List<WorkshopArticle>();
+
+            try
+            {
+                using SqlConnection connection = new SqlConnection(_connectionString);
+                result = await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters);
             }
             catch (Exception e)
             {
@@ -506,35 +535,6 @@ namespace AiDesigner.Server.Data
 
             // First, retrieve the pending articles
             var pendingArticles = (await connection.QueryAsync<WorkshopArticle>(queryArticles)).ToList();
-
-            // If there are any pending articles, retrieve the associated images
-            if (pendingArticles.Any())
-            {
-                var articleIds = pendingArticles.Select(a => a.Id);
-
-                List<ArticleImages>  imageLists = new List<ArticleImages>();
-                try
-                {
-                    imageLists = (await connection.QueryAsync<ArticleImages>(queryImages, new { ArticleIds = articleIds })).ToList();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine(e.Message);
-                }
-
-                // Group the images by article ID
-                var imageGroups = imageLists.GroupBy(img => img.ArticleId);
-
-                // Assign the images to the corresponding articles
-                foreach (var group in imageGroups)
-                {
-                    var article = pendingArticles.Find(a => a.Id == group.Key);
-                    if (article != null)
-                    {
-                        article.ArticleImages = group.ToList();
-                    }
-                }
-            }
 
             return pendingArticles;
         }
@@ -639,41 +639,6 @@ namespace AiDesigner.Server.Data
         }
 
         //Article image handeling
-        public async Task<string> InsertArticleImageAsync(ArticleImages articleImages)
-        {
-            if (articleImages == null || string.IsNullOrEmpty(articleImages.ImageId) || string.IsNullOrEmpty(articleImages.ArticleId))
-            {
-                return "Invalid Parameters";
-            }
-
-            const string query = @"INSERT INTO Ludde.Article_Images (ImageId, ArticleId, ImageData, Description) 
-                                VALUES (@ImageId, @ArticleId, @ImageData, @Description);";
-
-            try
-            {
-                using SqlConnection connection = new SqlConnection(_connectionString);
-                await connection.OpenAsync();
-
-                var parameters = new
-                {
-                    ImageId = articleImages.ImageId,
-                    ArticleId = articleImages.ArticleId,
-                    ImageData = articleImages.ImageData,
-                    Description = articleImages.Description
-                };
-
-                int rowsAffected = await connection.ExecuteAsync(query, parameters);
-
-                return rowsAffected > 0 ? "Successfully Inserted" : "Insert Failed";
-            }
-            catch (Exception ex)
-            {
-                // Log the exception
-                // For example: _logger.LogError(ex, "An error occurred while inserting the article image.");
-
-                return "An error occurred";
-            }
-        }
         public async Task<string> DeleteArticleImagesAsync(string articleId)
         {
             if (string.IsNullOrEmpty(articleId))
@@ -704,16 +669,6 @@ namespace AiDesigner.Server.Data
 
                 return "An error occurred";
             }
-        }
-        public async Task<IEnumerable<ArticleImages>> GetArticleImagesAsync(string articleId)
-        {
-            var query = @"
-                SELECT ai.ImageId, ai.ImageData, ai.Description
-                FROM Ludde.Article_Images ai
-                WHERE ai.ArticleId = @ArticleId";
-
-            await using SqlConnection connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<ArticleImages>(query, new { ArticleId = articleId });
         }
         public async Task ConnectArticleToUserAsync(UserArticle userArticle)
         {

@@ -517,15 +517,13 @@ namespace NodeBaseApi.Version2
         public string ProgramId { get; set; }
         public string ApiKey { get; set; }
         public byte[] ProgramImage { get; set; }
+        public byte[] Image { get; set; }
         public string Type { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
         public int Downloads { get; set; } = 0;
         public int Rating { get; set; } = 0;
         public string Status { get; set; } = "Pending";
         public bool IsPublic { get; set; } = false;
-
-        // Navigation property for the relationship
-        public List<ArticleImages> ArticleImages { get; set; }
     }
 
     public class UserArticle
@@ -536,17 +534,6 @@ namespace NodeBaseApi.Version2
         public int? Rating { get; set; }
         public string Review { get; set; }
         public bool IsFavorite { get; set; } = false;
-    }
-
-    public class ArticleImages
-    {
-        public string ImageId { get; set; }
-        public string ArticleId { get; set; }
-        public byte[] ImageData { get; set; }
-        public string Description { get; set; }
-
-        // Navigation property for the relationship
-        public WorkshopArticle WorkshopArticle { get; set; }
     }
 
     //News

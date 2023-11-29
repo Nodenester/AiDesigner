@@ -1,0 +1,144 @@
+﻿@using System.Text;
+@using System.Net.Http;
+@using Microsoft.AspNetCore.Authorization
+@using Newtonsoft.Json.Linq
+@using NodeBaseApi.Version2
+@inject HttpClient Http;
+@attribute [Authorize]
+
+<div style="width: 83%; margin: auto; box-sizing: border-box; display: flex; justify-content: space-between;">
+    <!-- Left section: Article content -->
+    <div class="flex flex-row mt-8 w-full">
+        <div class="flex flex-col items-start gap-4" style="margin-bottom: 3rem; text-align: left; flex-grow: 1; margin-left: 4rem;">
+            <input type="text" @bind="SelectedArticle.Name" placeholder="Name" style="width: 55.687rem;" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0 text-3xl" />
+
+            @if (SelectedArticle.IsPublic)
+            {
+                <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.Image)}")" alt="@SelectedArticle.Name" style="width: 55.687rem; height: 31rem; object-fit: cover; border-radius: 0px;" />
+            }
+
+@*             <textarea class="text-lg mb-2 text-gray-600 dark:text-gray-300 mb-4" @bind="@SelectedArticle.Description"></textarea>
+ *@            <textarea @bind="SelectedArticle.Description" placeholder="Description" rows="4" style="width: 55.687rem;" class="w-full p-2 border rounded dark:bg-gray-700 dark:text-white outline-none border-0 text-lg"></textarea>
+        </div>
+
+        <!-- Right section: Article details -->
+        <div class="flex flex-col justify-between p-2 dark:!bg-gray-600 rounded-lg shadow-lg" style="width: 27rem; margin-bottom: 3rem; align-self: flex-start; margin-right: 4em;">
+            @if (SelectedArticle != null)
+            {
+                @if (SelectedArticle.Image != null)
+                {
+                    <img src="@($"data:image/png;base64,{Convert.ToBase64String(SelectedArticle.ProgramImage)}")" alt="@SelectedArticle.Name" style="width: 26rem; height: 26rem; object-fit: cover; border-radius: 0px;" />
+                }
+
+                <div class="dark:!bg-gray-800 p-4 rounded mt-auto">
+                    <!-- Additional Details -->
+                    <h2 class="text-2xl font-semibold mb-2 text-white dark:text-gray-100">Additional Details</h2>
+                    <ul class="list-disc list-inside text-gray-600 dark:text-gray-300">
+                        <li><strong>Author:</strong> @SelectedArticle.AuthorName</li>
+                        <li><strong>Type:</strong> @SelectedArticle.Type</li>
+                        <li><strong>Public:</strong> @SelectedArticle.IsPublic</li>
+                        <li><strong>Created:</strong> @SelectedArticle.Created.ToShortDateString() </li>
+                        <li><strong>Downloads:</strong> @SelectedArticle.Downloads</li>
+                    </ul>
+
+                    @if (SelectedArticle.Status == "")
+                    {
+                        <button @onclick="ReleseArticle" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
+                            Release
+                        </button>
+                    }
+                    else
+                    {
+                        <button @onclick="UpdateArticle" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
+                            Update
+                        </button>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public WorkshopArticle SelectedArticle { get; set; }
+
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
+
+    bool gettingImage, gettingDescription;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (SelectedArticle.Description == "Temporary description" && !gettingDescription)
+        {
+            gettingDescription = true;
+            await GenerateDescription();
+        }
+        if (SelectedArticle.Image == null)
+        {
+            SelectedArticle.Image = new byte[0];
+        }
+        if (SelectedArticle.Image.Length == 0 && !gettingImage)
+        {
+            gettingImage = true;
+            await GenerateImage();
+        }
+    }
+
+    private void SetRating(int newRating)
+    {
+        // Here you could update the rating for SelectedArticle and perform any server updates if necessary
+        SelectedArticle.Rating = newRating;
+    }
+
+    private async Task ReleseArticle()
+    {
+        SelectedArticle.Status = "Pending";
+        HttpResponseMessage response = await Http.PostAsJsonAsync("Workshop/save-article", SelectedArticle);
+        if (response.IsSuccessStatusCode) { }
+    }
+
+    private async Task UpdateArticle()
+    {
+        SelectedArticle.Status = "Pending";
+        HttpResponseMessage response = await Http.PutAsJsonAsync("Workshop/update-article", SelectedArticle);
+        if(response.IsSuccessStatusCode){ }
+    }
+
+    private async Task GenerateImage()
+    {
+        HttpResponseMessage response = await Http.PostAsJsonAsync("Workshop/generate-article-image", SelectedArticle);
+        if (response.IsSuccessStatusCode)
+        {
+            var base64Image = await response.Content.ReadAsStringAsync();
+            SelectedArticle.ProgramImage = Convert.FromBase64String(base64Image);
+            StateHasChanged();
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Error generating image: " + response.StatusCode + ", Details: " + errorResponse);
+        }
+    }
+
+    private async Task GenerateDescription()
+    {
+        HttpResponseMessage response = await Http.PostAsJsonAsync("Workshop/generate-article-description", SelectedArticle);
+        if (response.IsSuccessStatusCode)
+        {
+            var jArray = JArray.Parse(await response.Content.ReadAsStringAsync());
+            string generatedText = jArray[0]["generated_text"].ToString();
+            int endIndex = generatedText.IndexOf("<!-- Generated Description End -->");
+            string cleanText = endIndex != -1 ? generatedText.Substring(0, endIndex) : generatedText;
+            SelectedArticle.Description = cleanText;
+            StateHasChanged();
+        }
+        else
+        {
+            var errorResponse = await response.Content.ReadAsStringAsync();
+            Console.WriteLine("Error generating description: " + response.StatusCode + ", Details: " + errorResponse);
+        }
+    }
+}
+
