@@ -55,9 +55,23 @@
                     <li><strong>Public:</strong> @SelectedArticle.IsPublic</li>
                     <li><strong>Created:</strong> @SelectedArticle.Created.ToShortDateString() </li>
                     <li><strong>Downloads:</strong> @SelectedArticle.Downloads</li>
+                    <select @bind="SelectedArticle.SearchClass" class="w-full p-2 rounded dark:bg-gray-600 dark:text-white outline-none border-0 data-te-select-init">
+                        <option value="Type 1">Type 1</option>
+                        <option value="Type 2">Type 2</option>
+                        <option value="Picture">Picture</option>
+                        <option value="Number">Number</option>
+                        <option value="Boolean">Boolean</option>
+                        <option value="Audio">Audio</option>
+                        <option value="Object">Object</option>
+                    </select>
                 </ul>
-
-                @if (SelectedArticle.Status == "")
+                @if (isLoading)
+                {
+                    <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
+                        Loading...
+                    </button>
+                }
+                else if (SelectedArticle.Status == "")
                 {
                     <button @onclick="ReleseArticle" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
                         Release
@@ -81,6 +95,7 @@
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
 
+    bool isLoading { get; set; } = false;
     bool gettingImage, gettingDescription;
 
     protected override async Task OnParametersSetAsync()
@@ -109,16 +124,20 @@
 
     private async Task ReleseArticle()
     {
+        isLoading = true;
         SelectedArticle.Status = "Pending";
         HttpResponseMessage response = await Http.PostAsJsonAsync("Workshop/save-article", SelectedArticle);
         if (response.IsSuccessStatusCode) { }
+        isLoading = false;
     }
 
     private async Task UpdateArticle()
     {
+        isLoading = true;
         SelectedArticle.Status = "Pending";
         HttpResponseMessage response = await Http.PutAsJsonAsync("Workshop/update-article", SelectedArticle);
         if(response.IsSuccessStatusCode){ }
+        isLoading = false;
     }
 
     private async Task GenerateImage()

@@ -1,0 +1,89 @@
+﻿@using NodeBaseApi.Version2
+@inject HttpClient Http;
+@inject IJSRuntime JSRuntime;
+
+<div class="@($"fixed inset-0 z-50 overflow-y-auto {(IsModalOpen ? "flex" : "hidden")} items-center justify-center")" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="relative w-full max-w-md p-4 bg-white rounded-lg shadow-lg">
+        <!-- Modal header -->
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold">
+                Write a Review
+            </h3>
+            <button type="button" @onclick="Close" class="text-gray-400 hover:text-gray-600">
+                <span class="sr-only">Close</span>
+                <!-- Insert close icon SVG here -->
+            </button>
+        </div>
+        <!-- Modal body -->
+        <div>
+            <div class="flex space-x-1">
+                @for (int i = 1; i <= 5; i++)
+                {
+                    <svg @onclick="() => UpdateRating(i)" class="w-8 h-8 cursor-pointer" fill="@GetStarColor(i)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
+                        <!-- Insert star SVG path here -->
+                    </svg>
+                }
+            </div>
+            <textarea @bind="userArticle.Review" rows="3" class="mt-2 w-full p-2 border rounded" placeholder="Your comment..."></textarea>
+        </div>
+        <!-- Modal footer -->
+        <div class="flex justify-end mt-4">
+            <button @onclick="SubmitReview" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+                Submit Review
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public string ArticleId { get; set; }
+
+    private bool IsModalOpen { get; set; }
+    private UserArticle userArticle = new UserArticle();
+
+    private string GetStarColor(int starNumber) => userArticle.Rating >= starNumber ? "#ffc107" : "#e4e5e9";
+
+    private void UpdateRating(int rating) => userArticle.Rating = rating;
+
+    public async Task OpenModal()
+    {
+        var response = await Http.GetAsync($"api/articles/{ArticleId}");
+        if (response.IsSuccessStatusCode)
+        {
+            var existingArticle = await response.Content.ReadFromJsonAsync<UserArticle>();
+            if (existingArticle != null && string.IsNullOrWhiteSpace(existingArticle.Review))
+            {
+                userArticle = existingArticle;
+                IsModalOpen = true;
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("alert", "Review already exists for this article.");
+            }
+        }
+        else
+        {
+            // Handle error response
+        }
+        StateHasChanged();
+    }
+
+    private async Task SubmitReview()
+    {
+        if (userArticle.Rating > 0 && !string.IsNullOrWhiteSpace(userArticle.Review))
+        {
+            var response = await Http.PutAsJsonAsync("api/update-user-article", userArticle);
+            if (response.IsSuccessStatusCode)
+            {
+                Close();
+                // Optionally refresh the list of articles or notify the user of success
+            }
+            else
+            {
+                // Handle error response
+            }
+        }
+    }
+
+    private void Close() => IsModalOpen = false;
+}
