@@ -77,7 +77,7 @@
 }
 else if(SelectedOption == "Home" && ProgramType == "Any")
 {
-    <WorkshopHome SelectAuthor="SelectAuthor" OnSelectedArticle="SetSelectedArticle" SelectedArticle="SelectedArticle"></WorkshopHome>
+    <WorkshopHome WorkshopLists="WorkshopLists" SelectAuthor="SelectAuthor" OnSelectedArticle="SetSelectedArticle" SelectedArticle="SelectedArticle"></WorkshopHome>
 }
 else
 {
@@ -93,6 +93,8 @@ else
 
     [CascadingParameter(Name = "SetPassingArticle")]
     protected EventCallback<WorkshopArticle> SetPassingArticle { get; set; }
+
+    public Tuple<List<WorkshopArticle>, List<WorkshopArticle>, List<WorkshopArticle>, List<WorkshopArticle>> WorkshopLists {get;set;}
 
     private Stack<string> PreviousOptions = new Stack<string>();
 
@@ -199,6 +201,16 @@ else
         }
         else
         {
+            if(WorkshopLists == null)
+            {
+                var PopularArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-popular");
+                var NodeNestorArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/author");
+                var NewArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/newest");
+                var MostDownloadedArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-downloaded/top");
+
+                WorkshopLists = Tuple.Create(PopularArticles, NodeNestorArticles, NewArticles, MostDownloadedArticles);
+                StateHasChanged();
+            }
             // await RefreshData();
         }
     }

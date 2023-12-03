@@ -199,6 +199,9 @@
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
 
+    [CascadingParameter(Name = "WorkshopArticles")]
+    public List<WorkshopArticle> workshopArticles { get; set; }
+
     //Vars For modal
     public CustomProgram NewProgram { get; set; } = new CustomProgram();
     public CustomBlockProgram NewBlockProgram { get; set; } = new CustomBlockProgram();
@@ -206,13 +209,11 @@
     private AddProgram ap { get; set; }
     private AddCustomBlock acb { get; set; }
 
-    public List<WorkshopArticle> workshopArticles { get; set; }
-
     private bool HasLoaded = false;
 
     protected override async Task OnParametersSetAsync()
     {
-        await UpdateVault();
+        // await UpdateVault();
     }
 
     bool isSingleClick = true;
@@ -359,46 +360,46 @@
 
     }
 
-    //Vault
-    public async Task UpdateVault()
-    {
-        if (CascAuth?.User != null && workshopArticles == null && HasLoaded == false)
-        {
-            HasLoaded = true;
-            var user = CascAuth.User;
+    // //Vault
+    // public async Task UpdateVault()
+    // {
+    //     if (CascAuth?.User != null && workshopArticles == null && HasLoaded == false)
+    //     {
+    //         HasLoaded = true;
+    //         var user = CascAuth.User;
 
-            if (user.Identity.IsAuthenticated)
-            {
-                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-                if (Guid.TryParse(userIdClaim, out Guid userId))
-                {
-                    try
-                    {
-                        var response = await Http.GetAsync($"Workshop/get-articles-connected-to-user/{userId}");
-                        if (response.IsSuccessStatusCode)
-                        {
-                            // Deserialize the response to the expected data model.
-                            workshopArticles = (await response.Content.ReadFromJsonAsync<IEnumerable<WorkshopArticle>>()).ToList();
-                        }
-                        else
-                        {
-                            Console.WriteLine($"The call failed with status code {response.StatusCode}");
-                            HasLoaded = false;
-                        }
-                    }
-                    catch (HttpRequestException ex)
-                    {
-                        Console.WriteLine($"Request exception: {ex.Message}");
-                        HasLoaded = false;
-                    }
-                }
-            }
-            else
-            {
-                HasLoaded = false;
-            }
-        }
-    }
+    //         if (user.Identity.IsAuthenticated)
+    //         {
+    //             var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+    //             if (Guid.TryParse(userIdClaim, out Guid userId))
+    //             {
+    //                 try
+    //                 {
+    //                     var response = await Http.GetAsync($"Workshop/get-articles-connected-to-user/{userId}");
+    //                     if (response.IsSuccessStatusCode)
+    //                     {
+    //                         // Deserialize the response to the expected data model.
+    //                         workshopArticles = (await response.Content.ReadFromJsonAsync<IEnumerable<WorkshopArticle>>()).ToList();
+    //                     }
+    //                     else
+    //                     {
+    //                         Console.WriteLine($"The call failed with status code {response.StatusCode}");
+    //                         HasLoaded = false;
+    //                     }
+    //                 }
+    //                 catch (HttpRequestException ex)
+    //                 {
+    //                     Console.WriteLine($"Request exception: {ex.Message}");
+    //                     HasLoaded = false;
+    //                 }
+    //             }
+    //         }
+    //         else
+    //         {
+    //             HasLoaded = false;
+    //         }
+    //     }
+    // }
 
     private async Task RemoveArticle(string id)
     {

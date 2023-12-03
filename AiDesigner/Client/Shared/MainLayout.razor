@@ -112,17 +112,19 @@
                     <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
                     <AuthorizeView>
                         <Authorized>
-                            <CascadingValue Value="@setTutorial" Name="setTutorial">
-                                <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
-                                    <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
-                                        <CascadingValue Value="@analytics" Name="analytics"> 
-                                            <CascadingValue Value="@addApiKey" Name="addApiKey">
-                                                <CascadingValue Value="@apiKeys" Name="ApiKeys">
-                                                    <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
-                                                        <CascadingValue Value="@passingArticle" Name="passingArticle">
-                                                            <CascadingValue Value=@setTokens Name="Settokens">
-                                                                <CascadingValue Value=@NewAps Name="NewAps">
-                                                                    @Body
+                            <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
+                                <CascadingValue Value="@setTutorial" Name="setTutorial">
+                                    <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
+                                        <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
+                                            <CascadingValue Value="@analytics" Name="analytics"> 
+                                                <CascadingValue Value="@addApiKey" Name="addApiKey">
+                                                    <CascadingValue Value="@apiKeys" Name="ApiKeys">
+                                                        <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                                                            <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                                                <CascadingValue Value=@setTokens Name="Settokens">
+                                                                    <CascadingValue Value=@NewAps Name="NewAps">
+                                                                        @Body
+                                                                    </CascadingValue>
                                                                 </CascadingValue>
                                                             </CascadingValue>
                                                         </CascadingValue>
@@ -269,6 +271,8 @@
     public WorkshopArticle passingArticle;
     private List<ApiKey> apiKeys = new List<ApiKey>();
 
+    public List<WorkshopArticle> workshopArticles { get; set; }
+
     public ChacheAnalytics analytics = new ChacheAnalytics();
 
     public Tutorial CurrentTutorial;
@@ -370,6 +374,7 @@
         await UpdatePrograms();
         await GetTokens();
         await GetApiKeys();
+        UpdateVault();
 
         // var uri = new Uri(NavigationManagers.Uri); // Get the current URL
         // if (uri.AbsolutePath == "/library" || uri.AbsolutePath == "/editor" || uri.AbsolutePath == "/marketplace")
@@ -564,6 +569,40 @@
     protected override bool ShouldRender()
     {
         return shouldRender;
+    }
+
+    //Vault
+    public async Task UpdateVault()
+    {
+        if (AuthState?.User != null && workshopArticles == null)
+        {
+            var user = AuthState.User;
+
+            if (user.Identity.IsAuthenticated)
+            {
+                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                if (Guid.TryParse(userIdClaim, out Guid userId))
+                {
+                    try
+                    {
+                        var response = await Http.GetAsync($"Workshop/get-articles-connected-to-user/{userId}");
+                        if (response.IsSuccessStatusCode)
+                        {
+                            // Deserialize the response to the expected data model.
+                            workshopArticles = (await response.Content.ReadFromJsonAsync<IEnumerable<WorkshopArticle>>()).ToList();
+                        }
+                        else
+                        {
+                            Console.WriteLine($"The call failed with status code {response.StatusCode}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Request exception: {ex.Message}");
+                    }
+                }
+            }
+        }
     }
 
     // private void HandleLocationChanged(object sender, LocationChangedEventArgs e)

@@ -234,6 +234,28 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
+        [HttpPut("update-user-article2/{programId}")]
+        public async Task<IActionResult> UpdateUserArticle(string programId, [FromBody] UserArticle userArticle)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState); // This will return the validation errors.
+            }
+
+            try
+            {
+                await _dbConnection.UpdateUserArticleAsync2(userArticle, programId);
+                return Ok("Successfully updated.");
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details here to get more information
+                return StatusCode(500, "An error occurred while processing your request.");
+            }
+        }
+
+
+
         [HttpDelete("remove-user-article/{userId}/{articleId}")]
         public async Task<IActionResult> RemoveUserArticle([FromRoute] string userId, [FromRoute] string articleId)
         {

@@ -309,6 +309,28 @@ namespace AiDesigner.Shared.Blocks
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    public class StringExtractor : Block
+    {
+        public StringExtractor()
+        {
+            Id = Guid.NewGuid();
+            Name = "String Extractor";
+            Description = "Extracts a substring between two specified delimiters.";
+            Inputs = new List<Input>
+        {
+            new Input { Name = "Main String", Type = Type.String, IsList = false, Description = "The main string to search in" },
+            new Input { Name = "Start Delimiter", Type = Type.String, IsList = false, Description = "The start delimiter" },
+            new Input { Name = "End Delimiter", Type = Type.String, IsList = false, Description = "The end delimiter" }
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Name = "Extracted Substring", Type = Type.String, IsList = false, Description = "The extracted substring" }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
     public class FindClosestStrings : Block
     {
         public FindClosestStrings()

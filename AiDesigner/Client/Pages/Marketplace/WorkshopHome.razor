@@ -8,9 +8,9 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">Popular</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (PopularArticles != null && PopularArticles.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item1.Count > 0)
             {
-                @foreach (var article in PopularArticles)
+                @foreach (var article in WorkshopLists.Item1)
                 {
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
@@ -57,9 +57,9 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">Made by NodeNestor</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (NodeNestorArticles != null && NodeNestorArticles.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item2.Count > 0)
             {
-                @foreach (var article in NodeNestorArticles)
+                @foreach (var article in WorkshopLists.Item2)
                 {
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
@@ -106,9 +106,9 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">New releases</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (NewArticles != null && NewArticles.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item3.Count > 0)
             {
-                @foreach (var article in NewArticles)
+                @foreach (var article in WorkshopLists.Item3)
                 {
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
@@ -155,9 +155,9 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">Most downloaded</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (MostDownloadedArticles != null && MostDownloadedArticles.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item4.Count > 0)
             {
-                @foreach (var article in MostDownloadedArticles)
+                @foreach (var article in WorkshopLists.Item4)
                 {
                     <button class="w-72 h-auto p-0 rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex flex-col items-center justify-center" @onclick="() => SetSelectedArticle(article)">
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
@@ -202,10 +202,8 @@
 
 
 @code {
-    public List<WorkshopArticle> PopularArticles { get; set; }
-    public List<WorkshopArticle> NodeNestorArticles { get; set; }
-    public List<WorkshopArticle> NewArticles { get; set; }
-    public List<WorkshopArticle> MostDownloadedArticles { get; set; }
+    [Parameter]
+    public Tuple<List<WorkshopArticle>, List<WorkshopArticle>, List<WorkshopArticle>, List<WorkshopArticle>> WorkshopLists {get;set;}
 
     [Parameter]
     public WorkshopArticle SelectedArticle { get; set; }
@@ -216,19 +214,9 @@
     [Parameter]
     public EventCallback<WorkshopArticle> OnSelectedArticle { get; set; }
 
-    private bool IsLoading { get; set; } = true;
-
     protected override async Task OnInitializedAsync()
     {
-        if(IsLoading)
-        {
-            IsLoading = false;
-            PopularArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-popular");
-            NodeNestorArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/author");
-            NewArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/newest");
-            MostDownloadedArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-downloaded/top");
-            StateHasChanged();
-        }
+
     }
 
     private void SetSelectedArticle(WorkshopArticle article)
