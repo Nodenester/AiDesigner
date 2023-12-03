@@ -379,11 +379,11 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> SearchArticlesAsync(int start, int end, string searchTerm = null, string searchClass = null, string type = null)
         {
             StringBuilder query = new StringBuilder(@"
-                SELECT a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating
+                SELECT a.*, p.IsPublic, p.Image, AVG(CASE WHEN u.Rating > 0 THEN u.Rating END) as Rating
                 FROM Ludde.Workshop_Article a
                 LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-                Left JOIN Ludde.programs p ON a.ProgramId = p.Id
-                WHERE 1=1 AND Status = 'Accepted'"
+                LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+                WHERE 1=1 AND a.Status = 'Accepted'"
             );
 
             var parameters = new DynamicParameters();
@@ -409,7 +409,7 @@ namespace AiDesigner.Server.Data
                 GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
                 ORDER BY a.Created DESC
                 OFFSET @Start ROWS
-                FETCH NEXT (@End - @Start) ROWS ONLY;"
+                FETCH NEXT @Count ROWS ONLY;"
             );
 
             parameters.Add("Start", start);
@@ -780,6 +780,35 @@ namespace AiDesigner.Server.Data
             });
         }
 
+        public async Task UpdateUserArticleAsync2(UserArticle userArticle, string programId)
+        {
+            var query = @"
+        UPDATE Ludde.User_Article 
+        SET Rating = @Rating, Review = @Review
+        FROM Ludde.User_Article 
+        INNER JOIN Ludde.Workshop_Article ON Ludde.User_Article.ArticleId = Ludde.Workshop_Article.Id
+        WHERE Ludde.User_Article.UserId = @UserId 
+        AND Ludde.Workshop_Article.ProgramId = @ProgramId;
+    ";
+
+            await using SqlConnection connection = new SqlConnection(_connectionString);
+            try
+            {
+                await connection.ExecuteAsync(query, new
+                {
+                    userArticle.Rating,
+                    userArticle.Review,
+                    UserId = userArticle.UserId,
+                    ProgramId = programId
+                });
+            }
+            catch (Exception ex)
+            {
+                // Ideally, you'd log this exception to a file or logging service.
+                Console.WriteLine(ex.Message);
+            }
+        }
+
         public async Task UpdateUserArticleAsync(UserArticle userArticle)
         {
             var query = @"
@@ -831,24 +860,25 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<CustomProgram>> GetAllProgramsFromUserWorkshopArticlesAsync(string userId)
         {
             const string query = @"
-                SELECT p.ProgramData
+                SELECT p.ProgramData, u.Rating
                 FROM programs p
-                WHERE p.Id IN (
-                    SELECT a.ProgramId
-                    FROM Ludde.Workshop_Article a
-                    INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-                    WHERE u.UserId = @UserId
-                )
+                INNER JOIN Ludde.Workshop_Article a ON p.Id = a.ProgramId
+                INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                WHERE u.UserId = @UserId
                 AND p.IsCustomBlock = 0;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
-            var result = await connection.QueryAsync<string>(query, new { UserId = userId });
+            var result = await connection.QueryAsync<(string programDataJson, int? rating)>(query, new { UserId = userId });
 
-            return result.Select(programDataJson =>
-                JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings)
-            );
+            return result.Select(t =>
+            {
+                var customProgram = JsonConvert.DeserializeObject<CustomProgram>(t.programDataJson, _jsonSerializerSettings);
+                customProgram.HasReview = t.rating.HasValue && t.rating.Value > 0;
+                return customProgram;
+            });
         }
+
 
         //News article handeling
         public async Task<IEnumerable<NewsArticle>> GetLatestArticlesAsync()

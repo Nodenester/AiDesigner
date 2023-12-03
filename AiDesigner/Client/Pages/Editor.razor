@@ -295,6 +295,11 @@
                                                             {
                                                                 <option value="@CustomBlock.Id">@CustomBlock.Name</option>
                                                             }
+                                                            @foreach (WorkshopArticle WorkshopCustomBlock in workshopArticles.Where(wcb => wcb.Type == "CustomBlock"))
+                                                            {
+                                                                <option value="@WorkshopCustomBlock.ProgramId">@WorkshopCustomBlock.Name.</option>
+                                                            }
+
                                                         </select>
                                                     }
                                                     else if (localProgram != null)
@@ -731,6 +736,9 @@
 
     [CascadingParameter(Name = "EAPs")]
     public List<ProgramObject> EAPs { get; set; }
+
+    [CascadingParameter(Name = "WorkshopArticles")]
+    public List<WorkshopArticle> workshopArticles { get; set; }
 
     private int _currentHistoryIndex = -1;
     private const int MaxHistoryLength = 30; // Adjust this value as per your needs

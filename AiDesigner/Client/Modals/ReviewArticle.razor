@@ -1,34 +1,36 @@
 ﻿@using NodeBaseApi.Version2
+@using System.Text.Json
+@using System.Text
 @inject HttpClient Http;
 @inject IJSRuntime JSRuntime;
 
 <div class="@($"fixed inset-0 z-50 overflow-y-auto {(IsModalOpen ? "flex" : "hidden")} items-center justify-center")" style="background-color: rgba(0, 0, 0, 0.5);">
-    <div class="relative w-full max-w-md p-4 bg-white rounded-lg shadow-lg">
+    <div class="relative w-full max-w-md p-4 rounded-lg shadow-lg dark:!bg-gray-600 bg-white">
         <!-- Modal header -->
-        <div class="flex justify-between items-center mb-4">
+        <div class="flex justify-between items-center mb-2">
             <h3 class="text-lg font-semibold">
                 Write a Review
             </h3>
-            <button type="button" @onclick="Close" class="text-gray-400 hover:text-gray-600">
-                <span class="sr-only">Close</span>
-                <!-- Insert close icon SVG here -->
+            <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-600 dark:hover:text-white" @onclick="Close">
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path></svg>
             </button>
         </div>
         <!-- Modal body -->
         <div>
-            <div class="flex space-x-1">
+            <div class="flex mb-2">
                 @for (int i = 1; i <= 5; i++)
                 {
-                    <svg @onclick="() => UpdateRating(i)" class="w-8 h-8 cursor-pointer" fill="@GetStarColor(i)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
-                        <!-- Insert star SVG path here -->
+                    int currentStar = i;
+                    <svg @onclick="() => UpdateRating(currentStar)" class="cursor-pointer" fill="@GetStarColor(i)" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" style="width: 1.6rem; height: 1.6rem;">
+                        <path d="M20.924 7.625a1.523 1.523 0 0 0-1.238-1.044l-5.051-.734-2.259-4.577a1.534 1.534 0 0 0-2.752 0L7.365 5.847l-5.051.734A1.535 1.535 0 0 0 1.463 9.2l3.656 3.563-.863 5.031a1.532 1.532 0 0 0 2.226 1.616L11 17.033l4.518 2.375a1.534 1.534 0 0 0 2.226-1.617l-.863-5.03L20.537 9.2a1.523 1.523 0 0 0 .387-1.575Z"></path>
                     </svg>
                 }
             </div>
-            <textarea @bind="userArticle.Review" rows="3" class="mt-2 w-full p-2 border rounded" placeholder="Your comment..."></textarea>
+            <textarea @bind="userArticle.Review" rows="3" class="w-full p-2 border rounded dark:!bg-gray-700 dark:text-white outline-none border-0" placeholder="Your comment..."></textarea>
         </div>
         <!-- Modal footer -->
-        <div class="flex justify-end mt-4">
-            <button @onclick="SubmitReview" class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+        <div class="flex justify-end mt-2">
+            <button @onclick="SubmitReview" class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 ">
                 Submit Review
             </button>
         </div>
@@ -36,35 +38,43 @@
 </div>
 
 @code {
-    [Parameter] public string ArticleId { get; set; }
+    [Parameter]
+    public CustomProgram customProgram { get;set; }
+
+    [CascadingParameter(Name = "CascAuth")]
+    public AuthenticationState CascAuth { get; set; }
 
     private bool IsModalOpen { get; set; }
-    private UserArticle userArticle = new UserArticle();
+    private UserArticle userArticle = new UserArticle() { Rating = 0 };
 
-    private string GetStarColor(int starNumber) => userArticle.Rating >= starNumber ? "#ffc107" : "#e4e5e9";
+    // private string GetStarColor(int starNumber) => userArticle.Rating >= starNumber ? "#ffc107" : "#d1d5db"; // #d1d5db is the hex code for gray-300
 
-    private void UpdateRating(int rating) => userArticle.Rating = rating;
-
-    public async Task OpenModal()
+    private string GetStarColor(int starNumber)
     {
-        var response = await Http.GetAsync($"api/articles/{ArticleId}");
-        if (response.IsSuccessStatusCode)
+        Console.WriteLine("------------" + starNumber + "; " + userArticle.Rating);
+
+        if (starNumber > userArticle.Rating || userArticle.Rating == null)
         {
-            var existingArticle = await response.Content.ReadFromJsonAsync<UserArticle>();
-            if (existingArticle != null && string.IsNullOrWhiteSpace(existingArticle.Review))
-            {
-                userArticle = existingArticle;
-                IsModalOpen = true;
-            }
-            else
-            {
-                await JSRuntime.InvokeVoidAsync("alert", "Review already exists for this article.");
-            }
+            Console.WriteLine("d1d5db");
+            return "#d1d5db";
         }
         else
         {
-            // Handle error response
+            Console.WriteLine("ffc107");
+            return "#ffc107";
         }
+    }
+
+    private void UpdateRating(int rating)
+    {
+        userArticle.Rating = rating;
+        Console.WriteLine(userArticle.Rating);
+    }
+
+    public async Task OpenModal()
+    {
+        IsModalOpen = true;
+        userArticle = new UserArticle();
         StateHasChanged();
     }
 
@@ -72,15 +82,40 @@
     {
         if (userArticle.Rating > 0 && !string.IsNullOrWhiteSpace(userArticle.Review))
         {
-            var response = await Http.PutAsJsonAsync("api/update-user-article", userArticle);
-            if (response.IsSuccessStatusCode)
+            try
             {
-                Close();
-                // Optionally refresh the list of articles or notify the user of success
+                if (CascAuth != null)
+                {
+                    var user = CascAuth.User;
+                    var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                    if (Guid.TryParse(userIdClaim, out Guid userId))
+                    {
+                        userArticle.ArticleId = Guid.NewGuid().ToString(); // Make sure this should really be a new Guid
+                        userArticle.UserId = userId.ToString();
+                        userArticle.IsCreator = false;
+                        userArticle.IsFavorite = false;
+
+                        // Serialize the object to JSON manually using System.Text.Json (or Newtonsoft.Json if preferred)
+                        var jsonContent = JsonSerializer.Serialize(userArticle);
+                        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+                        var response = await Http.PutAsync($"Workshop/update-user-article2/{customProgram.Id.ToString()}", content);
+                        if (response.IsSuccessStatusCode)
+                        {
+                            Close(); // Assuming 'Close' is a method to close the review form or dialog
+                        }
+                        else
+                        {
+                            // Log or handle the error response
+                            var errorResponse = await response.Content.ReadAsStringAsync();
+                            Console.WriteLine($"Error submitting review: {errorResponse}");
+                        }
+                    }
+                }
             }
-            else
+            catch (Exception ex)
             {
-                // Handle error response
+                Console.WriteLine($"Exception occurred: {ex.Message}");
             }
         }
     }

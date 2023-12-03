@@ -22,6 +22,7 @@ namespace NodeBaseApi.Version2
         public byte[]? Image { get; set; }
         public ProgramStructure ProgramStructure { get; set; }
         public DateTime? LastOpened { get; set; }
+        public bool HasReview { get; set; }
     }
 
     public class CustomProgram : ProgramObject
@@ -521,7 +522,7 @@ namespace NodeBaseApi.Version2
         public string Type { get; set; }
         public DateTime Created { get; set; } = DateTime.Now;
         public int Downloads { get; set; } = 0;
-        public int Rating { get; set; } = 0;
+        public double Rating { get; set; }
         public string Status { get; set; } = "Pending";
         public bool IsPublic { get; set; } = false;
     }

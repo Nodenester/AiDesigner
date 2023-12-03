@@ -123,6 +123,8 @@
     </div>
 </div>
 
+<AiDesigner.Client.Modals.ReviewArticle @ref="reviewModal" customProgram="selectedProgram"></AiDesigner.Client.Modals.ReviewArticle>
+
 <style>
     .box-style {
         width: 40%; /* or use w-1/3 from Tailwind directly in the HTML class attribute */
@@ -144,6 +146,8 @@
 
     public List<CustomProgram> customPrograms { get; set; }
     public List<CustomProgram> workshopPrograms { get; set; }
+
+    public AiDesigner.Client.Modals.ReviewArticle reviewModal { get; set; }
 
     JsonSerializerSettings settings = new JsonSerializerSettings
         {
@@ -272,6 +276,14 @@
                             await Task.Delay(2000);
                             isExecutionFailed = false;
                         }
+                        else if (!selectedProgram.HasReview)
+                        {
+                            Random rnd = new Random();
+                            if (rnd.Next(1, 21) == 1) // Generates a random number between 1 and 20
+                            {
+                                await reviewModal.OpenModal();
+                            }
+                        }
                     }
                     await GetTokens();
                 }
@@ -371,6 +383,10 @@
             string content = await httpResponse.Content.ReadAsStringAsync();
             workshopPrograms = JsonConvert.DeserializeObject<List<CustomProgram>>(content, settings);
             //Console.WriteLine("WPrograms: " + content);
+            // foreach (var www in workshopPrograms)
+            // {
+            //     Console.WriteLine(www.HasReview);
+            // }
         }
         else
         {
