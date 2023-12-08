@@ -135,13 +135,6 @@ namespace AiDesigner.Server.Controllers
             return Ok(article);
         }
 
-        [HttpGet("author/{authorId}/articles")]
-        public async Task<IActionResult> GetArticlesByAuthor(string authorId)
-        {
-            var articles = await _dbConnection.GetArticlesByAuthorAsync(authorId);
-            return Ok(articles);
-        }
-
         [HttpPut("update-article")]
         public async Task<IActionResult> UpdateArticle(WorkshopArticle article)
         {
@@ -427,6 +420,5 @@ namespace AiDesigner.Server.Controllers
             var articles = await _dbConnection.Get5ArticlesByAuthorAsync("14fa5960-cfeb-4cb5-8718-0df2fe41b071");
             return Ok(articles);
         }
-
     }
 }

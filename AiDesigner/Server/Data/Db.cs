@@ -414,6 +414,7 @@ namespace AiDesigner.Server.Data
 
             parameters.Add("Start", start);
             parameters.Add("End", end);
+            parameters.Add("Count", end - start);  // Assuming you want to fetch (end - start) number of rows
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
             var result = new List<WorkshopArticle>();  // Fixed initialization
@@ -431,31 +432,29 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> GetArticlesByAuthorIdAsync(string authorId)
         {
             StringBuilder query = new StringBuilder(@"
-        SELECT a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating
+        SELECT a.*, p.IsPublic, p.Image, 
+            AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating
         FROM Ludde.Workshop_Article a
         LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
         LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
         WHERE a.AuthorId = @AuthorId
         GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
-        ORDER BY a.Created DESC;"
-            );
+        ORDER BY a.Created DESC;
+    ");
 
             var parameters = new DynamicParameters();
             parameters.Add("AuthorId", authorId);
 
-            IEnumerable<WorkshopArticle> result = new List<WorkshopArticle>();
-
             try
             {
                 using SqlConnection connection = new SqlConnection(_connectionString);
-                result = await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters);
+                return await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters);
             }
             catch (Exception e)
             {
                 Console.WriteLine(e.Message);
+                return new List<WorkshopArticle>();
             }
-
-            return result;
         }
 
         //Get most downloaded articles
@@ -519,14 +518,19 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> GetMostPopularArticlesAsync()
         {
             const string query = @"
-            SELECT TOP 5 a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating, COUNT(u.ArticleId) as ReviewCount
-            FROM Ludde.Workshop_Article a
-            LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-            LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
-            WHERE a.Status = 'Accepted'
-            GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
-            ORDER BY (DATEDIFF(day, a.Created, GETDATE()) * 0.1) + (a.Downloads * 0.4) + (AVG(ISNULL(u.Rating, 0)) * 0.5) DESC
-            ";
+    SELECT TOP 5 a.*, p.IsPublic, p.Image, 
+        AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating, 
+        COUNT(u.ArticleId) as ReviewCount,
+        ((1.0 / (DATEDIFF(day, a.Created, GETDATE()) + 1) * 0.1) + 
+        (COALESCE(a.Downloads, 0) * 0.4) + 
+        (COALESCE(AVG(ISNULL(u.Rating, 0)), 0) * 0.5)) as PopularityScore
+    FROM Ludde.Workshop_Article a
+    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    WHERE a.Status = 'Accepted'
+    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
+    ORDER BY PopularityScore DESC
+    ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<WorkshopArticle>(query);
@@ -535,11 +539,13 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> GetTopDownloadedArticlesAsync()
         {
             const string query = @"
-    SELECT TOP 5 a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
+    SELECT TOP 5 a.*, p.IsPublic, p.Image, 
+        AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating 
     FROM Ludde.Workshop_Article a
     LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-    WHERE a.Status = 'Accepted'  -- Assuming you want to filter by status
-    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
+    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    WHERE a.Status = 'Accepted'
+    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
     ORDER BY a.Downloads DESC
     ";
 
@@ -558,11 +564,13 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> GetNewestArticlesAsync()
         {
             const string query = @"
-    SELECT TOP 5 a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
+    SELECT TOP 5 a.*, p.IsPublic, p.Image, 
+        AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating
     FROM Ludde.Workshop_Article a
     LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-    WHERE a.Status = 'Accepted'  -- Assuming you want to filter by status
-    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
+    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    WHERE a.Status = 'Accepted'
+    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
     ORDER BY a.Created DESC
     ";
 
@@ -581,20 +589,29 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> Get5ArticlesByAuthorAsync(string authorId)
         {
             StringBuilder query = new StringBuilder(@"
-            SELECT TOP 5 a.*, p.IsPublic, p.Image, AVG(ISNULL(u.Rating, 0)) as AverageRating
-            FROM Ludde.Workshop_Article a
-            LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-            LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
-            WHERE a.AuthorId = @AuthorId
-            GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
-            ORDER BY a.Created DESC
-            ");
+    SELECT TOP 5 a.*, p.IsPublic, p.Image, 
+        AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating
+    FROM Ludde.Workshop_Article a
+    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    WHERE a.AuthorId = @AuthorId
+    GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
+    ORDER BY a.Created DESC
+    ");
 
             var parameters = new DynamicParameters();
             parameters.Add("AuthorId", authorId);
 
-            await using SqlConnection connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters);
+            try
+            {
+                await using SqlConnection connection = new SqlConnection(_connectionString);
+                return await connection.QueryAsync<WorkshopArticle>(query.ToString(), parameters);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"Error in GetTopDownloadedArticlesAsync: {e.Message}");
+                return new List<WorkshopArticle>();
+            }
         }
         //----------------------------------------------------------------------------------------------------------
 
@@ -627,7 +644,7 @@ namespace AiDesigner.Server.Data
         {
             var query = @"
                 INSERT INTO Ludde.Workshop_Article (Id, Name, Description, SearchClass, AuthorId, AuthorName, ProgramId, ApiKey, ProgramImage, Type, Created, Downloads, Status)
-                VALUES (@Id, @Name, @Description, @SearchClass, @AuthorId, @AuthorName, @ProgramId, @ApiKey, @ProgramImage, @Type, @Created, @Downloads, 'Pending');
+                VALUES (@Id, @Name, @Description, @SearchClass, @AuthorId, @AuthorName, @ProgramId, @ApiKey, @ProgramImage, @Type, @Created, @Downloads, 'Accepted');
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -658,23 +675,12 @@ namespace AiDesigner.Server.Data
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryFirstOrDefaultAsync<WorkshopArticle>(query, new { ProgramId = programId });
         }
-        public async Task<IEnumerable<WorkshopArticle>> GetArticlesByAuthorAsync(string authorId)
-        {
-            const string query = @"
-                SELECT a.*, AVG(u.Rating) as AverageRating
-                FROM Ludde.Workshop_Article a
-                LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-                WHERE a.AuthorId = @AuthorId
-                GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status;
-            ";
-            await using SqlConnection connection = new SqlConnection(_connectionString);
-            return await connection.QueryAsync<WorkshopArticle>(query, new { AuthorId = authorId });
-        }
+
         public async Task UpdateArticleAsync(WorkshopArticle article)
         {
             var query = @"
                 UPDATE Ludde.Workshop_Article 
-                SET Name = @Name, Description = @Description, SearchClass = @SearchClass, AuthorId = @AuthorId, AuthorName = @AuthorName, ProgramId = @ProgramId, ApiKey = @ApiKey, ProgramImage = @ProgramImage, Type = @Type, Created = @Created, Downloads = @Downloads, Status = 'Pending'
+                SET Name = @Name, Description = @Description, SearchClass = @SearchClass, AuthorId = @AuthorId, AuthorName = @AuthorName, ProgramId = @ProgramId, ApiKey = @ApiKey, ProgramImage = @ProgramImage, Type = @Type, Created = @Created, Downloads = @Downloads, Status = 'Accepted'
                 WHERE Id = @Id;
             ";
 
