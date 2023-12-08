@@ -1,0 +1,101 @@
+﻿@page
+@model NameModel
+
+@{
+    ViewData["Title"] = "Manage Name";
+    ViewData["ActivePage"] = ManageNavPages.Name;
+}
+
+<div class="nameContainer">
+    <h3>@ViewData["Title"]</h3>
+    <partial name="_StatusMessage" for="StatusMessage" />
+
+    <form id="name-form" method="post">
+        <div asp-validation-summary="All" class="text-danger" role="alert"></div>
+
+        <div class="form-floating mb-3">
+            <input asp-for="Input.NewName" class="form-control" placeholder="Please enter new name." />
+            <label asp-for="Input.NewName" class="form-label"></label>
+            <span asp-validation-for="Input.NewName" class="text-danger"></span>
+        </div>
+
+        <button id="change-name-button" type="submit" asp-page-handler="ChangeName" class="profileBtn w-100">Change name</button>
+    </form>
+</div>
+
+<style>
+    .nameContainer {
+        background-color: #2b2b2b;
+        padding: 30px;
+        border-radius: 8px;
+        color: #eaeaea;
+        max-width: 600px;
+    }
+
+    h3 {
+        text-align: center;
+        margin-bottom: 25px;
+    }
+
+    .darkbg{
+        background-color: #353535 !important;
+        border:0px !important;
+        border-bottom-right-radius: 4px !important;
+        border-top-right-radius: 4px !important;
+    }
+
+    .form-control, .verificationBtn {
+        background-color: #353535;
+        color: #eaeaea;
+        border: none;
+        border-radius: 4px;
+        padding: 10px 15px;
+    }
+
+        .form-control:focus {
+            background-color: #353535;
+            box-shadow: none;
+            color: #eaeaea;
+            border: none;
+            outline: none;
+        }
+
+        .form-control:disabled {
+            background-color: #353535;
+            opacity: 0.7;
+            border: none;
+            /* Gives a slight faded effect to indicate it's disabled color: #eaeaea; */
+        }
+
+    .form-label {
+        color: #eaeaea;
+    }
+
+    .text-danger {
+        color: #ff6b6b;
+    }
+
+    .profileBtn, .verificationBtn {
+        background-color: #2ea44f;
+        border: none;
+        padding: 10px 15px;
+        font-size: 18px;
+        border-radius: 4px;
+        transition: background-color 0.3s;
+        color: #fff;
+    }
+
+        .profileBtn:hover, .verificationBtn:hover {
+            background-color: #249739;
+        }
+
+    .verificationBtn {
+        background-color: transparent;
+        text-decoration: underline;
+        margin-top: 5px;
+    }
+</style>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

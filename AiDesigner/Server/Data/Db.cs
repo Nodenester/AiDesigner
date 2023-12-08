@@ -923,7 +923,7 @@ namespace AiDesigner.Server.Data
                     BEGIN
                         INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens, LastRefill)
                         OUTPUT inserted.Tokens
-                        VALUES (NEWID(), @UserId, 0, @Today);
+                        VALUES (NEWID(), @UserId, 1000, @Today);
                     END
                     ELSE
                     BEGIN
