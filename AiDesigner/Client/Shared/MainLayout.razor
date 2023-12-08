@@ -369,7 +369,7 @@
     protected override async Task OnInitializedAsync()
     {
         Http.Timeout = TimeSpan.FromMinutes(10);
-        // NavigationManagers.LocationChanged += HandleLocationChanged;
+        //NavigationManagers.LocationChanged += HandleLocationChanged;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         await UpdatePrograms();
         await GetTokens();
@@ -605,17 +605,25 @@
         }
     }
 
-    // private void HandleLocationChanged(object sender, LocationChangedEventArgs e)
+    // private async void HandleLocationChanged(object sender, LocationChangedEventArgs e)
     // {
     //     shouldRender = true;
+
+    //     // Await the delay to ensure the UI has time to update
+    //     await Task.Delay(20);
+
     //     var uri = new Uri(e.Location);
-    //     if (uri.AbsolutePath == "/library" || uri.AbsolutePath == "/editor" || uri.AbsolutePath == "/marketplace")
+
+    //     // Checking if the new URI matches specific paths
+    //     if (uri.AbsolutePath == "/library" || uri.AbsolutePath == "/editor" || uri.AbsolutePath == "/workshop")
     //     {
     //         StateHasChanged();
-    //         return;
     //     }
-    //     StateHasChanged();
-    //     shouldRender = false;
+    //     else
+    //     {
+    //         StateHasChanged();
+    //         shouldRender = false;
+    //     }
     // }
 
     // public void Dispose()
