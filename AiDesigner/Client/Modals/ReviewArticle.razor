@@ -51,16 +51,16 @@
 
     private string GetStarColor(int starNumber)
     {
-        Console.WriteLine("------------" + starNumber + "; " + userArticle.Rating);
+        //Console.WriteLine("------------" + starNumber + "; " + userArticle.Rating);
 
         if (starNumber > userArticle.Rating || userArticle.Rating == null)
         {
-            Console.WriteLine("d1d5db");
+            //Console.WriteLine("d1d5db");
             return "#d1d5db";
         }
         else
         {
-            Console.WriteLine("ffc107");
+            //Console.WriteLine("ffc107");
             return "#ffc107";
         }
     }

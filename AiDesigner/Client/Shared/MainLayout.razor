@@ -68,7 +68,7 @@
                             }
 
                             <!-- Token Count -->
-                            <div class="bg-blue-500 dark:bg-gray-600 p-1 rounded-lg text-white mx-4 items-center">
+                            <div class="bg-green-600 dark:bg-gray-600 p-1 rounded-lg text-white mx-4 items-center">
                                 <span>Tokens: @CurrentTokens</span>
                             </div>
 
@@ -140,7 +140,7 @@
                                 @Body
                             </NotAuthorized>
                         </AuthorizeView>
-                        @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics")
+                            @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics" && Title != "chat")
                         {
                             <Footer></Footer>
                         }
@@ -374,7 +374,7 @@
         await UpdatePrograms();
         await GetTokens();
         await GetApiKeys();
-        UpdateVault();
+        await UpdateVault();
 
         // var uri = new Uri(NavigationManagers.Uri); // Get the current URL
         // if (uri.AbsolutePath == "/library" || uri.AbsolutePath == "/editor" || uri.AbsolutePath == "/marketplace")

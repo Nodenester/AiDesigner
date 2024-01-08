@@ -19,6 +19,7 @@ namespace NodeBaseApi.Version2
         public string AuthorName { get; set; }
         public bool IsPublic { get; set; }
         public bool SupportsSessions { get; set; }
+        public bool SupportsChat { get; set; } = false;
         public byte[]? Image { get; set; }
         public ProgramStructure ProgramStructure { get; set; }
         public DateTime? LastOpened { get; set; }

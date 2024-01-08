@@ -11,49 +11,64 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http
 @attribute [Authorize]
+@using Radzen
 @inject TooltipService tooltipService
+@inject NotificationService notificationService
 
-
-<div class="flex bo" style="height: 81%;">
+<div class="flex bo" style="height: 100%;">
     <!-- Select Program box -->
-    <div class="flex-shrink-0 flex flex-col dark:bg-gray-700 w-72 rounded-lg">
+    <div class="@($"flex-shrink-0 {(isSidebarActive ? "active" : "")}") flex flex-col dark:bg-gray-700 w-72">
         @if (customPrograms != null && workshopPrograms != null)
         {
-            <div class="text-center p-4 overflow-y-auto" style="height: 50%;">
-                <p class="text-lg font-semibold mb-4">Your Programs</p>
+            <div class="p-2 overflow-y-auto" style="height: 50%;">
+                <p class="text-lg font-semibold mb-4 ml-4">Your Programs</p>
                 @foreach (var program in customPrograms)
                 {
-                    <div class="mb-2 h-12">
+                    <div class="p-2 rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 @(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800")">
                         <button @ref='programButtonReferences[(program.Id, "custom")]'
                                 @onmouseenter='() => ShowTooltip(program.Id, "custom")'
                                 @onmouseleave="HideTooltip"
-                                class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
+                                class="flex items-center text-white w-full h-full"
                                 @onclick="() => SetSelectedProgram(program)">
-                            @program.Name
+                            @if (program.Image != null)
+                            {
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.Image)" class="program-image mr-2">
+                            }    
+                            <span class="ml-2">
+                                @program.Name
+                            </span>
                         </button>
                     </div>
                 }
             </div>
-            <div class="text-center p-4 overflow-y-auto" style="height: 40%;">
-                <p class="text-lg font-semibold mb-4">Vaulted Programs</p>
-                @foreach (var program in workshopPrograms)
+            <div class="p-2 overflow-y-auto" style="height: 40%;">
+                <p class="text-lg font-semibold mb-4 ml-4">Vaulted Programs</p>
+                @if (workshopArticles != null)
                 {
-                    <div class="mb-2 h-12">
-                        <button @ref='programButtonReferences[(program.Id, "")]'
-                                @onmouseenter='() => ShowTooltip(program.Id, "")'
-                                @onmouseleave="HideTooltip"
-                                class="@(selectedProgram == program ? "dark:!bg-gray-600" : "dark:!g-gray-800") hover:dark:!bg-gray-600 text-white w-full h-full p-2 rounded-lg shadow hover:shadow-lg transition"
-                                @onclick="() => SetSelectedProgram(program)">
-                            @program.Name
-                        </button>
-                    </div>
+                    @foreach (var program in workshopArticles.Where(article => article.Type == "Program"))
+                    {
+                        var isSelected = selectedProgram?.Id.ToString() == program.ProgramId;
+                        <div class="p-2 rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 @(isSelected ? "dark:!bg-gray-600" : "dark:!g-gray-800")">
+                            <button @ref='programButtonReferences[(Guid.Parse(program.ProgramId), "")]'
+                                    @onmouseenter='() => ShowTooltip(Guid.Parse(program.ProgramId), "")'
+                                    @onmouseleave="HideTooltip"
+                                    class="flex items-center text-white w-full h-full"
+                                    @onclick="() => SelectWorkshopArticle(program)">
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.ProgramImage)" class="program-image">
+                                <span class="ml-2">
+                                    @program.Name
+                               </span>
+                            </button>
+                        </div>
+                    }
                 }
             </div>
         }
+        <button class="toggle-button text-white" @onclick="ToggleSidebar">☰</button>
     </div>
-
+    <div class="w-full flex mleft">
     <!-- Input box -->
-    <div class="box-style text-center p-4 pt-2 overflow-y-auto">
+    <div class="box-style text-center p-4 pt-2 overflow-y-auto inputHeight">
         <p class="text-lg font-semibold mb-2">Program Inputs</p>
         @if (selectedProgram != null)
         {
@@ -107,7 +122,7 @@
     </div>
 
     <!-- Output box -->
-    <div class="box-style flex flex-col items-center text-center p-4 pt-2 overflow-y-auto">
+    <div class="box-style flex flex-col items-center text-center p-4 pt-2 overflow-y-auto inputHeight">
         <p class="text-lg font-semibold mb-2">Program Outputs</p>
         @if (selectedProgram != null)
         {
@@ -121,11 +136,25 @@
             </div>
         }
     </div>
+    </div>
 </div>
+
+<RadzenNotification @ref="notifyReference" />
 
 <AiDesigner.Client.Modals.ReviewArticle @ref="reviewModal" customProgram="selectedProgram"></AiDesigner.Client.Modals.ReviewArticle>
 
 <style>
+    .mleft{
+        margin-left: 16rem;
+    }
+
+    .program-image {
+        width: 2.5rem; /* Adjust size as needed */
+        height: 2.5rem; /* Adjust size as needed */
+        border-radius: 50%; /* This makes the image round */
+        object-fit: cover; /* Ensures the image covers the area without stretching */
+    }
+
     .box-style {
         width: 40%; /* or use w-1/3 from Tailwind directly in the HTML class attribute */
     }
@@ -133,6 +162,58 @@
     .item-style {
         margin-top: 0rem;
     }
+
+    .rz-growl-item
+    {
+        margin: 0rem !important;
+    }
+
+    .rz-notification-message {
+        /* Wrap words that are too long to fit on one line */
+        word-wrap: break-word;
+        /* Prevent the content from going outside the box */
+        overflow: hidden;
+        /* Add ellipsis if the text is too long to fit in the box */
+        text-overflow: ellipsis;
+        /* Make sure the notification has a fixed width or max-width if you want it to be flexible */
+        width: 22rem; /* or you can use max-width: 250px; */
+        /* Set a max height and make the content scrollable */
+        max-height: 30rem;
+        min-height: 30rem;
+        overflow-y: auto;
+        /* Ensure these styles have higher specificity */
+        z-index: 1002; /* This should be higher or equal to the notification's z-index to be effective */
+    }
+
+    /* You may also need to style the inner container if it exists */
+    .rz-growl-item-container {
+/*      max-height: 100px; Adjust as needed */
+        overflow-y: auto; /* This will add a scrollbar if the content exceeds the max-height */
+    }
+
+    /* Some extra styling for the selecter menu */
+    .flex-shrink-0 {
+        height: 100vh;
+        width: 16rem;
+        margin: 0;
+        padding: 0;
+        position: absolute;
+        top: 3.7rem;
+    }
+
+    /* If there's a global padding or margin affecting all elements, override it for the body */
+    body {
+        margin: 0;
+        padding: 0;
+    }
+
+    /* Additional styles to ensure the layout doesn't break */
+    html, body {
+        height: 100%;
+        overflow: hidden; /* Prevents scrolling if the content is larger than the screen */
+    }
+
+
 </style>
 
 @code {
@@ -142,12 +223,17 @@
     [CascadingParameter(Name = "Settokens")]
     protected EventCallback<int> SetTokens { get; set; }
 
+    [CascadingParameter(Name = "WorkshopArticles")]
+    public List<WorkshopArticle> workshopArticles { get; set; }
+
     public CustomProgram selectedProgram { get; set; }
 
     public List<CustomProgram> customPrograms { get; set; }
     public List<CustomProgram> workshopPrograms { get; set; }
 
     public AiDesigner.Client.Modals.ReviewArticle reviewModal { get; set; }
+
+    private RadzenNotification notifyReference;
 
     JsonSerializerSettings settings = new JsonSerializerSettings
         {
@@ -168,6 +254,13 @@
 
     private bool isLoading = false;
     private bool isExecutionFailed = false;
+
+    bool isSidebarActive = true;
+
+    void ToggleSidebar()
+    {
+        isSidebarActive = !isSidebarActive;
+    }
 
     private Dictionary<(Guid, string), ElementReference> programButtonReferences = new Dictionary<(Guid, string), ElementReference>();
 
@@ -265,6 +358,7 @@
                     catch (Exception ex)
                     {
                         isExecutionFailed = true;
+                        ShowErrorNotification("Error", $"Error executing program: Server is down or program is faulty");
                         Console.WriteLine($"Error executing program: {ex.Message}");
                     }
                     finally
@@ -333,6 +427,12 @@
         selectedProgram.ProgramStructure.InputValues[inputItem.Id] = inputItem.Data;
     }
 
+    private void SelectWorkshopArticle(WorkshopArticle workshopArticle)
+    {
+
+        SetSelectedProgram(workshopPrograms.Where(program => program.Id.ToString() == workshopArticle.ProgramId).First());
+    }
+
     private void SetSelectedProgram(CustomProgram customProgram)
     {
         selectedProgram = customProgram;
@@ -382,11 +482,11 @@
         {
             string content = await httpResponse.Content.ReadAsStringAsync();
             workshopPrograms = JsonConvert.DeserializeObject<List<CustomProgram>>(content, settings);
-            //Console.WriteLine("WPrograms: " + content);
-            // foreach (var www in workshopPrograms)
-            // {
-            //     Console.WriteLine(www.HasReview);
-            // }
+            Console.WriteLine("------------------------------------Test");
+            foreach (var www in workshopPrograms)
+            {
+                Console.WriteLine(www.Image.Length);
+            }
         }
         else
         {
@@ -430,5 +530,17 @@
     private void setCurrentSession(Session session)
     {
         currentSession = session;
+    }
+
+    private void ShowErrorNotification(string summary, string detail)
+    {
+        var message = new NotificationMessage
+            {
+                Severity = NotificationSeverity.Warning,
+                Summary = summary,
+                Detail = detail,
+                Duration = 5000 // Duration in milliseconds
+            };
+        notificationService.Notify(message); // Using the instance 'notificationService'
     }
 }

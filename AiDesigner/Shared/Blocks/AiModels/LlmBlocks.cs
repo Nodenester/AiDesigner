@@ -59,6 +59,30 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    public class Mixtral8x7b : Block
+    {
+        public Mixtral8x7b()
+        {
+            Id = Guid.NewGuid();
+            Name = "Mixtral 8x7b";
+            Description = "Mixtral 8x7b API";
+            Inputs = new List<Input>
+            {
+                new Input { Name = "Query", Type = Type.String, Description = "The input query for the Mixtral 8x7b API", IsRequired = true },
+                new Input { Name = "MaxNewTokens", Type = Type.Number, Description = "Maximum new tokens to be generated (Max tokens 4096)", IsRequired = false},
+                new Input { Name = "TopP", Type = Type.Number, Description = "Top P value for controlling randomness", IsRequired = false },
+                new Input { Name = "Temperature", Type = Type.Number, Description = "Temperature value for controlling creativity", IsRequired = false },
+                new Input { Name = "StopWords", Type = Type.String, IsList = true, Description = "List of words where the AI should stop generating text", IsRequired = false },
+                new Input { Name = "ReturnFullText", Type = Type.Boolean, Description = "Whether to include the input prompt in the API response", IsRequired = false }
+            };
+            Outputs = new List<Output>
+            {
+                new Output { Name = "ApiResponse", Type = Type.String, Description = "The API response from Mixtral 8x7b" }
+            };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
 
     public class Llama213b : Block
     {

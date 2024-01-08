@@ -138,14 +138,14 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         {
             Id = Guid.NewGuid();
             Name = "Text Reader";
-            Description = "This block reads text from images using the OCR-Donut-CORD model.";
+            Description = "This block reads text from images using the OCR-Donut-CORD model (it is bad so use a llm to predict what it actually means).";
             Inputs = new List<Input>
         {
             new Input { Name = "ImageData", Type = Type.Picture, IsList = false, Description = "Image data for text extraction" }
         };
             Outputs = new List<Output>
         {
-            new Output { Name = "ExtractedText", Type = Type.String, IsList = false, Description = "Extracted text from the image" }
+            new Output { Name = "ExtractedText", Type = Type.String, IsList = true, Description = "Extracted text from the image" }
         };
         }
 

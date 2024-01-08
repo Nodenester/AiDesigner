@@ -201,6 +201,8 @@
 
                 var allCalls = JsonConvert.DeserializeObject<List<Call>>(responseBody);
 
+                if (allCalls == null) { return; };
+
                 allCalls.ForEach(call =>
                 {
                     if (call.StartTime.HasValue)
