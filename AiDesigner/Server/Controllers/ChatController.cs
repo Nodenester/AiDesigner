@@ -180,8 +180,8 @@ namespace NodeBaseApi.Controllers
         {
             try
             {
-                var apiKeys = await _dbConnection.GetLatest100CallsByUserIdAsync(userId);
-                return Ok(apiKeys);
+                var calls = await _dbConnection.GetLatest100CallsByUserIdAsync(userId);
+                return Ok(calls);
             }
             catch (Exception ex)
             {
@@ -192,12 +192,12 @@ namespace NodeBaseApi.Controllers
 
         // GET api/Chat/Call/Getlatest/{numCalls}
         [HttpGet("Call/Getlatest/{numCalls}")]
-        public async Task<ActionResult<IEnumerable<Call>>> GetLatest100Calls(int numCalls)
+        public async Task<ActionResult<IEnumerable<Call>>> GetLatestCalls(int numCalls)
         {
             try
             {
-                var apiKeys = await _dbConnection.GetLatestCallsAsync(numCalls);
-                return Ok(apiKeys);
+                var calls = await _dbConnection.GetLatestCallsAsync(numCalls);
+                return Ok(calls);
             }
             catch (Exception ex)
             {

@@ -20,7 +20,6 @@ namespace AiDesigner.Server.Data
     {
         private readonly string _connectionString;
         private readonly JsonSerializerSettings _jsonSerializerSettings;
-
         public DBConnection(string connectionString)
         {
             _connectionString = connectionString;
@@ -564,7 +563,7 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<WorkshopArticle>> GetNewestArticlesAsync()
         {
             const string query = @"
-    SELECT TOP 5 a.*, p.IsPublic, p.Image, 
+    SELECT TOP 15 a.*, p.IsPublic, p.Image, 
         AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating
     FROM Ludde.Workshop_Article a
     LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
@@ -1002,37 +1001,49 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<Call>> GetLatest100CallsByUserIdAsync(string userId)
         {
             var query = @"
-                WITH UserCalls AS (
-                    SELECT
-                        c.ProgramId,
-                        c.[Api/UserId] AS ApiUserId,                        
-                        c.IsTest,
-                        c.StartTime,
-                        c.EndTime,
-                        c.Cost,
-                        ROW_NUMBER() OVER (ORDER BY c.StartTime DESC) as RowNum
-                    FROM
-                        Ludde.Calls c
-                    JOIN
-                        Ludde.ApiKeys ak
-                    ON
-                        c.[Api/UserId] = ak.UserId
-                    WHERE
-                        ak.UserId = @UserId
-                )
-                SELECT
-                    *
-                FROM
-                    UserCalls
-                WHERE
-                    RowNum <= 125;
+WITH CombinedCalls AS (
+    SELECT
+        ProgramId,
+        [Api/UserId] AS ApiUserId,                        
+        IsTest,
+        StartTime,
+        EndTime,
+        Cost
+    FROM
+        Ludde.Calls
+    WHERE
+        [Api/UserId] = @UserId
+
+    UNION ALL
+
+    SELECT
+        c.ProgramId,
+        c.[Api/UserId] AS UserId,                        
+        c.IsTest,
+        c.StartTime,
+        c.EndTime,
+        c.Cost
+    FROM
+        Ludde.Calls c
+    INNER JOIN
+        Ludde.ApiKeys ak ON c.[Api/UserId] = ak.UserId
+    WHERE
+        ak.UserId = @UserId
+)
+SELECT TOP 100
+    *
+FROM
+    CombinedCalls
+ORDER BY
+    StartTime DESC;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
 
             try
             {
-                return await connection.QueryAsync<Call>(query, new { UserId = userId });
+                var retur = await connection.QueryAsync<Call>(query, new { UserId = userId });
+                return retur;
             }
             catch (Exception ex)
             {

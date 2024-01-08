@@ -1,0 +1,207 @@
+﻿/* Add media queries for different screen sizes */
+@media screen and (min-width: 768px) {
+    .flex-shrink-0 {
+        left: 0 !important;
+        overflow-y: auto;
+    }
+
+    .toggle-button {
+        display: none;
+    }
+}
+
+/* Tablets and smaller laptops */
+/*@media screen and (max-width: 1024px) {
+    .about-us-container {
+        flex-direction: column;*/ /* Stack elements vertically */
+        /*align-items: center;*/ /* Center items */
+        /*text-align: center;*/ /* Center text */
+    /*}
+
+    .about-us-title h1 {
+        font-size: 40px;*/ /* Adjust font size */
+        /*margin-bottom: 1rem;*/ /* Add space below the title */
+    /*}
+
+    .about-us-text {
+        position: absolute;
+        left: 50%;
+        top: calc(50% - 1.25rem);*/ /* 0.625rem is half the font-size, this makes the first line vertically centered */
+        /*font-size: 25px;
+    }
+
+    .Start-Text {
+        font-size: 4rem;*/ /* Smaller font size */
+        /*padding-bottom: 4rem;
+    }
+
+    .Section {
+        flex-direction: column;*/ /* Stack elements vertically */
+    /*}
+
+    .ImageRightTextLeft .Text, .ImageLeftTextRight .Text {
+        order: 2;*/ /* Reorder text and image */
+    /*}
+
+    .ImageRightTextLeft .Image, .ImageLeftTextRight .Image {
+        order: 1;
+        padding: 1rem;
+    }*/
+
+    /* Chat page */
+    /*.flex-shrink-0 {
+        left: 0 !important;
+    }
+}*/
+
+/* Mobile devices */
+@media screen and (max-width: 1024px) {
+
+    .pricing-container {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: center; /* Center items */
+        text-align: center; /* Center text */
+        width: 100%; /* Use full width */
+    }
+
+    .pricing-title h1 {
+        font-size: 1.8rem; /* Adjust font size for mobile */
+        margin-bottom: 1rem; /* Space below the title */
+    }
+
+    .pricing-text {
+        position: static !important; /* Remove absolute positioning */
+        padding: 0 1rem; /* Add padding for better readability */
+    }
+
+    .about-us-container {
+        flex-direction: column; /* Stack elements vertically */
+        align-items: center; /* Center items */
+        text-align: center; /* Center text */
+        width: 100%; /* Use full width */
+    }
+
+    .about-us-title h1 {
+        font-size: 1.8rem; /* Adjust font size for mobile */
+        margin-bottom: 1rem; /* Space below the title */
+    }
+
+    .about-us-text {
+        position: static !important; /* Remove absolute positioning */
+        padding: 0 1rem; /* Add padding for better readability */
+    }
+
+
+    .Section {
+        flex-direction: column;
+    }
+
+    .ImageRightTextLeft .Text, .ImageLeftTextRight .Text {
+        order: 2;
+        padding: 1rem;
+        font-size: 1.5rem;
+    }
+
+    .ImageRightTextLeft .Image, .ImageLeftTextRight .Image {
+        order: 1;
+        padding: 1rem;
+    }
+
+    .Image img {
+        width: 90%;
+    }
+
+    /* Chat page */
+
+    .flex-shrink-0 {
+        position: fixed;
+        top: 0;
+        left: -16rem !important;
+        width: 16rem !important;
+        height: 100vh;
+        /*        overflow-y: auto;*/
+        transition: left 0.3s;
+        z-index: 1001;
+    }
+
+        /* When the sidebar is active (you'll toggle this class using Blazor) */
+        .flex-shrink-0.active {
+            left: 0 !important;
+        }
+
+    /* Toggle Button */
+    .toggle-button {
+        position: absolute;
+        top: 4%;
+        left: 115%;
+        transform: translate(-100%, -50%);
+        z-index: 1002;
+        font-size: 2rem;
+    }
+
+    /* Adjust the main container when the sidebar is active */
+    .bo.active {
+        margin-left: 16rem;
+    }
+
+    /* Other styles */
+    .dropdown-sidebar {
+        display: none;
+    }
+
+    /* Adjust the main container to stack elements vertically */
+    .flex.bo {
+        flex-direction: column;
+    }
+
+    /* Adjust the box styles for input and output sections to use almost full width */
+    .box-style {
+        width: 95% !important;
+        margin: 0 auto;
+    }
+
+    /* Adjust the program image size */
+    .program-image {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+
+    .mleft {
+        display: flex;
+        flex-direction: column;
+        margin-left: 0 !important;
+    }
+
+    .flex.flex-col.items-center.h-full .bg-gray-500 {
+        display: none !important;
+    }
+
+    .inputHeight {
+        min-height: 15rem;
+    }
+
+    /*Pricing*/
+        .specific-pricing-container {
+        flex-direction: column; /* Stack children vertically */
+        min-height: 30rem;
+    }
+
+    .specific-pricing-right {
+        width: 100%; 
+        margin-bottom: 2rem; 
+        top: 0% !important;
+    }
+
+        .specific-pricing-right p {
+            top: 0% !important;
+        }
+
+        .specific-pricing-right ul {
+            top: 0% !important;
+        }
+
+    .specific-pricing-list ul {
+        padding-left: 1.33rem; /* Adjust the padding for better readability */
+        padding-top: 4.5rem;
+    }
+}

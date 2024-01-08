@@ -3,14 +3,11 @@
 <!-- Add a container to hold your pricing content -->
 <div style="display: flex; justify-content: center; width: 100%;">
     <div class="pricing-container">
-        <!-- Add a large title on the top-left -->
         <div class="pricing-title">
             <h1>Pricing</h1>
         </div>
-
-        <!-- Add a short text at the top-middle -->
         <div class="pricing-text">
-            <p>Discover affordable AI with our flexible, usage-based pricing. Only pay for what you use, and scale your projects without scaling your costs. Currently, everyone gets a free 1000 tokens to use per day. Payment integration is coming soon!</p>
+            <p>Explore our flexible pricing options tailored to your needs. Choose between purchasing tokens for on-demand usage or opting for a monthly subscription for continuous access. Our system is designed to provide you with the most cost-effective solution, whether you're managing a small project or scaling up. Payment integration is coming soon!</p>
         </div>
     </div>
 </div>
@@ -18,7 +15,7 @@
 <!-- New Section: Image on the Right, Text on the Left -->
 <div class="Section ImageRightTextLeft">
     <div class="Text">
-        <h2 style="font-size: 2.2rem">Flexible, Node-Based Pricing</h2>
+        <h2 style="font-size: 2.2rem !important">Flexible, Node-Based Pricing</h2>
         <p>Experience true scalability with our unique pricing model. You only pay for the nodes you use, allowing you to optimize costs while expanding your AI capabilities. Start small, scale big—without breaking the bank. Currently only openai models are integrated so youll have to provide your own apikey.</p>
     </div>
     <div class="Image">
@@ -26,117 +23,20 @@
     </div>
 </div>
 
-@* <!-- New Section: specific pricing ai modals -->
-<div style="display: flex; justify-content: center; width: 100%;">
-    <div class="specific-pricing-container">
-        <!-- Create a flexbox layout -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <!-- Large title on the left -->
-            <div class="specific-pricing-title">
-                <h1>Language models</h1>
-            </div>
+<!-- New Section: Subscription pricing section -->
+<AiDesigner.Client.Components.Payment.SubscriptionPricing></AiDesigner.Client.Components.Payment.SubscriptionPricing>
 
-            <!-- Right-side content -->
-            <div class="specific-pricing-right">
-                <!-- Smaller text -->
-                <div class="specific-pricing-text">
-                    <p>Efficiently manage your costs with our node-based pricing for AI Language models.</p>
-                </div>
-
-                <!-- List of pricing -->
-                <div class="specific-pricing-list">
-                    <ul>
-                        <li>Simple node: 1 tokens per word</li>
-                        <li>Medium node: 3 tokens per word</li>
-                        <li>Complex node: 6 tokens per word</li>
-                        <li>Gpt 3.5 node: 5 tokens per word</li>
-                        <li>Gpt 4 node: 10 tokens per word</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<br />
-<hr style="width: 83%; margin-left: auto; margin-right: auto;">
-
-<!-- New Section: specific pricing ai modals -->
-<div style="display: flex; justify-content: center; width: 100%;">
-    <div class="specific-pricing-container">
-        <!-- Create a flexbox layout -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <!-- Large title on the left -->
-            <div class="specific-pricing-title">
-                <h1>Image models</h1>
-            </div>
-
-            <!-- Right-side content -->
-            <div class="specific-pricing-right">
-                <!-- Smaller text -->
-                <div class="specific-pricing-text">
-                    <p>Efficiently manage your costs with our node-based pricing for AI Image models.</p>
-                </div>
-
-                <!-- List of pricing -->
-                <div class="specific-pricing-list">
-                    <ul>
-                        <li>Simple generation node: 20 tokens per image</li>
-                        <li>Medium generation node: 40 tokens per image</li>
-                        <li>Complex generation node: 80 tokens per image</li>
-                        <li>Simple detection node: 15 tokens per image</li>
-                        <li>Strong detection node: 30 tokens per image</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<br />
-<hr style="width: 83%; margin-left: auto; margin-right: auto;">
-
-<!-- New Section: specific pricing ai modals -->
-<div style="display: flex; justify-content: center; width: 100%;">
-    <div class="specific-pricing-container">
-        <!-- Create a flexbox layout -->
-        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-            <!-- Large title on the left -->
-            <div class="specific-pricing-title">
-                <h1>Sound models</h1>
-            </div>
-
-            <!-- Right-side content -->
-            <div class="specific-pricing-right">
-                <!-- Smaller text -->
-                <div class="specific-pricing-text">
-                    <p>Efficiently manage your costs with our node-based pricing for AI Sound models.</p>
-                </div>
-
-                <!-- List of pricing -->
-                <div class="specific-pricing-list">
-                    <ul>
-                        <li>Simple generation node: 4 tokens per second</li>
-                        <li>Medium generation node: 8 tokens per second</li>
-                        <li>Complex generation node: 16 tokens per second</li>
-                        <li>Simple detection node: 2 tokens per second</li>
-                        <li>Strong detection node: 5 tokens per second</li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </div>
-</div> *@
+<AiDesigner.Client.Components.Payment.PricingDetails></AiDesigner.Client.Components.Payment.PricingDetails>
 
 <style>
-.pricing-container {
+    .pricing-container {
         width: 83%;
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        margin-top: 20px;
+        margin-top: 1.2rem;
         position: relative;
-        margin-bottom: 6rem;
+        margin-bottom: 14rem;
     }
 
     .pricing-title h1 {
@@ -185,7 +85,7 @@
         justify-content: flex-start;
         align-items: center;
         margin-top: 20px;
-        margin-bottom: 12rem;
+        margin-bottom: 16rem;
         position: relative;
     }
 
