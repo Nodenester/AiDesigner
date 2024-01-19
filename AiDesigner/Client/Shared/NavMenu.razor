@@ -1,4 +1,4 @@
-﻿<div class="text-lg top-row px-3 py-2 bg-white dark:!bg-gray-800 flex items-center justify-center">
+﻿<div class="text-lg top-row px-3 py-2 !bg-gray-100 dark:!bg-gray-800 flex items-center justify-center">
     <div class="container mx-auto sm:px-4">
         <a class="text-gray-800 dark:text-white font-bold no-underline" href="">NodeNestor</a>
         
@@ -12,34 +12,34 @@
 <div class="nav-scrollable bg-gray-100 dark:!bg-gray-700">
     <nav class="">
         <div class="nav-item px-3 py-2">
-            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:text-white dark:hover:!bg-gray-600" href="home" Match="NavLinkMatch.All">
+            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:!text-white text-black hover:!bg-white dark:hover:!bg-gray-600" href="home" Match="NavLinkMatch.All">
                 @* <span class="oi oi-home" aria-hidden="true"></span> *@ Home
             </NavLink>
         </div>
         <div class="nav-item px-3 py-2">
-            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:text-white dark:hover:!bg-gray-600" href="library">
+            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:!text-white text-black hover:!bg-white dark:hover:!bg-gray-600" href="library">
                @* <span class="oi oi-plus" aria-hidden="true"></span> *@ Library
             </NavLink>
         </div>
         <div class="nav-item px-3 py-2">
-            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:text-white dark:hover:!bg-gray-600" href="statistics">
+            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:!text-white text-black hover:!bg-white dark:hover:!bg-gray-600" href="statistics">
                 @* <span class="oi oi-plus" aria-hidden="true"></span> *@ Statistics
             </NavLink>
         </div>
         <div class="nav-item px-3 py-2">
-            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:text-white dark:hover:!bg-gray-600" href="workshop">
+            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:!text-white text-black hover:!bg-white dark:hover:!bg-gray-600" href="workshop">
                 @* <span class="oi oi-list-rich" aria-hidden="true"></span> *@ Workshop
             </NavLink>
         </div>
         <div class="nav-item px-3 py-2">
-            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:text-white dark:hover:!bg-gray-600" href="documentation/introduction/overview">
+            <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:!text-white text-black hover:!bg-white dark:hover:!bg-gray-600" href="documentation/introduction/overview">
                 @* <span class="oi oi-list-rich" aria-hidden="true"></span> *@ Docs
             </NavLink>
         </div>
         <AuthorizeView Roles="Administrator">
             <Authorized>
                 <div class="nav-item px-3 py-2">
-                    <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:text-white dark:hover:!bg-gray-600" href="Admin-Page">
+                    <NavLink class="text-lg inline-block py-1 px-4 no-underline dark:text-white text-black dark:hover:!bg-gray-600" href="Admin-Page">
                         Admin page
                     </NavLink>
                 </div>
@@ -51,7 +51,7 @@
 <style>
     /* Normal theme */
     .active {
-        background-color: #353535; /* Dark Blue */
+        background-color: white !important; /* Dark Blue */
         color: #000000; /* White Text */
     }
 

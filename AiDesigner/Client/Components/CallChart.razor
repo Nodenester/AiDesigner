@@ -16,17 +16,17 @@
                 <div style="display: flex; gap: 0.5rem;" class="w-1/2">
                     <Dropdown @ref="dropdown" Selected="@SelectedApi" width="w-48">
 @*                         <button @onclick="@(() => SelectOption(new ApiKey{Name = "All" }))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
- *@                        <button @onclick="@(() => SelectOption(new ApiKey{Name = "Account" }))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "Account" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Account</button>
+                        *@                        <button @onclick="@(() => SelectOption(new ApiKey{Name = "Account" }))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == "Account" ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">Account</button>
                         @foreach (var apiKey in ApiKeys)
                         {
-                            <button @onclick="@(() => SelectOption(apiKey))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == apiKey.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@apiKey.Name</button>
+                            <button @onclick="@(() => SelectOption(apiKey))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedApi == apiKey.Name ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">@apiKey.Name</button>
                         }
                     </Dropdown>
                     <Dropdown @ref="programdropdown" Selected="@SelectedProgram" width="w-48">
-                        <button @onclick="@(() => SelectProgram(new CustomProgram{Name = "All"}))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == "All" ? "bg-gray-600" : "") dark:hover:bg-gray-600">All</button>
+                        <button @onclick="@(() => SelectProgram(new CustomProgram{Name = "All"}))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == "All" ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">All</button>
                         @foreach (var eap in Programs)
                         {
-                            <button @onclick="@(() => SelectProgram(eap))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == eap.Name ? "bg-gray-600" : "") dark:hover:bg-gray-600">@eap.Name</button>
+                            <button @onclick="@(() => SelectProgram(eap))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedProgram == eap.Name ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">@eap.Name</button>
                         }
                     </Dropdown>
                 </div>
