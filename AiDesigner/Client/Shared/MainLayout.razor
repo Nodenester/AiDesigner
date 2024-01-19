@@ -32,10 +32,10 @@
                 }
                 <main class="flex-1 flex flex-col">
 
-                    <div class="flex">
+                    <div class="flex bg-gray-100">
                         @if(Title == "editor")
                         {
-                            <div class="text-lg top-row px-3 py-2 bg-white dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
+                            <div class="text-lg top-row px-3 py-2 dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
                                 <div class="container mx-auto sm:px-4">
                                     <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">NodeNestor</a>
                                 </div>
@@ -46,7 +46,7 @@
                         @if (Title != "home" && Title != "library" && Title != "editor" && Title != "statistics" && !Title.Contains("documentation"))
                         {
 
-                            <div class="text-lg top-row px-3 py-2 bg-white dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
+                            <div class="text-lg top-row px-3 py-2 dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
                                 <div class="container mx-auto sm:px-4">
                                     <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">NodeNestor</a>
                                 </div>
@@ -59,7 +59,7 @@
                             <TopNavMenu />
                         }
 
-                        <div style="display: flex; justify-content: flex-end; align-items: center; height: 100%;" class="top-row auth bg-white dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow">
+                        <div style="display: flex; justify-content: flex-end; align-items: center; height: 100%;" class="top-row auth dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow">
 
                             <!-- This is your conditional content for tutorials. -->
                             @if (CurrentTutorial != null)
@@ -140,7 +140,7 @@
                                 @Body
                             </NotAuthorized>
                         </AuthorizeView>
-                            @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics" && Title != "chat")
+                        @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics" && Title != "chat")
                         {
                             <Footer></Footer>
                         }
@@ -216,13 +216,13 @@
     }
 
         #menu li:hover {
-            background-color: #b3b3b3; /* Lighter Gray */
+            background-color: white; /* Lighter Gray */
             color: #000; /* Black Text */
         }
 
     #menu .selected {
-        background-color: #004080; /* Dark Blue */
-        color: #fff; /* White Text */
+        background-color: white; /* Dark Blue */
+        color: #000; /* White Text */
     }
 
     .dark #menu .selected {
