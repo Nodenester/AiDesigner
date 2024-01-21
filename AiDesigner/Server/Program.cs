@@ -5,9 +5,10 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Identity;
 using System.IdentityModel.Tokens.Jwt;
+using Google.Protobuf.WellKnownTypes;
+using Microsoft.AspNetCore.Components.Web;
 
 var builder = WebApplication.CreateBuilder(args);
-
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -25,6 +26,10 @@ builder.Services.AddIdentityServer()
         opt.ApiResources.Single().UserClaims.Add("role");
     });
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
+
+builder.Services.AddRazorComponents()
+    .AddInteractiveWebAssemblyComponents();
+
 
 //builder.Services.AddIdentityServer()
 //    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
@@ -54,17 +59,19 @@ else
 
 app.UseHttpsRedirection();
 
-app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
 
 app.UseIdentityServer();
 app.UseAuthorization();
+app.UseAntiforgery();
 
 
 app.MapRazorPages();
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+app.MapRazorComponents<AiDesigner.Server.App>()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(AiDesigner.Client._Imports).Assembly);
 
 app.Run();
