@@ -1,11 +1,12 @@
-﻿@page "/PaymentOptions"
+﻿@page "/paymentoptions"
+@using NodeBaseApi.Version2
 @inject HttpClient Http
-@inject JSRuntime JSRuntime
+@inject IJSRuntime JSRuntime
 
 <div class="dark:!bg-gray-600 bg-white">
     <div class="container px-6 py-8 mx-auto">
-        <div class="flex flex-col items-center justify-center space-y-8 lg:-mx-4 lg:flex-row lg:items-stretch lg:space-y-0">
-            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
+        <div class="flex flex-col items-center justify-center space-y-8 lg:-mx-4 lg:flex-row lg:items-stretch lg:space-y-0"
+            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white rounded-lg lg:mx-4 @(wallet.SubscriptionTier == 0 ? "border-4 border-green-500" : "border-2 border-gray-200") dark:!bg-gray-800">
                 <div class="flex-shrink-0">
                     <h2 class="inline-flex items-center justify-center px-2 font-semibold tracking-tight text-green-600 uppercase rounded-lg bg-gray-50 dark:bg-gray-700">
                         Testing
@@ -18,7 +19,7 @@
                 </div>
                 <ul class="flex-1 space-y-4">
                     <li class="text-gray-500 dark:text-gray-400">
-                        Up 1000 tokens per day
+                        Up 500 tokens per day
                     </li>
                     <li class="text-gray-500 dark:text-gray-400">
                         unlimited projects
@@ -33,7 +34,7 @@
                 </button>
             </div>
 
-            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
+            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white rounded-lg lg:mx-4 @(wallet.SubscriptionTier == 1 ? "border-4 border-green-500" : "border-2 border-gray-200") dark:!bg-gray-800 dark:border-gray-700">
                 <div class="flex-shrink-0">
                     <h2 class="inline-flex items-center justify-center px-2 font-semibold tracking-tight text-green-600 uppercase rounded-lg bg-gray-50 dark:bg-gray-700">
                         Casual
@@ -59,12 +60,12 @@
                     </li>
                 </ul>
 
-                <button class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
+                <button @onclick="() => SubscribeTokens(2000)" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
                     Start subscription
                 </button>
             </div>
 
-            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
+            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white rounded-lg lg:mx-4 @(wallet.SubscriptionTier == 2 ? "border-4 border-green-500" : "border-2 border-gray-200") dark:!bg-gray-800 dark:border-gray-700">
                 <div class="flex-shrink-0">
                     <h2 class="inline-flex items-center justify-center px-2 font-semibold tracking-tight text-green-600 uppercase rounded-lg bg-gray-50 dark:bg-gray-700">
                         Profesional
@@ -90,7 +91,7 @@
                     </li>
                 </ul>
 
-                <button class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
+                <button @onclick="() => SubscribeTokens(8000)" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
                     Start subscription
                 </button>
             </div>
@@ -98,9 +99,6 @@
     </div>
 
     <div class="container px-6 py-8 mx-auto">
-        <h2 class="text-2xl font-bold text-center text-gray-800 uppercase dark:text-gray-100">
-            One-Time Token Purchase
-        </h2>
         <div class="flex flex-col items-center justify-center space-y-8 lg:-mx-4 lg:flex-row lg:items-stretch lg:space-y-0">
             <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
                 <div class="flex-shrink-0">
@@ -133,7 +131,7 @@
             <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
                 <div class="flex-shrink-0">
                     <span class="pt-2 text-4xl font-bold text-gray-800 uppercase dark:text-gray-100">
-                        24000 Tokens
+                        80000 Tokens
                     </span>
                     <span class="text-gray-500 dark:text-gray-400">
                         for $19,99
@@ -159,10 +157,22 @@
 </style>
 
 @code {
+    [CascadingParameter(Name = "Wallet")]
+    public Wallet wallet { get; set; }
+
     private async Task PurchaseTokens(int tokenAmount)
     {
         // Call the server endpoint with the token amount to create a Stripe session
         var response = await Http.PostAsJsonAsync("your_api_endpoint/create-stripe-payment-session", new { TokenAmount = tokenAmount });
+        var sessionId = await response.Content.ReadAsStringAsync();
+
+        // JS interop to redirect to Stripe checkout
+        await JSRuntime.InvokeVoidAsync("redirectToStripe", sessionId);
+    }
+
+    private async Task SubscribeTokens(int tokenAmount)
+    {
+        var response = await Http.PostAsJsonAsync("your_api_endpoint/create-subscription-session", new { TokenAmount = tokenAmount });
         var sessionId = await response.Content.ReadAsStringAsync();
 
         // JS interop to redirect to Stripe checkout

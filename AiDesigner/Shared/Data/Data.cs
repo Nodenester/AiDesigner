@@ -624,5 +624,13 @@ namespace NodeBaseApi.Version2
     {
         public DisconnectedInputException(string message) : base(message) { }
     }
+
+    public class Wallet
+    {
+        public int Tokens { get; set; }
+        public int BoughtTokens { get; set; }
+        public int SubscriptionTier { get; set; }
+    }
+
 }
 

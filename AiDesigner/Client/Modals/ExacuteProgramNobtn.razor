@@ -97,7 +97,7 @@
     public AuthenticationState CascAuth { get; set; }
 
     [CascadingParameter(Name = "Settokens")]
-    protected EventCallback<int> SetTokens { get; set; }
+    protected EventCallback<Wallet> SetTokens { get; set; }
 
     List<object> ProgramOutput { get; set; } = new List<object>();
 
@@ -232,7 +232,7 @@
 
                     if (response.IsSuccessStatusCode)
                     {
-                        await SetTokens.InvokeAsync(await response.Content.ReadFromJsonAsync<int>());
+                        await SetTokens.InvokeAsync(await response.Content.ReadFromJsonAsync<Wallet>());
                     }
                 }
                 catch (HttpRequestException ex)

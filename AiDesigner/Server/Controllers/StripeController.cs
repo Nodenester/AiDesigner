@@ -1,17 +1,8 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Security.Claims;
-using System.Text.Json;
 using System.Threading.Tasks;
-using AiDesigner.Server.Data;
-using AiDesigner.Shared.Blocks;
-using AiDesigner.Shared.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using NodeBaseApi.Version2;
 using Stripe.Checkout;
 
 namespace NodeBaseApi.StripeController
@@ -22,27 +13,29 @@ namespace NodeBaseApi.StripeController
     public class StripeController : ControllerBase
     {
         [HttpPost("create-stripe-session")]
-        public async Task<IActionResult> CreateStripeSession()
+        public async Task<IActionResult> CreateStripeSession([FromBody] TokenRequest request)
         {
+            int totalPrice = CalculatePrice(request.TokenAmount);
+
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string> { "card" },
                 LineItems = new List<SessionLineItemOptions>
-        {
-            new SessionLineItemOptions
-            {
-                PriceData = new SessionLineItemPriceDataOptions
                 {
-                    UnitAmount = 2000, // price in cents
-                    Currency = "usd",
-                    ProductData = new SessionLineItemPriceDataProductDataOptions
+                    new SessionLineItemOptions
                     {
-                        Name = "T-shirt",
+                        PriceData = new SessionLineItemPriceDataOptions
+                        {
+                            UnitAmount = totalPrice,
+                            Currency = "usd",
+                            ProductData = new SessionLineItemPriceDataProductDataOptions
+                            {
+                                Name = "Token Purchase",
+                            },
+                        },
+                        Quantity = 1,
                     },
                 },
-                Quantity = 1,
-            },
-        },
                 Mode = "payment",
                 SuccessUrl = "https://example.com/success",
                 CancelUrl = "https://example.com/cancel",
@@ -55,22 +48,24 @@ namespace NodeBaseApi.StripeController
         }
 
         [HttpPost("create-subscription-session")]
-        public async Task<IActionResult> CreateSubscriptionSession()
+        public async Task<IActionResult> CreateSubscriptionSession([FromBody] TokenRequest request)
         {
+            int totalPrice = CalculateSubPrice(request.TokenAmount);
+
             var options = new SessionCreateOptions
             {
                 PaymentMethodTypes = new List<string> { "card" },
                 LineItems = new List<SessionLineItemOptions>
-        {
-            new SessionLineItemOptions
-            {
-                Price = "price_YOUR_SUBSCRIPTION_PRICE_ID", // Replace with your Stripe price ID
-                Quantity = 1,
-            },
-        },
+                {
+                    new SessionLineItemOptions
+                    {
+                        Price = $"price_{totalPrice}", // Replace with your Stripe price ID
+                        Quantity = 1,
+                    },
+                },
                 Mode = "subscription",
-                SuccessUrl = "https://example.com/success", // Replace with your success URL
-                CancelUrl = "https://example.com/cancel", // Replace with your cancel URL
+                SuccessUrl = "https://example.com/success",
+                CancelUrl = "https://example.com/cancel",
             };
 
             var service = new SessionService();
@@ -78,5 +73,38 @@ namespace NodeBaseApi.StripeController
 
             return Ok(new { SessionId = session.Id });
         }
+
+        private int CalculatePrice(int tokenAmount)
+        {
+            switch (tokenAmount)
+            {
+                case 24000:
+                    return 599; // price in cents for $5.99
+                case 40000:
+                    return 999; // price in cents for $9.99
+                case 80000:
+                    return 1999; // price in cents for $19.99
+                default:
+                    throw new ArgumentException("Invalid token amount");
+            }
+        }
+
+        private int CalculateSubPrice(int tokenAmount)
+        {
+            switch (tokenAmount)
+            {
+                case 2000:
+                    return 999; // price in cents for $9.99
+                case 8000:
+                    return 2999; // price in cents for $29.99
+                default:
+                    throw new ArgumentException("Invalid token amount");
+            }
+        }
+    }
+
+    public class TokenRequest
+    {
+        public int TokenAmount { get; set; }
     }
 }

@@ -131,9 +131,8 @@ namespace NodeBaseApi.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception details
+                // Log and handle the exception
                 Console.WriteLine(ex);
-                // Return a 500 status code
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
