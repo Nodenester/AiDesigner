@@ -911,33 +911,67 @@ namespace AiDesigner.Server.Data
         }
 
         //Token handeling
-        public async Task<int> EnsureWalletAndRetrieveTokensAsync(Guid userId)
+        public async Task<Wallet> EnsureWalletAndRetrieveTokensAsync(Guid userId)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
                     DECLARE @Today DATE = CAST(GETDATE() AS DATE);
+                    DECLARE @TokensToAdd INT;
+
+                    SELECT @TokensToAdd = CASE SubscriptionTier
+                        WHEN 0 THEN 500
+                        WHEN 1 THEN 2000
+                        WHEN 2 THEN 8000
+                        ELSE 500 
+                    END FROM Ludde.TokenWallet WHERE UserId = @UserId;
 
                     IF NOT EXISTS (SELECT 1 FROM Ludde.TokenWallet WHERE UserId = @UserId)
                     BEGIN
-                        INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens, LastRefill)
-                        OUTPUT inserted.Tokens
-                        VALUES (NEWID(), @UserId, 1000, @Today);
+                        INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens, LastRefill, BoughtTokens, SubscriptionTier)
+                        OUTPUT inserted.Tokens, inserted.BoughtTokens
+                        VALUES (NEWID(), @UserId, @TokensToAdd, @Today, 0, 0);
                     END
                     ELSE
                     BEGIN
                         UPDATE Ludde.TokenWallet
-                        SET Tokens = 1000, LastRefill = @Today
-                        WHERE UserId = @UserId AND LastRefill <> @Today AND Tokens < 1000;
-    
-                        SELECT Tokens
+                        SET Tokens = @TokensToAdd, LastRefill = @Today
+                        WHERE UserId = @UserId AND LastRefill <> @Today;
+
+                        SELECT Tokens, BoughtTokens, SubscriptionTier
                         FROM Ludde.TokenWallet
                         WHERE UserId = @UserId;
                     END
                 ";
-                return await connection.ExecuteScalarAsync<int>(query, new { UserId = userId });
+                var walletData = await connection.QueryFirstOrDefaultAsync<Wallet>(query, new { UserId = userId });
+                return walletData ?? new Wallet();
             }
         }
+
+        public async Task<bool> AddBoughtTokensAsync(Guid userId, int tokensToAdd)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    UPDATE Ludde.TokenWallet
+                    SET BoughtTokens = BoughtTokens + @TokensToAdd
+                    WHERE UserId = @UserId;
+
+                    SELECT CAST(
+                        CASE WHEN @@ROWCOUNT = 1 THEN 1 ELSE 0 END
+                    AS BIT);
+                ";
+
+                var success = await connection.ExecuteScalarAsync<bool>(query, new
+                {
+                    UserId = userId,
+                    TokensToAdd = tokensToAdd
+                });
+
+                return success;
+            }
+        }
+
 
         //Api Calls handeling
         public async Task<IEnumerable<Call>> GetApiCallsAsync(string Key)

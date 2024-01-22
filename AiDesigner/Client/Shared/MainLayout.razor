@@ -69,8 +69,32 @@
                             }
 
                             <!-- Token Count -->
-                            <div class="bg-green-600 dark:bg-gray-600 p-1 rounded-lg text-white mx-4 items-center">
-                                <span>Tokens: @CurrentTokens</span>
+                            <div class="group bg-green-600 dark:bg-gray-600 p-1 rounded-lg text-white mx-4 items-center relative">
+                                <a href="/paymentoptions" class="cursor-pointer block">
+                                    <span>Tokens: @(CurrentTokens.Tokens + CurrentTokens.BoughtTokens)</span>
+                                </a>                                
+                                <div class="absolute hidden group-hover:block bg-green-700 dark:bg-gray-700 mt-1 p-1 w-32 rounded-md -ml-4">
+                                    <div class="px-1 py-1">
+                                        @if (CurrentTokens.SubscriptionTier == 1)
+                                        {
+                                                <p>Profesional: 8000 t/d </p>
+                                        }
+                                        else if (CurrentTokens.SubscriptionTier == 2)
+                                        {
+                                                <p>Casual: 2000 t/d </p>
+                                        }
+                                        else
+                                        {
+                                                <p>Free: 500 t/d </p>
+                                        }
+                                    </div>
+                                    <div class="px-1 py-1">
+                                        Daily: @CurrentTokens.Tokens
+                                    </div>
+                                    <div class="px-1 py-1">
+                                        Extra: @CurrentTokens.BoughtTokens
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Toggle Dark Mode -->
@@ -113,18 +137,20 @@
                     <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
                     <AuthorizeView>
                         <Authorized>
-                            <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
-                                <CascadingValue Value="@setTutorial" Name="setTutorial">
-                                    <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
-                                        <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
-                                            <CascadingValue Value="@analytics" Name="analytics"> 
-                                                <CascadingValue Value="@addApiKey" Name="addApiKey">
-                                                    <CascadingValue Value="@apiKeys" Name="ApiKeys">
-                                                        <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
-                                                            <CascadingValue Value="@passingArticle" Name="passingArticle">
-                                                                <CascadingValue Value=@setTokens Name="Settokens">
-                                                                    <CascadingValue Value=@NewAps Name="NewAps">
-                                                                        @Body
+                            <CascadingValue Value="@CurrentTokens" Name="Wallet">
+                                <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
+                                    <CascadingValue Value="@setTutorial" Name="setTutorial">
+                                        <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
+                                            <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
+                                                <CascadingValue Value="@analytics" Name="analytics"> 
+                                                    <CascadingValue Value="@addApiKey" Name="addApiKey">
+                                                        <CascadingValue Value="@apiKeys" Name="ApiKeys">
+                                                            <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                                                                <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                                                    <CascadingValue Value=@setTokens Name="Settokens">
+                                                                        <CascadingValue Value=@NewAps Name="NewAps">
+                                                                            @Body
+                                                                        </CascadingValue>
                                                                     </CascadingValue>
                                                                 </CascadingValue>
                                                             </CascadingValue>
@@ -278,7 +304,7 @@
 
     public Tutorial CurrentTutorial;
 
-    public int CurrentTokens { get; set; } = 0;
+    public Wallet CurrentTokens { get; set; } = new Wallet();
 
     public AuthenticationState AuthState { get; set; }
 
@@ -290,7 +316,7 @@
 
     public EventCallback<ProgramObject> NewAps => EventCallback.Factory.Create<ProgramObject>(this, AddAps);
 
-    public EventCallback<int> setTokens => EventCallback.Factory.Create<int>(this, SetTokens);
+    public EventCallback<Wallet> setTokens => EventCallback.Factory.Create<Wallet>(this, SetTokens);
 
     public EventCallback<ProgramObject> setAp => EventCallback.Factory.Create<ProgramObject>(this, SetAP);
 
@@ -339,7 +365,7 @@
         analytics.tutorials[tutorial.TutorialId -1] = tutorial;
     }
 
-    public void SetTokens(int tokens)
+    public void SetTokens(Wallet tokens)
     {
         CurrentTokens = tokens;
     }
@@ -461,7 +487,7 @@
 
                     if (response.IsSuccessStatusCode)
                     {
-                        CurrentTokens = await response.Content.ReadFromJsonAsync<int>();
+                        CurrentTokens = await response.Content.ReadFromJsonAsync<Wallet>();
                     }
                 }
                 catch (HttpRequestException ex)
