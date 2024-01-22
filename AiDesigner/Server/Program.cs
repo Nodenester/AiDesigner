@@ -9,6 +9,8 @@ using Google.Protobuf.WellKnownTypes;
 using Microsoft.AspNetCore.Components.Web;
 using Stripe;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Authorization.Policy;
+using Microsoft.AspNetCore.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -45,6 +47,8 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
 
 builder.Services.AddSingleton<DBConnection>(new DBConnection(connectionString));
+builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AiDesigner.Server.Data.AuthorizationMiddlewareResultHandler>();
+
 
 var app = builder.Build();
 
@@ -61,18 +65,17 @@ else
     app.UseHsts();
 }
 
-app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
-
 app.UseHttpsRedirection();
 
 app.UseStaticFiles();
 
 app.UseRouting();
 
+app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
+
 app.UseIdentityServer();
 app.UseAuthorization();
 app.UseAntiforgery();
-
 
 app.MapRazorPages();
 app.MapControllers();
