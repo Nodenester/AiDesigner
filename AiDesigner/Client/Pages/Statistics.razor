@@ -1,22 +1,23 @@
-﻿@using Microsoft.AspNetCore.Authorization;
+﻿@using AiDesigner.Client.Components.StatisticsPage
+@using Microsoft.AspNetCore.Authorization;
 @attribute [Authorize]
 
 @page "/statistics"
 
 @* right side *@
 <div class="flex-grow dark:bg-gray-600 rounded-lg w-full">
-    <AiDesigner.Client.Components.CallChart></AiDesigner.Client.Components.CallChart>
+    <CallChart></CallChart>
 </div>
 <div class="flex justify-center">
     <div class="flex space-x-6 rounded-lg mt-4 mx-auto w-full" >
         <!-- Left Half -->
         <div class="w-1/2 rounded-lg">
-            <AiDesigner.Client.Components.HandleApiKeys></AiDesigner.Client.Components.HandleApiKeys>
+            <HandleApiKeys></HandleApiKeys>
         </div>
 
         <!-- Right Half -->
         <div class="w-1/2 rounded-lg">
-            <AiDesigner.Client.Components.HandleSessions></AiDesigner.Client.Components.HandleSessions>
+            <HandleSessions></HandleSessions>
         </div>
     </div>
 </div>

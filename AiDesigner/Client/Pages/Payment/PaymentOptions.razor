@@ -1,4 +1,8 @@
-﻿<div class="dark:!bg-gray-600 bg-white">
+﻿@page "/PaymentOptions"
+@inject HttpClient Http
+@inject JSRuntime JSRuntime
+
+<div class="dark:!bg-gray-600 bg-white">
     <div class="container px-6 py-8 mx-auto">
         <div class="flex flex-col items-center justify-center space-y-8 lg:-mx-4 lg:flex-row lg:items-stretch lg:space-y-0">
             <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
@@ -92,6 +96,55 @@
             </div>
         </div>
     </div>
+
+    <div class="container px-6 py-8 mx-auto">
+        <h2 class="text-2xl font-bold text-center text-gray-800 uppercase dark:text-gray-100">
+            One-Time Token Purchase
+        </h2>
+        <div class="flex flex-col items-center justify-center space-y-8 lg:-mx-4 lg:flex-row lg:items-stretch lg:space-y-0">
+            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
+                <div class="flex-shrink-0">
+                    <span class="pt-2 text-4xl font-bold text-gray-800 uppercase dark:text-gray-100">
+                        24000 Tokens
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400">
+                        for $5.99
+                    </span>
+                </div>
+                <button @onclick="() => PurchaseTokens(24000)" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
+                    Buy Now
+                </button>
+            </div>
+
+            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
+                <div class="flex-shrink-0">
+                    <span class="pt-2 text-4xl font-bold text-gray-800 uppercase dark:text-gray-100">
+                        40000 Tokens
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400">
+                        for $9,99
+                    </span>
+                </div>
+                <button @onclick="() => PurchaseTokens(40000)" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
+                    Buy Now
+                </button>
+            </div>
+
+            <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white border-2 border-gray-200 rounded-lg lg:mx-4 dark:!bg-gray-800 dark:border-gray-700">
+                <div class="flex-shrink-0">
+                    <span class="pt-2 text-4xl font-bold text-gray-800 uppercase dark:text-gray-100">
+                        24000 Tokens
+                    </span>
+                    <span class="text-gray-500 dark:text-gray-400">
+                        for $19,99
+                    </span>
+                </div>
+                <button @onclick="() => PurchaseTokens(80000)" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
+                    Buy Now
+                </button>
+            </div>
+        </div>
+    </div>
 </div>
 
 <style>
@@ -104,3 +157,15 @@
         font-size: 1.5rem !important;
     }
 </style>
+
+@code {
+    private async Task PurchaseTokens(int tokenAmount)
+    {
+        // Call the server endpoint with the token amount to create a Stripe session
+        var response = await Http.PostAsJsonAsync("your_api_endpoint/create-stripe-payment-session", new { TokenAmount = tokenAmount });
+        var sessionId = await response.Content.ReadAsStringAsync();
+
+        // JS interop to redirect to Stripe checkout
+        await JSRuntime.InvokeVoidAsync("redirectToStripe", sessionId);
+    }
+}

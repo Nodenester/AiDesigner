@@ -5,7 +5,8 @@
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
 @using System.Text
-@using static AiDesigner.Client.Components.InputList;
+@using AiDesigner.Client.Components.Chat;
+@using static AiDesigner.Client.Components.Chat.InputList
 @inject HttpClient Http
 
 <button @onclick="Open" class="px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded" type="button">
