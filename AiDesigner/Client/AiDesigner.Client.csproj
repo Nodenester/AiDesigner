@@ -35,4 +35,8 @@
     <None Include="Pages\Marketplace\MarketplaceList.razor" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Components\Pages\" />
+  </ItemGroup>
+
 </Project>

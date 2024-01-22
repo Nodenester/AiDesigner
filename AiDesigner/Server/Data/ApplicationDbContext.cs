@@ -1,6 +1,8 @@
 ﻿using AiDesigner.Server.Models;
 using Duende.IdentityServer.EntityFramework.Options;
 using Microsoft.AspNetCore.ApiAuthorization.IdentityServer;
+using Microsoft.AspNetCore.Authorization.Policy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -34,6 +36,14 @@ namespace AiDesigner.Server.Data
                     NormalizedName = "ADMINISTRATOR"
                 }
             );
+        }
+    }
+
+    public class AuthorizationMiddlewareResultHandler : IAuthorizationMiddlewareResultHandler
+    {
+        public Task HandleAsync(RequestDelegate next, HttpContext context, AuthorizationPolicy policy, PolicyAuthorizationResult authorizeResult)
+        {
+            return next(context);
         }
     }
 }
