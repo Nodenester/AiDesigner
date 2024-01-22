@@ -1391,16 +1391,6 @@ video {
   background-color: rgb(255 255 255 / var(--tw-bg-opacity));
 }
 
-.\!bg-gray-700 {
-  --tw-bg-opacity: 1 !important;
-  background-color: rgb(43 43 43 / var(--tw-bg-opacity)) !important;
-}
-
-.\!bg-gray-800 {
-  --tw-bg-opacity: 1 !important;
-  background-color: rgb(43 43 43 / var(--tw-bg-opacity)) !important;
-}
-
 .fill-current {
   fill: currentColor;
 }
@@ -1509,10 +1499,6 @@ video {
 
 .pb-6 {
   padding-bottom: 1.5rem;
-}
-
-.pl-0 {
-  padding-left: 0px;
 }
 
 .pl-1 {

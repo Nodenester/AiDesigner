@@ -7,11 +7,12 @@
 @using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2;
 @using System.Text
-@using static AiDesigner.Client.Components.InputList;
+@using AiDesigner.Client.Components.Chat;
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http
 @attribute [Authorize]
 @using Radzen
+@using static AiDesigner.Client.Components.Chat.InputList
 @inject TooltipService tooltipService
 @inject NotificationService notificationService
 

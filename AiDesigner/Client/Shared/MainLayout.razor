@@ -1,4 +1,5 @@
-﻿@using AiDesigner.Shared;
+﻿@using AiDesigner.Client.Components.Comps
+@using AiDesigner.Shared;
 @inherits LayoutComponentBase
 @inject IJSRuntime JSRuntime;
 @inject NavigationManager NavigationManagers
@@ -64,7 +65,7 @@
                             <!-- This is your conditional content for tutorials. -->
                             @if (CurrentTutorial != null)
                             {
-                                <AiDesigner.Client.Components.TutorialPopup completeTutorial="Completetutorial" settTutorial="SetTutorial" tutorials="@analytics.tutorials" tutorial="@CurrentTutorial"></AiDesigner.Client.Components.TutorialPopup>
+                                <TutorialPopup completeTutorial="Completetutorial" settTutorial="SetTutorial" tutorials="@analytics.tutorials" tutorial="@CurrentTutorial"></TutorialPopup>
                             }
 
                             <!-- Token Count -->

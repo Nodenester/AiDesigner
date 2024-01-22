@@ -5,7 +5,7 @@
 @using NodeBaseApi.Version2;
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
-@using static AiDesigner.Client.Components.InputList;
+@using static AiDesigner.Client.Components.Chat.InputList;
 @inject HttpClient Http
 
 <Dropdown IsDark="@IsDark" Selected="@(selectedSession?.SessionName ?? string.Empty)" width="w-48">

@@ -1,4 +1,5 @@
 ﻿@page "/library"
+@using AiDesigner.Client.Components.EditorLibrary
 @using AiDesigner.Shared
 @inject NavigationManager NavigationManager
 @using AiDesigner.Shared.Data;
@@ -128,7 +129,7 @@
     {
         @foreach (var article in workshopArticles.OrderBy(a => !a.IsPublic))
         {
-            <div class="relative rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex" style="width: 18rem; height: 9.84rem;">
+            <div class="relative rounded bg-gray-200 dark:bg-gray-700 text-black dark:text-white flex custom-button" style="width: 18rem; height: 9.84rem;">
 
                 <!-- Remove Button -->
                 <button @onclick="(() => RemoveArticle(article.Id.ToString()))" class="absolute top-0 right-0 p-0 m-1 text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white close-button">
@@ -175,7 +176,7 @@
 
 <style>
     .custom-button:hover .close-button {
-        opacity: 1;
+        opacity: 1 !important;
     }
 
     .close-button {

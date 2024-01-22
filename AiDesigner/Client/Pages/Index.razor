@@ -1,5 +1,6 @@
 ﻿@page "/home"
 @using AiDesigner.Client.Components
+@using AiDesigner.Client.Components.HomePage
 @using Newtonsoft.Json;
 @using Microsoft.AspNetCore.Authorization;
 @using NodeBaseApi.Version2;
@@ -14,16 +15,16 @@
     <div class="self-end dark:bg-gray-600 rounded-lg flex flex-col h-full w-full">
         <div class="dark:bg-gray-600 rounded-lg w-full mb-4 flex space-x-4 pr-6 h-full">
             <div class="flex-grow p-0 dark:bg-gray-700 rounded-lg">
-                <AiDesigner.Client.Components.LatestTutorials />
+                <LatestTutorials />
             </div>
             <div class="flex-shrink-0 p-0 dark:!bg-gray-700 bg-gray-100 rounded-lg">
                 @if(Calls != null)
                 {
-                    <AiDesigner.Client.Components.LatestUses Calls="@Latest100Calls" />
+                    <LatestUses Calls="@Latest100Calls" />
                 }
                 else
                 {
-                    <AiDesigner.Client.Components.LatestUses />
+                    <LatestUses />
                 }
             </div>
 
