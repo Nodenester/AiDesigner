@@ -1,4 +1,5 @@
 ﻿@using AiDesigner.Client.Components
+@using AiDesigner.Client.Components.Chat
 @using AiDesigner.Shared.Data;
 @using Newtonsoft.Json;
 @using NodeBaseApi.Version2;
@@ -28,42 +29,83 @@
             <!-- Modal body -->
             <div class="p-6 space-y-6 dark:text-gray-300 dark:bg-gray-600 dark:text-white">
                 <div class="flex space-x-4" style="height: 30rem;">
-                    <div class="w-1/2 border-r !border-gray-300 dark:!border-gray-500 overflow-auto">
-                        <h3 class="text-lg font-semibold">Inputs:</h3>
-                        @if (AP != null)
-                        {
-                            <div style="margin-top: 0rem; margin-right: 1rem;">
+                    @if (AP != null && !AP.SupportsChat)
+                    {
+                        <div class="w-1/2 border-r !border-gray-300 dark:!border-gray-500 overflow-auto">
+                            <h3 class="text-lg font-semibold">Inputs:</h3>
+                            @if (AP != null)
+                            {
+                                <div style="margin-top: 0rem; margin-right: 1rem;">
+                                    @foreach (var input in AP.ProgramStructure.ProgramStart)
+                                    {
+                                        if (input.Name == "Start")
+                                        {
+                                            continue;
+                                        }
+                                        <div class="bg-white dark:!bg-gray-800 px-2 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                                            <InputList Id="input.Id" Type="input.Type" Value="AP.ProgramStructure.InputValues[input.Id]" IsList="input.IsList" Placeholdervalue="input.Name" SendbackValue="SetValue"></InputList>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                        </div>
+                        <div class="w-1/2 overflow-auto">
+                            <p class="text-lg font-semibold">Outputs:</p>
+                            @if (AP != null)
+                            {
+                                <div style="margin-top: 0rem;">
+                                    @foreach (var output in ProgramOutput)
+                                    {
+                                        <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition" style="min-width: 100%;">
+                                            <OutputDisplay OutputItem="@output" />
+                                        </div>
+                                    }
+                                </div>
+                            }    
+                        </div>
+                    }
+                    else if (AP != null && AP.SupportsChat)
+                    {
+                        <div class="chat-modal-container">
+                            <!-- Output box for chat -->
+                            <div class="chat-modal-output">
+                                <p class="text-lg font-semibold">Chat Outputs:</p>
+                                @if (ProgramChatOutput.ContainsKey(AP.Id))
+                                {
+                                    @foreach (var output in ProgramChatOutput[AP.Id])
+                                    {
+                                        <OutputDisplay OutputItem="@output" />
+                                    }
+                                }
+                            </div>
+
+                            <!-- Input box for chat -->
+                            <div class="chat-modal-input rounded-lg p-2 dark:bg-gray-700">
+                                <p class="text-lg font-semibold">Chat Input:</p>
                                 @foreach (var input in AP.ProgramStructure.ProgramStart)
                                 {
                                     if (input.Name == "Start")
                                     {
                                         continue;
                                     }
-                                    <div class="bg-white dark:!bg-gray-800 px-4 py-2 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                                    <div class="item-style p-2">
                                         <InputList Id="input.Id" Type="input.Type" Value="AP.ProgramStructure.InputValues[input.Id]" IsList="input.IsList" Placeholdervalue="input.Name" SendbackValue="SetValue"></InputList>
                                     </div>
                                 }
                             </div>
-                        }
-                    </div>
-                    <div class="w-1/2 overflow-auto">
-                            <p class="text-lg font-semibold">Outputs:</p>
-                        @if (AP != null)
-                        {
-                            <div style="margin-top: 0rem;">
-                                @foreach (var output in ProgramOutput)
-                                {
-                                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition" style="min-width: 100%;">
-                                        <OutputDisplay OutputItem="@output" />
-                                    </div>
-                                }
-                            </div>
-                        }    
-                    </div>
+                        </div>
+                    }
                 </div>
             </div>
             <!-- Modal footer -->
             <div class="flex items-center justify-center p-6 pt-0 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600 outline-none">
+                @if(AP != null && AP.SupportsChat)
+                {
+                    <button class="rounded text-sm px-4 py-2  w-24 bg-blue-600 hover:bg-blue-700 text-white mr-4 border-0"
+                            @onclick="ClearOutput">
+                        <span>Clear</span>
+                    </button>
+                }
                 <button type="button" class="w-44 px-4 py-2 text-sm font-semibold text-white rounded border-0 @(isLoading ? "bg-gray-500 cursor-not-allowed" : isExecutionFailed ? "bg-red-600" : "bg-green-600 hover:bg-green-700") text-white"
                         @onclick="ExecuteProgram"
                         disabled="@isLoading">
@@ -100,6 +142,7 @@
     protected EventCallback<Wallet> SetTokens { get; set; }
 
     List<object> ProgramOutput { get; set; } = new List<object>();
+    Dictionary<Guid, List<object>> ProgramChatOutput { get; set; } = new Dictionary<Guid, List<object>>();
 
     Session currentSession = new Session();
 
@@ -193,6 +236,14 @@
                     if (response.IsSuccessStatusCode)
                     {
                         ProgramOutput = JsonConvert.DeserializeObject<List<object>>(responseContent);
+                        if (AP.SupportsChat && ProgramChatOutput.ContainsKey(AP.Id))
+                        {
+                            ProgramChatOutput[AP.Id].AddRange(ProgramOutput);
+                        }
+                        else if (AP.SupportsChat)
+                        {
+                            ProgramChatOutput[AP.Id] = ProgramOutput;
+                        }
                     }
                     else
                     {
@@ -215,6 +266,14 @@
                 }
                 await GetTokens();
             }
+        }
+    }
+
+    private void ClearOutput()
+    {
+        if (AP != null && ProgramChatOutput.ContainsKey(AP.Id))
+        {
+            ProgramChatOutput[AP.Id].Clear();
         }
     }
 
@@ -248,8 +307,36 @@
             }
         }
     }
+
     private void setCurrentSession(Session session)
     {
         currentSession = session;
     }
 }
+
+<style>
+    .chat-modal-container {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        height: calc(100% - 2rem);
+        margin: 1rem 0;
+        width: 100%;
+    }
+
+    .chat-modal-output {
+        @* overflow-y: auto; *@ flex-grow: 1;
+        margin-bottom: 1rem;
+    }
+
+    .chat-modal-input {
+        flex-shrink: 0;
+    }
+
+    .chat-modal-button {
+        flex-shrink: 0;
+        display: flex;
+        justify-content: center;
+    }
+</style>
+                   

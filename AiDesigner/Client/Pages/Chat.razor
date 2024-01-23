@@ -68,75 +68,136 @@
         <button class="toggle-button text-white" @onclick="ToggleSidebar">☰</button>
     </div>
     <div class="w-full flex mleft">
-    <!-- Input box -->
-    <div class="box-style text-center p-4 pt-2 overflow-y-auto inputHeight">
-        <p class="text-lg font-semibold mb-2">Program Inputs</p>
-        @if (selectedProgram != null)
+        @if (selectedProgram != null && !selectedProgram.SupportsChat)
         {
-            <div>
-                @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
+            <!-- Input box -->
+            <div class="box-style text-center p-4 pt-2 overflow-y-auto inputHeight">
+                <p class="text-lg font-semibold mb-2">Program Inputs</p>
+                @if (selectedProgram != null)
                 {
-                    if (input.Name == "Start")
-                    {
-                        continue;
-                    }
-                    <div class="item-style bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
-                        <InputList Id="input.Id" Type="input.Type" Value="selectedProgram.ProgramStructure.InputValues[input.Id]" IsList="input.IsList" Placeholdervalue="input.Name" SendbackValue="SetValue"></InputList>
+                    <div>
+                        @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
+                        {
+                            if (input.Name == "Start")
+                            {
+                                continue;
+                            }
+                            <div class="item-style bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                                <InputList Id="input.Id" Type="input.Type" Value="selectedProgram.ProgramStructure.InputValues[input.Id]" IsList="input.IsList" Placeholdervalue="input.Name" SendbackValue="SetValue"></InputList>
+                            </div>
+                        }
                     </div>
                 }
             </div>
-        }
-    </div>
 
-    <!-- Center line -->
-    <div class="flex flex-col items-center h-full">
-        <!-- Vertical Line -->
-        <div class="bg-gray-500 w-[2px] flex-grow"></div>
+            <!-- Center line -->
+            <div class="flex flex-col items-center h-full">
+                <!-- Vertical Line -->
+                <div class="bg-gray-500 w-[2px] flex-grow"></div>
 
-        <!-- Session dropdown -->
-        @if (selectedProgram != null && selectedProgram.SupportsSessions)
-        {
-            <div class="mt-2">
-                <SelectSession IsDark="true" SelectSessions="setCurrentSession" ProgramId="@selectedProgram.Id.ToString()"></SelectSession>
-            </div>
-        }
+                <!-- Session dropdown -->
+                @if (selectedProgram != null && selectedProgram.SupportsSessions)
+                {
+                    <div class="mt-2">
+                        <SelectSession IsDark="true" SelectSessions="setCurrentSession" ProgramId="@selectedProgram.Id.ToString()"></SelectSession>
+                    </div>
+                }
 
-        <!-- Button -->
-        <div class="align-center mb-0 mt-2">
-            <button class="py-1 rounded px-6 h-12 w-48 @(isLoading ? "bg-gray-500 cursor-not-allowed" : isExecutionFailed ? "bg-red-600" : "bg-green-600 hover:bg-green-700") text-white"
+                <!-- Button -->
+                <div class="align-center mb-0 mt-2">
+                    <button class="py-1 rounded px-6 h-12 w-48 @(isLoading ? "bg-gray-500 cursor-not-allowed" : isExecutionFailed ? "bg-red-600" : "bg-green-600 hover:bg-green-700") text-white"
                     @onclick="ExecuteProgram"
                     disabled="@isLoading">
-                @if (isLoading)
-                {
-                    <span>Loading...</span>
-                }
-                else if (isExecutionFailed)
-                {
-                    <span>Failed</span>
-                }
-                else
-                {
-                    <span>Execute Program</span>
-                }
-            </button>
-        </div>
-    </div>
+                        @if (isLoading)
+                        {
+                            <span>Loading...</span>
+                        }
+                        else if (isExecutionFailed)
+                        {
+                            <span>Failed</span>
+                        }
+                        else
+                        {
+                            <span>Execute Program</span>
+                        }
+                    </button>
+                </div>
+            </div>
 
-    <!-- Output box -->
-    <div class="box-style flex flex-col items-center text-center p-4 pt-2 overflow-y-auto inputHeight">
-        <p class="text-lg font-semibold mb-2">Program Outputs</p>
-        @if (selectedProgram != null)
-        {
-            <div class="flex flex-col justify-end items-end w-full">
-                @foreach (var output in ProgramOutput)
+            <!-- Output box -->
+            <div class="box-style flex flex-col items-center text-center p-4 pt-2 overflow-y-auto inputHeight">
+                <p class="text-lg font-semibold mb-2">Program Outputs</p>
+                @if (selectedProgram != null)
                 {
-                    <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition" style="min-width: 100%;">
-                        <OutputDisplay OutputItem="@output" />
+                    <div class="flex flex-col justify-end items-end w-full">
+                        @foreach (var output in ProgramOutput)
+                        {
+                            <div class="bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition" style="min-width: 100%;">
+                                <OutputDisplay OutputItem="@output" />
+                            </div>
+                        }
                     </div>
                 }
             </div>
         }
-    </div>
+        else if (selectedProgram != null && selectedProgram.SupportsChat)
+        {
+            <div class="chat-mode-container">
+                <!-- Output box for chat -->
+                <div class="chat-mode-output p-4 inputHeight">
+                    <p class="text-lg font-semibold mb-2">Chat Outputs</p>
+                    @if (ProgramChatOutput != null && ProgramChatOutput.ContainsKey(selectedProgram.Id) && ProgramChatOutput[selectedProgram.Id] != null)
+                    {
+                        @foreach (var output in ProgramChatOutput[selectedProgram.Id])
+                        {
+                            <OutputDisplay OutputItem="@output" />
+                        }
+                    }
+                </div>
+
+                <!-- Input box for chat -->
+                <div class="chat-mode-input p-4 inputHeight">
+                    <p class="text-lg font-semibold mb-2">Chat Input</p>
+                    @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
+                    {
+                        if (input.Name == "Start")
+                        {
+                            continue;
+                        }
+                        <div class="item-style bg-white dark:!bg-gray-800 p-4 rounded-lg mb-2 shadow hover:shadow-lg transition">
+                            <InputList Id="input.Id" Type="input.Type" Value="selectedProgram.ProgramStructure.InputValues[input.Id]" IsList="input.IsList" Placeholdervalue="input.Name" SendbackValue="SetValue"></InputList>
+                        </div>
+                    }
+                </div>
+
+                <!-- Execute Button for chat -->
+                <div class="chat-mode-button flex justify-around">
+                    <!-- Clear Output Button -->
+                    <button class="py-1 rounded px-6 h-12 w-24 bg-blue-600 hover:bg-blue-700 text-white mr-4"
+                            @onclick="ClearOutput">
+                        <span>Clear</span>
+                    </button>
+
+                    <!-- Existing Execute Button -->
+                    <button class="py-1 rounded px-6 h-12 w-48 @(isLoading ? "bg-gray-500 cursor-not-allowed" : isExecutionFailed ? "bg-red-600" : "bg-green-600 hover:bg-green-700") text-white"
+                            @onclick="ExecuteProgram"
+                            disabled="@isLoading">
+                        @if (isLoading)
+                        {
+                            <span>Loading...</span>
+                        }
+                        else if (isExecutionFailed)
+                        {
+                            <span>Failed</span>
+                        }
+                        else
+                        {
+                            <span>Execute Program</span>
+                        }
+                    </button>
+                </div>
+            </div>
+        }
     </div>
 </div>
 
@@ -145,6 +206,29 @@
 <AiDesigner.Client.Modals.ReviewArticle @ref="reviewModal" customProgram="selectedProgram"></AiDesigner.Client.Modals.ReviewArticle>
 
 <style>
+    .chat-mode-container {
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        width: 50%;
+        margin: 0 auto;
+        justify-content: space-between; /* Aligns children at start and end */
+    }
+
+    .chat-mode-output {
+        margin-bottom: 1rem;
+        flex-grow: 1; 
+    }
+
+    .chat-mode-input, .chat-mode-button {
+        flex-shrink: 0; 
+    }
+
+    .chat-mode-button {
+        display: flex;
+        justify-content: center;
+    }
+
     .mleft{
         margin-left: 16rem;
     }
@@ -249,6 +333,7 @@
         };
 
     List<object> ProgramOutput { get; set; } = new List<object>();
+    Dictionary<Guid, List<object>> ProgramChatOutput { get; set; } = new Dictionary<Guid, List<object>>();
 
     Session currentSession = new Session();
 
@@ -350,6 +435,14 @@
                         if (response.IsSuccessStatusCode)
                         {
                             ProgramOutput = JsonConvert.DeserializeObject<List<object>>(responseContent);
+                            if (selectedProgram.SupportsChat && ProgramChatOutput.ContainsKey(selectedProgram.Id))
+                            {
+                                ProgramChatOutput[selectedProgram.Id].AddRange(ProgramOutput);
+                            }
+                            else if (selectedProgram.SupportsChat)
+                            {
+                                ProgramChatOutput[selectedProgram.Id] = ProgramOutput;
+                            }
                         }
                         else
                         {
@@ -421,6 +514,14 @@
     protected override async Task OnParametersSetAsync()
     {
 
+    }
+
+    private void ClearOutput()
+    {
+        if (selectedProgram != null && ProgramChatOutput.ContainsKey(selectedProgram.Id))
+        {
+            ProgramChatOutput[selectedProgram.Id].Clear();
+        }
     }
 
     private void SetValue(InputItem inputItem)
