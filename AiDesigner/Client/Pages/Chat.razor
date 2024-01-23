@@ -205,102 +205,6 @@
 
 <AiDesigner.Client.Modals.ReviewArticle @ref="reviewModal" customProgram="selectedProgram"></AiDesigner.Client.Modals.ReviewArticle>
 
-<style>
-    .chat-mode-container {
-        overflow-y: auto;
-        display: flex;
-        flex-direction: column;
-        width: 50%;
-        margin: 0 auto;
-        justify-content: space-between; /* Aligns children at start and end */
-    }
-
-    .chat-mode-output {
-        margin-bottom: 1rem;
-        flex-grow: 1; 
-    }
-
-    .chat-mode-input, .chat-mode-button {
-        flex-shrink: 0; 
-    }
-
-    .chat-mode-button {
-        display: flex;
-        justify-content: center;
-    }
-
-    .mleft{
-        margin-left: 16rem;
-    }
-
-    .program-image {
-        width: 2.5rem; /* Adjust size as needed */
-        height: 2.5rem; /* Adjust size as needed */
-        border-radius: 50%; /* This makes the image round */
-        object-fit: cover; /* Ensures the image covers the area without stretching */
-    }
-
-    .box-style {
-        width: 40%; /* or use w-1/3 from Tailwind directly in the HTML class attribute */
-    }
-
-    .item-style {
-        margin-top: 0rem;
-    }
-
-    .rz-growl-item
-    {
-        margin: 0rem !important;
-    }
-
-    .rz-notification-message {
-        /* Wrap words that are too long to fit on one line */
-        word-wrap: break-word;
-        /* Prevent the content from going outside the box */
-        overflow: hidden;
-        /* Add ellipsis if the text is too long to fit in the box */
-        text-overflow: ellipsis;
-        /* Make sure the notification has a fixed width or max-width if you want it to be flexible */
-        width: 22rem; /* or you can use max-width: 250px; */
-        /* Set a max height and make the content scrollable */
-        max-height: 30rem;
-        min-height: 30rem;
-        overflow-y: auto;
-        /* Ensure these styles have higher specificity */
-        z-index: 1002; /* This should be higher or equal to the notification's z-index to be effective */
-    }
-
-    /* You may also need to style the inner container if it exists */
-    .rz-growl-item-container {
-/*      max-height: 100px; Adjust as needed */
-        overflow-y: auto; /* This will add a scrollbar if the content exceeds the max-height */
-    }
-
-    /* Some extra styling for the selecter menu */
-    .flex-shrink-0 {
-        height: 100vh;
-        width: 16rem;
-        margin: 0;
-        padding: 0;
-        position: absolute;
-        top: 3.7rem;
-    }
-
-    /* If there's a global padding or margin affecting all elements, override it for the body */
-    body {
-        margin: 0;
-        padding: 0;
-    }
-
-    /* Additional styles to ensure the layout doesn't break */
-    html, body {
-        height: 100%;
-        overflow: hidden; /* Prevents scrolling if the content is larger than the screen */
-    }
-
-
-</style>
-
 @code {
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
@@ -397,9 +301,14 @@
     {
         if (selectedProgram != null)
         {
+            if (selectedProgram.SupportsChat)
+            {
+                selectedProgram.ProgramStructure.InputValues[selectedProgram.ProgramStructure.ProgramStart[1].Id] = ProgramChatOutput;
+            }
+
             var nonNullInputValues = selectedProgram.ProgramStructure.InputValues
-     .Where(kvp => kvp.Value != null)
-     .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+             .Where(kvp => kvp.Value != null)
+             .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
 
             if (CascAuth != null)
             {
