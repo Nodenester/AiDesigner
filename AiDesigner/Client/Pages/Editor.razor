@@ -88,6 +88,11 @@
                                     <input type="checkbox" @bind="localProgram.SupportsSessions" id="SuportSession" class="w-4 h-4 accent-green-600 rounded" />
                                 <label for="SuportSession" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
                             </div>
+                            <label for="SupportsChat" class="block text-sm font-medium text-gray-700 dark:text-white">Supports chat</label>
+                            <div class="mt-1">
+                                <input type="checkbox" @bind="localProgram.SupportsSessions" id="SupportsChat" class="w-4 h-4 accent-green-600 rounded" />
+                                <label for="SupportsChat" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
+                            </div>
                             <div class="mt-1">
                                 <label for="apiKey" class="block text-sm font-medium text-gray-700 dark:text-white">API Key</label>
                                 <input type="text" @bind="((CustomProgram)localProgram).ApiKey" id="apiKey" class="w-full p-2 border rounded dark:bg-gray-600 dark:text-gray-300 outline-none border-0" readonly />
