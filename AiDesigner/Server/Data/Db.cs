@@ -289,7 +289,7 @@ namespace AiDesigner.Server.Data
 
                 var query = @"
                     UPDATE Ludde.programs
-                    SET Name = @Name, Description = @Description, Author = @Author, AuthorName = @AuthorName, ApiKey = @ApiKey, IsCustomBlock = @IsCustomBlock, IsPublic = @IsPublic, ProgramData = @ProgramData, Image = @Image, SupportsSessions = @SupportsSessions, LastOpened = GETDATE()
+                    SET Name = @Name, Description = @Description, Author = @Author, AuthorName = @AuthorName, ApiKey = @ApiKey, IsCustomBlock = @IsCustomBlock, IsPublic = @IsPublic, ProgramData = @ProgramData, Image = @Image, SupportsSessions = @SupportsSessions, LastOpened = GETDATE(), SupportsChat = @SupportsChat
                     WHERE Id = @Id;
                 ";
 
@@ -299,7 +299,9 @@ namespace AiDesigner.Server.Data
                 parameters.Add("Description", programObject.Description);
                 parameters.Add("Author", programObject.Author);
                 parameters.Add("AuthorName", programObject.AuthorName);
-                parameters.Add("SupportsSessions", programObject.SupportsSessions); // Add the SupportsSessions parameter
+                parameters.Add("SupportsSessions", programObject.SupportsSessions);
+                parameters.Add("SupportsChat", programObject.SupportsChat);
+
 
                 if (programObject is CustomProgram program)
                 {

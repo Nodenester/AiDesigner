@@ -1,0 +1,89 @@
+﻿.chat-mode-container {
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    width: 50%;
+    margin: 0 auto;
+    justify-content: space-between;
+}
+
+@media (max-width: 1048px) {
+    .chat-mode-container {
+        height: calc(100vh - 8rem);
+        width: 90%;
+    }
+}
+
+.chat-mode-output {
+    margin-bottom: 1rem;
+    flex-grow: 1;
+}
+
+.chat-mode-input, .chat-mode-button {
+    flex-shrink: 0;
+}
+
+.chat-mode-button {
+    display: flex;
+    justify-content: center;
+}
+
+.mleft {
+    margin-left: 16rem;
+}
+
+.program-image {
+    width: 2.5rem; 
+    height: 2.5rem; 
+    border-radius: 50%; 
+    object-fit: cover; 
+}
+
+.box-style {
+    width: 40%; 
+}
+
+.item-style {
+    margin-top: 0rem;
+}
+
+.rz-growl-item {
+    margin: 0rem !important;
+}
+
+.rz-notification-message {
+    word-wrap: break-word;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 22rem; 
+    max-height: 30rem;
+    min-height: 30rem;
+    overflow-y: auto;
+    z-index: 1002;
+}
+
+.rz-growl-item-container {
+    overflow-y: auto;
+}
+
+/* Some extra styling for the selecter menu */
+.flex-shrink-0 {
+    height: 100vh;
+    width: 16rem;
+    margin: 0;
+    padding: 0;
+    position: absolute;
+    top: 3.7rem;
+}
+
+/* If there's a global padding or margin affecting all elements, override it for the body */
+body {
+    margin: 0;
+    padding: 0;
+}
+
+/* Additional styles to ensure the layout doesn't break */
+html, body {
+    height: 100%;
+    overflow: hidden; 
+}

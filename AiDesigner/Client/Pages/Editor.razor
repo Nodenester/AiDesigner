@@ -89,10 +89,15 @@
                                 <label for="SuportSession" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
                             </div>
                             <label for="SupportsChat" class="block text-sm font-medium text-gray-700 dark:text-white">Supports chat</label>
-                            <div class="mt-1">
-                                <input type="checkbox" @bind="localProgram.SupportsSessions" id="SupportsChat" class="w-4 h-4 accent-green-600 rounded" />
-                                <label for="SupportsChat" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
-                            </div>
+                                <div class="mt-1">
+                                    <input type="checkbox"
+                                           checked="@localProgram.SupportsChat"
+                                           @onchange="HandleChange"
+                                           id="SupportsChat"
+                                           class="w-4 h-4 accent-green-600 rounded" />
+                                    <label for="SupportsChat" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
+                                </div>
+
                             <div class="mt-1">
                                 <label for="apiKey" class="block text-sm font-medium text-gray-700 dark:text-white">API Key</label>
                                 <input type="text" @bind="((CustomProgram)localProgram).ApiKey" id="apiKey" class="w-full p-2 border rounded dark:bg-gray-600 dark:text-gray-300 outline-none border-0" readonly />
@@ -159,17 +164,33 @@
                                     <div class="right-part">
                                         @foreach (var output in localProgram.ProgramStructure.ProgramStart.Select((value, index) => new { Value = value, Index = index }))
                                         {
-                                            <div class="node-output d-flex"
-                                                 @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(output.Value.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), null, output.Value)'>
-                                                <span class="small-font">
-                                                    @output.Value.Name
-                                                    @if (output.Index != 0) // Adding the character for all but the first item
-                                                    {
-                                                        <text>‎</text> <!-- Replace 'YourCharacter' with the desired character -->
-                                                    }
-                                                </span>
-                                                <div id="@output.Value.Id" class="@GetShape(output.Value.Type.ToString(), output.Value.IsList) @GetColor(output.Value.Type.ToString()) Connection" @onclick="() => SelectOutput(output.Value)"></div>
-                                            </div>
+                                            if (output.Value.Name == "Chat History")
+                                            {
+                                                if (localProgram.SupportsChat)
+                                                {
+                                                    <div class="node-output d-flex"
+                                                    @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(output.Value.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), null, output.Value)'>
+                                                        <span class="small-font">
+                                                            @output.Value.Name
+                                                        </span>
+                                                        <div id="@output.Value.Id" class="@GetShape(output.Value.Type.ToString(), output.Value.IsList) @GetColor(output.Value.Type.ToString()) Connection" @onclick="() => SelectOutput(output.Value)"></div>
+                                                    </div>
+                                                }
+                                            }
+                                            else
+                                            {
+                                                <div class="node-output d-flex"
+                                                @onmouseenter='() => ShowTooltip(inputElementReferences.TryGetValue(output.Value.Id.ToString(), out var elementRef) ? elementRef : new ElementReference(), null, output.Value)'>
+                                                    <span class="small-font">
+                                                        @output.Value.Name
+                                                        @if (output.Index > 1)
+                                                        {
+                                                            <text>‎</text>
+                                                        }
+                                                    </span>
+                                                    <div id="@output.Value.Id" class="@GetShape(output.Value.Type.ToString(), output.Value.IsList) @GetColor(output.Value.Type.ToString()) Connection" @onclick="() => SelectOutput(output.Value)"></div>
+                                                </div>
+                                            }
                                         }
                                         @if (localProgram.ProgramStructure.ProgramStart.Count() == 0)
                                         {
@@ -885,6 +906,13 @@
         await DrawConnections(localProgram.ProgramStructure);
         StateHasChanged();
     }
+    public async void RemoveConnection(string connectionId)
+    {
+        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.clearAllConnections");
+        localProgram.ProgramStructure.RemoveConnection(Guid.Parse(connectionId.Replace("-endpoint", "")));
+        await DrawConnections(localProgram.ProgramStructure);
+        StateHasChanged();
+    }
 
     [JSInvokable]
     public async void OnGlobalKeyPress(string key, string code)
@@ -1494,6 +1522,15 @@
     //}
 
     //Logic stuff
+    private async void HandleChange(ChangeEventArgs e)
+    {
+        bool isChecked = Convert.ToBoolean(e.Value);
+        if(!isChecked)
+        {
+            RemoveConnection(localProgram.ProgramStructure.ProgramStart[1].Id.ToString());
+        }
+    }
+
     private Dictionary<string, ElementReference> inputElementReferences = new Dictionary<string, ElementReference>();
     private Dictionary<string, ElementReference> outputElementReferences = new Dictionary<string, ElementReference>();
 
@@ -1588,7 +1625,7 @@
                 Description = output.Description,
                 Type = output.Type,
                 IsList = output.IsList,
-                IsRequired = false  // Assuming IsRequired = false as default, adjust as necessary
+                IsRequired = false  
             };
     }
 

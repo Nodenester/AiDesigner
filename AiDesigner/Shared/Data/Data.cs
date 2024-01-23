@@ -58,6 +58,14 @@ namespace NodeBaseApi.Version2
                     Type = Type.Trigger,
                     IsList = false,
                     Description = "The start of the program."
+                },
+                new Output()
+                {
+                    Id = Guid.NewGuid(),
+                    Name = "Chat History",
+                    Type = Type.Object,
+                    IsList = true,
+                    Description = "The chat history from the current "
                 }
             }
             );

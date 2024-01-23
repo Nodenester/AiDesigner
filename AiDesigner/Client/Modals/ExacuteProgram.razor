@@ -197,6 +197,10 @@
 
     private async Task ExecuteProgram()
     {
+        if (AP.SupportsChat)
+        {
+            AP.ProgramStructure.InputValues[AP.ProgramStructure.ProgramStart[1].Id] = ProgramChatOutput;
+        }
 
         var nonNullInputValues = AP.ProgramStructure.InputValues
             .Where(kvp => kvp.Value != null)
