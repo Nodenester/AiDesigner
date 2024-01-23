@@ -972,6 +972,29 @@ namespace AiDesigner.Server.Data
             }
         }
 
+        public async Task<bool> SetSubscriptionTierAsync(Guid userId, int subscriptionTier)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+            UPDATE Ludde.TokenWallet
+            SET SubscriptionTier = @SubscriptionTier
+            WHERE UserId = @UserId;
+
+            SELECT CAST(
+                CASE WHEN @@ROWCOUNT = 1 THEN 1 ELSE 0 END
+            AS BIT);
+        ";
+
+                var success = await connection.ExecuteScalarAsync<bool>(query, new
+                {
+                    UserId = userId,
+                    SubscriptionTier = subscriptionTier
+                });
+
+                return success;
+            }
+        }
 
         //Api Calls handeling
         public async Task<IEnumerable<Call>> GetApiCallsAsync(string Key)

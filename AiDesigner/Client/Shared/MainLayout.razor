@@ -68,34 +68,38 @@
                                 <TutorialPopup completeTutorial="Completetutorial" settTutorial="SetTutorial" tutorials="@analytics.tutorials" tutorial="@CurrentTutorial"></TutorialPopup>
                             }
 
-                            <!-- Token Count -->
-                            <div class="group bg-green-600 dark:bg-gray-600 p-1 rounded-lg text-white mx-4 items-center relative">
-                                <a href="/paymentoptions" class="cursor-pointer block">
-                                    <span>Tokens: @(CurrentTokens.Tokens + CurrentTokens.BoughtTokens)</span>
-                                </a>                                
-                                <div class="absolute hidden group-hover:block bg-green-700 dark:bg-gray-700 mt-1 p-1 w-32 rounded-md -ml-4">
-                                    <div class="px-1 py-1">
-                                        @if (CurrentTokens.SubscriptionTier == 1)
-                                        {
+                            @if (AuthState != null && AuthState.User.Identity != null && AuthState.User.Identity.IsAuthenticated )
+                            {
+                                <!-- Token Count -->
+                                <div class="group bg-gray-100 hover:bg-white dark:!bg-gray-700 hover:dark:!bg-gray-600 p-1 rounded-lg text-white mx-4 items-center relative ">
+                                    <a href="/paymentoptions" class="cursor-pointer block text-white hover:text-white px-1">
+                                        <span class="dark:!text-white text-black">Tokens: @(CurrentTokens.Tokens + CurrentTokens.BoughtTokens)</span>
+                                    </a>
+                                    <div class="absolute hidden group-hover:block bg-gray-100 dark:bg-gray-700 mt-1 p-1 w-32 rounded-md -ml-4 dark:!text-white text-black" style="z-index:9999">
+                                        <div class="px-1 py-1">
+                                            @if (CurrentTokens.SubscriptionTier == 1)
+                                            {
                                                 <p>Profesional: 8000 t/d </p>
-                                        }
-                                        else if (CurrentTokens.SubscriptionTier == 2)
-                                        {
+                                            }
+                                            else if (CurrentTokens.SubscriptionTier == 2)
+                                            {
                                                 <p>Casual: 2000 t/d </p>
-                                        }
-                                        else
-                                        {
+                                            }
+                                            else
+                                            {
                                                 <p>Free: 500 t/d </p>
-                                        }
-                                    </div>
-                                    <div class="px-1 py-1">
-                                        Daily: @CurrentTokens.Tokens
-                                    </div>
-                                    <div class="px-1 py-1">
-                                        Extra: @CurrentTokens.BoughtTokens
+                                            }
+                                        </div>
+                                        <div class="px-1 py-1">
+                                            Daily: @CurrentTokens.Tokens
+                                        </div>
+                                        <div class="px-1 py-1">
+                                            Extra: @CurrentTokens.BoughtTokens
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            }
+
 
                             <!-- Toggle Dark Mode -->
                             <label class="relative inline-flex items-center cursor-pointer border-0">

@@ -1,7 +1,8 @@
 ﻿@page "/paymentoptions"
 @using NodeBaseApi.Version2
 @inject HttpClient Http
-@inject IJSRuntime JSRuntime
+@inject NavigationManager NavMan
+
 
 <div class="dark:!bg-gray-600 bg-white">
     <div class="container px-6 py-8 mx-auto">
@@ -29,9 +30,9 @@
                     </li>
                 </ul>
 
-                <button href="home" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
+                <a href="home" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
                     Start free
-                </button>
+                </a>
             </div>
 
             <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white rounded-lg lg:mx-4 @(wallet.SubscriptionTier == 1 ? "border-4 border-green-500" : "border-2 border-gray-200") dark:!bg-gray-800 dark:border-gray-700">
@@ -60,8 +61,9 @@
                     </li>
                 </ul>
 
-                <button @onclick="() => SubscribeTokens(2000)" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
-                    Start subscription
+                <button @onclick="wallet.SubscriptionTier != 1 ? (() => SubscribeTokens(2000)) : null"
+                        class="@(wallet.SubscriptionTier == 1 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700") inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors rounded-lg focus:outline-none">
+                                @(wallet.SubscriptionTier == 1 ? "Current Plan" : "Start subscription")
                 </button>
             </div>
 
@@ -91,8 +93,9 @@
                     </li>
                 </ul>
 
-                <button @onclick="() => SubscribeTokens(8000)" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
-                    Start subscription
+                <button @onclick="wallet.SubscriptionTier != 2 ? (() => SubscribeTokens(8000)) : null"
+                        class="@(wallet.SubscriptionTier == 2 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700") inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors rounded-lg focus:outline-none">
+                                @(wallet.SubscriptionTier == 2 ? "Current Plan" : "Start subscription")
                 </button>
             </div>
         </div>
@@ -162,20 +165,43 @@
 
     private async Task PurchaseTokens(int tokenAmount)
     {
-        // Call the server endpoint with the token amount to create a Stripe session
-        var response = await Http.PostAsJsonAsync("your_api_endpoint/create-stripe-payment-session", new { TokenAmount = tokenAmount });
-        var sessionId = await response.Content.ReadAsStringAsync();
-
-        // JS interop to redirect to Stripe checkout
-        await JSRuntime.InvokeVoidAsync("redirectToStripe", sessionId);
+        try
+        {
+            var response = await Http.PostAsJsonAsync<int>("Stripe/create-payment-session", tokenAmount);
+            if (response.IsSuccessStatusCode)
+            {
+                var sessionData = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                NavMan.NavigateTo(sessionData["url"]);
+            }
+            else
+            {
+                // Handle errors (e.g., display a message to the user)
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error during PurchaseTokens: " + ex.Message);
+        }
     }
 
     private async Task SubscribeTokens(int tokenAmount)
     {
-        var response = await Http.PostAsJsonAsync("your_api_endpoint/create-subscription-session", new { TokenAmount = tokenAmount });
-        var sessionId = await response.Content.ReadAsStringAsync();
-
-        // JS interop to redirect to Stripe checkout
-        await JSRuntime.InvokeVoidAsync("redirectToStripe", sessionId);
+        try
+        {
+            var response = await Http.PostAsJsonAsync<int>("Stripe/create-subscription-session", tokenAmount);
+            if (response.IsSuccessStatusCode)
+            {
+                var sessionData = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                NavMan.NavigateTo(sessionData["url"]);
+            }
+            else
+            {
+                // Handle errors
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error during SubscribeTokens: " + ex.Message);
+        }
     }
 }

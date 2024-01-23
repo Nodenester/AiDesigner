@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -12,10 +13,11 @@ namespace NodeBaseApi.StripeController
     [Route("[controller]")]
     public class StripeController : ControllerBase
     {
-        [HttpPost("create-stripe-session")]
-        public async Task<IActionResult> CreateStripeSession([FromBody] TokenRequest request)
+        [HttpPost("create-payment-session")]
+        public async Task<ActionResult> CreateStripeSession([FromBody] int TokenAmount)
         {
-            int totalPrice = CalculatePrice(request.TokenAmount);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            int totalPrice = CalculatePrice(TokenAmount);
 
             var options = new SessionCreateOptions
             {
@@ -37,20 +39,26 @@ namespace NodeBaseApi.StripeController
                     },
                 },
                 Mode = "payment",
-                SuccessUrl = "https://example.com/success",
-                CancelUrl = "https://example.com/cancel",
+                SuccessUrl = "https://localhost:44310",
+                CancelUrl = "https://localhost:44310/paymentoptions",
+
+                Metadata = new Dictionary<string, string>
+                {
+                    { "userId", userId }
+                }
             };
 
             var service = new SessionService();
             Stripe.Checkout.Session session = await service.CreateAsync(options);
 
-            return Ok(new { SessionId = session.Id });
+            return Ok(new { SessionId = session.Id, Url = session.Url });
         }
 
         [HttpPost("create-subscription-session")]
-        public async Task<IActionResult> CreateSubscriptionSession([FromBody] TokenRequest request)
+        public async Task<ActionResult> CreateSubscriptionSession([FromBody] int TokenAmount)
         {
-            int totalPrice = CalculateSubPrice(request.TokenAmount);
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            string stripePriceId = GetStripePriceIdForSubscription(TokenAmount);
 
             var options = new SessionCreateOptions
             {
@@ -59,19 +67,23 @@ namespace NodeBaseApi.StripeController
                 {
                     new SessionLineItemOptions
                     {
-                        Price = $"price_{totalPrice}", // Replace with your Stripe price ID
+                        Price = stripePriceId, // Use the Stripe price ID
                         Quantity = 1,
                     },
                 },
                 Mode = "subscription",
-                SuccessUrl = "https://example.com/success",
-                CancelUrl = "https://example.com/cancel",
+                SuccessUrl = "https://localhost:44310",
+                CancelUrl = "https://localhost:44310/paymentoptions",
+                Metadata = new Dictionary<string, string>
+                {
+                    { "userId", userId }
+                }
             };
 
             var service = new SessionService();
             Stripe.Checkout.Session session = await service.CreateAsync(options);
 
-            return Ok(new { SessionId = session.Id });
+            return Ok(new { SessionId = session.Id, Url = session.Url });
         }
 
         private int CalculatePrice(int tokenAmount)
@@ -89,22 +101,17 @@ namespace NodeBaseApi.StripeController
             }
         }
 
-        private int CalculateSubPrice(int tokenAmount)
+        private string GetStripePriceIdForSubscription(int tokenAmount)
         {
             switch (tokenAmount)
             {
                 case 2000:
-                    return 999; // price in cents for $9.99
+                    return "price_1ObX2bGS8y7NleDORuIlzPCO"; // Replace with the Stripe price ID for $9.99
                 case 8000:
-                    return 2999; // price in cents for $29.99
+                    return "price_1ObX2bGS8y7NleDOvy9Btv2z"; // Replace with the Stripe price ID for $29.99
                 default:
                     throw new ArgumentException("Invalid token amount");
             }
         }
-    }
-
-    public class TokenRequest
-    {
-        public int TokenAmount { get; set; }
     }
 }
