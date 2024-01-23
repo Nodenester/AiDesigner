@@ -34,11 +34,17 @@
     <NotAuthorized>
         <!-- Added padding to the links for non-authorized view -->
         <div style="padding-left: 1rem; padding-right: 1rem;">
-            <a href="authentication/register" class="mr-2">Register</a>
-            <a href="authentication/login">Log in</a>
+            <a href="authentication/register" class="mr-2 hover-link dark:hover:!text-white hover:text-black">Register</a>
+            <a class="hover-link dark:hover:!text-white hover:text-black" href="authentication/login">Log in</a>
         </div>
     </NotAuthorized>
 </AuthorizeView>
+
+<style>
+    .dark .hover-link:hover {
+        color: white !important;
+    }
+</style>
 
 @code {
     private bool isDropdownOpen = false;
