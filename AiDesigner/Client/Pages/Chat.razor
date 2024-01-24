@@ -375,7 +375,7 @@
                             await Task.Delay(2000);
                             isExecutionFailed = false;
                         }
-                        else if (!selectedProgram.HasReview)
+                        else if (!selectedProgram.HasReview && selectedProgram is CustomProgram)
                         {
                             Random rnd = new Random();
                             if (rnd.Next(1, 21) == 1) // Generates a random number between 1 and 20

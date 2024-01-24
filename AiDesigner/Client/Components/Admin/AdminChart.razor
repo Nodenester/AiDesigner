@@ -67,14 +67,14 @@
     bool smooth = false;
     bool showDataLabels = false;
 
-    private string SelectedTime { get; set; } = "Day";  // Default to Month
+    private string SelectedTime { get; set; } = "Day";
     private Dropdown timeDropdown;
 
-    private void SelectTime(string time)
+    private async Task SelectTime(string time)
     {
         timeDropdown.ToggleDropdown();
         SelectedTime = time;
-        GroupData();  // Update data based on the selected time
+        await GetCalls();
     }
 
     class DataItem
@@ -103,39 +103,124 @@
 
     private async Task GetCalls()
     {
-        var response = await Http.GetAsync($"Chat/Call/GetLatest/{1000}");
-        if (response.IsSuccessStatusCode)
+        var user = CascAuth.User;
+        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        if (Guid.TryParse(userIdClaim, out Guid userId))
         {
-            var responseBody = await response.Content.ReadAsStringAsync();
+            var useId = userId.ToString();
 
-            var allCalls = JsonConvert.DeserializeObject<List<Call>>(responseBody);
-
-            allCalls.ForEach(call =>
+            var response = await Http.GetAsync($"Chat/Call/GetAggregatedDataForAdminAsync/{SelectedTime}");
+            if (response.IsSuccessStatusCode)
             {
-                if (call.StartTime.HasValue)
-                {
-                    call.StartTime = call.StartTime.Value.ToLocalTime();
-                }
-                if (call.EndTime.HasValue)
-                {
-                    call.EndTime = call.EndTime.Value.ToLocalTime();
-                }
-            });
+                var responseBody = await response.Content.ReadAsStringAsync();
+                var aggregatedDataList = JsonConvert.DeserializeObject<List<AggregatedData>>(responseBody);
 
-            Calls = allCalls
-                .GroupBy(call => call.StartTime)
-                .Select(group => group.First())
-                .ToList();
+                // Convert AggregatedData to DataItem
+                ShowCalls = aggregatedDataList.Select(ad => new DataItem
+                    {
+                        Date = ConvertDateToString(ad),
+                        Revenue = (double)ad.TotalRevenue,
+                        CallCount = (ad.CallCount * 20) + 0.6942
+                    }).ToList();
 
-            currentCalls = Calls;
+                StateHasChanged();
+            }
+            else
+            {
+                // Handle error response
+                // Example: Log the error, show an error message, etc.
+            }
+        }
+    }
 
-            StateHasChanged();
-            GroupData();
+    private string ConvertDateToString(AggregatedData ad)
+    {
+        // For year-level aggregation
+        if (ad.Month == null && ad.Day == null && ad.Hour == null)
+        {
+            return $"{ad.Year}";
+        }
+        // For month-level aggregation
+        else if (ad.Day == null && ad.Hour == null)
+        {
+            return $"{ad.Year}-{ad.Month:00}";
+        }
+        // For day-level aggregation
+        else if (ad.Hour == null)
+        {
+            return $"{ad.Year}-{ad.Month:00}-{ad.Day:00}";
+        }
+        // For hour-level aggregation (within a day)
+        else
+        {
+            return $"{ad.Hour:00}:00";
+        }
+    }
+
+    private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
+    {
+        int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
+        return dt.AddDays(-1 * diff).Date;
+    }
+
+    string FormatAsTokens(object value)
+    {
+        double numberValue = Convert.ToDouble(value);
+        if (numberValue.ToString().Contains(".6942"))
+        {
+            return $"{(numberValue - 0.6942) / 20}";
         }
         else
         {
-            Console.WriteLine("Failed to get calls");
+            return $"{numberValue}";
         }
+    }
+
+    string FormatAsMonth(object value)
+    {
+        if (value != null)
+        {
+            switch (SelectedTime)
+            {
+                case "Year":
+                    if (DateTime.TryParseExact(value.ToString(), "yyyy-MM", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateYear))
+                    {
+                        return dateYear.ToString("MMM");
+                    }
+                    break;
+                case "Month":
+                    if (DateTime.TryParseExact(value.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateMonth))
+                    {
+                        return dateMonth.ToString("dd");
+                    }
+                    break;
+                case "Week":
+                    if (DateTime.TryParseExact(value.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out DateTime dateWeek))
+                    {
+                        return dateWeek.ToString("dd MMM");
+                    }
+                    break;
+                case "Day":
+                    return value.ToString() + ":00";
+            }
+        }
+
+        return string.Empty;
+    }
+
+    private void SetCurrentCalls()
+    {
+        if (Calls == null)
+        {
+            Console.WriteLine("Calls is null");
+            return;
+        }
+
+        currentCalls = Calls;
+
+        // Logging the count of currentCalls to console
+        Console.WriteLine(currentCalls.Count());
+        GroupData();
     }
 
     private void GroupData()
@@ -263,46 +348,6 @@
         }
 
         ShowCalls.AddRange(groupedData);
-    }
-
-    private DateTime StartOfWeek(DateTime dt, DayOfWeek startOfWeek)
-    {
-        int diff = (7 + (dt.DayOfWeek - startOfWeek)) % 7;
-        return dt.AddDays(-1 * diff).Date;
-    }
-
-    string FormatAsTokens(object value)
-    {
-        double numberValue = Convert.ToDouble(value);
-        if (numberValue.ToString().Contains(".6942"))
-        {
-            return $"{(numberValue - 0.6942) / 10}";
-        }
-        else
-        {
-            return $"{numberValue}";
-        }
-    }
-
-    string FormatAsMonth(object value)
-    {
-        if (value != null)
-        {
-            switch (SelectedTime)
-            {
-                case "Year":
-                    return DateTime.ParseExact(value.ToString(), "yyyy-MM", CultureInfo.InvariantCulture).ToString("MMM");
-                case "Month":
-                    return DateTime.ParseExact(value.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd");
-                case "Week":
-                    return DateTime.ParseExact(value.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture).ToString("dd MMM");
-                case "Day":
-                    return value.ToString() + ":00";
-                default:
-                    return value.ToString();
-            }
-        }
-
-        return string.Empty;
+        StateHasChanged();
     }
 }
