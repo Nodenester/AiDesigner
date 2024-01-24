@@ -98,7 +98,7 @@
                 Console.WriteLine("------------------------------------------------------------");
             }
 
-            var response = await Http.PostAsJsonAsync("Chat/News/Create", newsArticle);
+            var response = await Http.PostAsJsonAsync("Admin/News/Create", newsArticle);
 
             if (!response.IsSuccessStatusCode)
             {

@@ -100,25 +100,6 @@ namespace NodeBaseApi.Controllers
             }
         }
 
-        // POST api/Chat/News/Create
-        [HttpPost("News/Create")]
-        public async Task<ActionResult> CreateNews([FromBody] NewsArticle article)
-        {
-            try
-            {
-                await _dbConnection.CreateArticleAsync(article.Id, article.Title, article.Content, article.ImageData);
-
-                return Ok("Article created successfully.");
-            }
-            catch (Exception ex)
-            {
-                // Log the exception details
-                Console.WriteLine(ex);
-                // Return a 500 status code
-                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
-            }
-        }
-
         //Token stuff
         // POST api/Chat/GetCreateWallet
         [HttpPost("Wallet/GetCreateWallet")]
@@ -171,22 +152,6 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
-
-        [HttpGet("Call/GetAggregatedDataForAdminAsync/{timeFrame}")]
-        public async Task<ActionResult<IEnumerable<AggregatedData>>> GetAggregatedData(string timeFrame)
-        {
-            try
-            {
-                var aggregatedData = await _dbConnection.GetAggregatedDataForAdminAsync(timeFrame);
-                return Ok(aggregatedData);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
-            }
-        }
-
 
         // GET api/Chat/Call/GetByUserId/{userId}
         [HttpGet("Call/GetByUserId/{userId}")]
