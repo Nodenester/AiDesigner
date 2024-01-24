@@ -74,7 +74,9 @@
                                 {
                                     @foreach (var output in ProgramChatOutput[AP.Id])
                                     {
-                                        <OutputDisplay OutputItem="@output" />
+                                        <div style="min-width: 100%;">
+                                            <OutputDisplay OutputItem="@output" />
+                                        </div>
                                     }
                                 }
                             </div>
@@ -84,7 +86,7 @@
                                 <p class="text-lg font-semibold">Chat Input:</p>
                                 @foreach (var input in AP.ProgramStructure.ProgramStart)
                                 {
-                                    if (input.Name == "Start")
+                                    if (input.Name == "Start" || input.Name == "Chat History")
                                     {
                                         continue;
                                     }
@@ -193,10 +195,9 @@
 
     private async Task ExecuteProgram()
     {
-
         if (AP.SupportsChat)
         {
-            AP.ProgramStructure.InputValues[AP.ProgramStructure.ProgramStart[1].Id] = ProgramChatOutput;
+            AP.ProgramStructure.InputValues[AP.ProgramStructure.ProgramStart[1].Id] = ProgramChatOutput.Values;
         }
 
         var nonNullInputValues = AP.ProgramStructure.InputValues

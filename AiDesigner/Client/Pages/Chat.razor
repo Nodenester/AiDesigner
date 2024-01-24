@@ -150,7 +150,9 @@
                     {
                         @foreach (var output in ProgramChatOutput[selectedProgram.Id])
                         {
-                            <OutputDisplay OutputItem="@output" />
+                            <div style="min-width: 100%;"> 
+                                <OutputDisplay OutputItem="@output" />
+                            </div>
                         }
                     }
                 </div>
@@ -160,7 +162,7 @@
                     <p class="text-lg font-semibold mb-2">Chat Input</p>
                     @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
                     {
-                        if (input.Name == "Start")
+                        if (input.Name == "Start" || input.Name == "Chat History")
                         {
                             continue;
                         }
@@ -303,7 +305,7 @@
         {
             if (selectedProgram.SupportsChat)
             {
-                selectedProgram.ProgramStructure.InputValues[selectedProgram.ProgramStructure.ProgramStart[1].Id] = ProgramChatOutput;
+                selectedProgram.ProgramStructure.InputValues[selectedProgram.ProgramStructure.ProgramStart[1].Id] = ProgramChatOutput.Values;
             }
 
             var nonNullInputValues = selectedProgram.ProgramStructure.InputValues

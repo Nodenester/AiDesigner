@@ -1525,6 +1525,7 @@
     private async void HandleChange(ChangeEventArgs e)
     {
         bool isChecked = Convert.ToBoolean(e.Value);
+        localProgram.SupportsChat = isChecked;
         if(!isChecked)
         {
             RemoveConnection(localProgram.ProgramStructure.ProgramStart[1].Id.ToString());
