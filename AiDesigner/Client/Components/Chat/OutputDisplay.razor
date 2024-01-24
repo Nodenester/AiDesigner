@@ -45,6 +45,18 @@
             case int number:
                 builder.AddContent(11, number.ToString());
                 break;
+            case long longNumber:
+                builder.AddContent(11, longNumber.ToString());
+                break;
+            case float floatNumber:
+                builder.AddContent(11, floatNumber.ToString("0.######")); // Adjust format as needed
+                break;
+            case double doubleNumber:
+                builder.AddContent(11, doubleNumber.ToString("0.######")); // Adjust format as needed
+                break;
+            case decimal decimalNumber:
+                builder.AddContent(11, decimalNumber.ToString("0.######")); // Adjust format as needed
+                break;
             case bool boolean:
                 builder.AddContent(12, boolean ? "True" : "False");
                 break;
