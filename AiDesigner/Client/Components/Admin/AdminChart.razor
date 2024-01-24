@@ -109,7 +109,7 @@
         {
             var useId = userId.ToString();
 
-            var response = await Http.GetAsync($"Chat/Call/GetAggregatedDataForAdminAsync/{SelectedTime}");
+            var response = await Http.GetAsync($"Admin/Call/GetAggregatedDataForAdminAsync/{SelectedTime}");
             if (response.IsSuccessStatusCode)
             {
                 var responseBody = await response.Content.ReadAsStringAsync();
