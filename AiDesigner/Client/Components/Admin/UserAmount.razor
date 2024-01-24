@@ -1,0 +1,63 @@
+﻿@using Newtonsoft.Json
+@inject HttpClient Http
+
+<div class="flex space-x-4 dark:!bg-gray-800 p-4 rounded-lg mt-4">
+    <div class="text-white">
+        <p style="font-size: 1.5rem;">Total Users: @totalUsers</p>
+    </div>
+    <div class="text-white">
+        <p style="font-size: 1.5rem;">Users with Subscriptions: @usersWithSubscriptions</p>
+    </div>
+</div>
+
+@code {
+    private int totalUsers = 0;
+    private int usersWithSubscriptions = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        totalUsers = await GetTotalUsersCount();
+        usersWithSubscriptions = await GetNonZeroSubscriptionCount();
+    }
+
+    private async Task<int> GetTotalUsersCount()
+    {
+        var response = await Http.GetAsync("Admin/UserCount");
+        if (response.IsSuccessStatusCode)
+        {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var userCountResponse = JsonConvert.DeserializeObject<UserCountResponse>(responseBody);
+            return userCountResponse.TotalUsers;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    private async Task<int> GetNonZeroSubscriptionCount()
+    {
+        var response = await Http.GetAsync("Admin/NonZeroSubscriptionCount");
+        if (response.IsSuccessStatusCode)
+        {
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var subscriptionCountResponse = JsonConvert.DeserializeObject<SubscriptionCountResponse>(responseBody);
+            return subscriptionCountResponse.NonZeroSubscriptions;
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    public class UserCountResponse
+    {
+        public int TotalUsers { get; set; }
+    }
+
+    public class SubscriptionCountResponse
+    {
+        public int NonZeroSubscriptions { get; set; }
+    }
+
+}

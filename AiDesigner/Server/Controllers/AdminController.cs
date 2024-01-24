@@ -72,5 +72,45 @@ namespace AiDesigner.Server.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+
+        // GET Admin/UserCount
+        [HttpGet("UserCount")]
+        public async Task<ActionResult> GetUserCount()
+        {
+            try
+            {
+                int userCount = await _dbConnection.GetTotalUsersCountAsync();
+
+                return Ok(new { TotalUsers = userCount });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                Console.WriteLine(ex);
+                // Return a 500 status code
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+        // GET Admin/NonZeroSubscriptionCount
+        [HttpGet("NonZeroSubscriptionCount")]
+        public async Task<ActionResult> GetNonZeroSubscriptionCount()
+        {
+            try
+            {
+                int count = await _dbConnection.GetNonZeroSubscriptionCountAsync();
+
+                return Ok(new { NonZeroSubscriptionCount = count });
+            }
+            catch (Exception ex)
+            {
+                // Log the exception details
+                Console.WriteLine(ex);
+                // Return a 500 status code
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
+
     }
 }

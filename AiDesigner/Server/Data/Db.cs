@@ -1791,6 +1791,37 @@ ORDER BY
             }
         }
 
+        public async Task<int> GetTotalUsersCountAsync()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    SELECT COUNT(*)
+                    FROM AspNetUsers;
+                ";
+
+                int userCount = await connection.ExecuteScalarAsync<int>(query);
+
+                return userCount;
+            }
+        }
+
+        public async Task<int> GetNonZeroSubscriptionCountAsync()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+                    SELECT COUNT(*)
+                    FROM TokenWallet
+                    WHERE SubscriptionTier IS NOT NULL AND SubscriptionTier <> 0;
+                ";
+
+                int count = await connection.ExecuteScalarAsync<int>(query);
+
+                return count;
+            }
+        }
+
 
     }
 }
