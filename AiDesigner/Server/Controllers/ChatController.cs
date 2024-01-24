@@ -172,6 +172,21 @@ namespace NodeBaseApi.Controllers
             }
         }
 
+        [HttpGet("Call/GetAggregatedDataForAdminAsync/{timeFrame}")]
+        public async Task<ActionResult<IEnumerable<AggregatedData>>> GetAggregatedData(string timeFrame)
+        {
+            try
+            {
+                var aggregatedData = await _dbConnection.GetAggregatedDataForAdminAsync(timeFrame);
+                return Ok(aggregatedData);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
+            }
+        }
+
 
         // GET api/Chat/Call/GetByUserId/{userId}
         [HttpGet("Call/GetByUserId/{userId}")]

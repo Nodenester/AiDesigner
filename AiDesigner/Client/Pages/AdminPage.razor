@@ -1,4 +1,5 @@
 ﻿@page "/Admin-Page"
+@using AiDesigner.Client.Components.Admin
 @using Microsoft.AspNetCore.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using NodeBaseApi.Version2;
@@ -16,7 +17,7 @@
         </div>
         <!-- Column 2 -->
         <div class="flex-grow p-4 max-w-screen-xl">
-            <AiDesigner.Client.Components.AdminChart/>
+            <AdminChart/>
         </div>
         <!-- Column 3 -->
         <div class="p-0 pl-2 grid grid-cols-1 gap-0">

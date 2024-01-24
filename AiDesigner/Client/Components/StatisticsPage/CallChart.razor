@@ -266,53 +266,6 @@
         return string.Empty;
     }
 
-
-    // private async Task GetCalls()
-    // {
-    //     var user = CascAuth.User;
-    //     var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-    //     if (Guid.TryParse(userIdClaim, out Guid userId))
-    //     {
-    //         var response = await Http.GetAsync($"Chat/Call/GetByUserId/{userId}");
-    //         if (response.IsSuccessStatusCode)
-    //         {
-    //             var responseBody = await response.Content.ReadAsStringAsync();
-
-    //             var allCalls = JsonConvert.DeserializeObject<List<Call>>(responseBody);
-
-    //             allCalls.ForEach(call =>
-    //             {
-    //                 if (call.StartTime.HasValue)
-    //                 {
-    //                     call.StartTime = call.StartTime.Value.ToLocalTime();
-    //                 }
-    //                 if (call.EndTime.HasValue)
-    //                 {
-    //                     call.EndTime = call.EndTime.Value.ToLocalTime();
-    //                 }
-    //             });
-
-    //             Calls = allCalls
-    //                 .GroupBy(call => call.StartTime)
-    //                 .Select(group => group.First())
-    //                 .ToList();
-
-    //             Programs = EAPs
-    //                 .OfType<CustomProgram>()
-    //                 .Where(customProgram => Calls.Any(call => call.ProgramId == customProgram.Id.ToString()))
-    //                 .ToList();
-
-    //             StateHasChanged();
-    //             SetCurrentCalls();
-    //         }
-    //         else
-    //         {
-    //             var errorBody = await response.Content.ReadAsStringAsync();
-    //             Console.WriteLine(errorBody);  // Log the error response body to see what's being returned
-    //         }
-    //     }
-    // }
-
     private void SetCurrentCalls()
     {
         if (Calls == null)
