@@ -37,10 +37,10 @@
                         <label for="IsPublic" class="ml-2 text-sm text-gray-700 dark:text-white">Show Labels</label>
                     </div>
                     <Dropdown @ref="timeDropdown" Selected="@SelectedTime" width="w-24">
-                        <button @onclick="@(() => SelectTime("Day"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Day" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Day</button>
-                        <button @onclick="@(() => SelectTime("Week"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Week" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Week</button>
-                        <button @onclick="@(() => SelectTime("Month"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Month" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Month</button>
-                        <button @onclick="@(() => SelectTime("Year"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Year" ? "bg-gray-600" : "") dark:hover:bg-gray-600">Year</button>
+                        <button @onclick="@(() => SelectTime("Day"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Day" ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">Day</button>
+                        <button @onclick="@(() => SelectTime("Week"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Week" ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">Week</button>
+                        <button @onclick="@(() => SelectTime("Month"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Month" ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">Month</button>
+                        <button @onclick="@(() => SelectTime("Year"))" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 @(SelectedTime == "Year" ? "bg-white dark:!bg-gray-600" : "") hover:bg-white dark:hover:bg-gray-600">Year</button>
                     </Dropdown>
                 </div>
             </RadzenCard>
