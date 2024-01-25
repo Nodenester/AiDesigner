@@ -1806,19 +1806,26 @@ ORDER BY
             }
         }
 
-        public async Task<int> GetNonZeroSubscriptionCountAsync()
+        public async Task<(int, int)> GetSubscriptionCountsByTierAsync()
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                var query = @"
-                    SELECT COUNT(*)
-                    FROM TokenWallet
-                    WHERE SubscriptionTier IS NOT NULL AND SubscriptionTier <> 0;
-                ";
+                await connection.OpenAsync();
+                var queryTier1 = @"
+            SELECT COUNT(*)
+            FROM TokenWallet
+            WHERE SubscriptionTier = 1;
+        ";
+                var queryTier2 = @"
+            SELECT COUNT(*)
+            FROM TokenWallet
+            WHERE SubscriptionTier = 2;
+        ";
 
-                int count = await connection.ExecuteScalarAsync<int>(query);
+                int countTier1 = await connection.ExecuteScalarAsync<int>(queryTier1);
+                int countTier2 = await connection.ExecuteScalarAsync<int>(queryTier2);
 
-                return count;
+                return (countTier1, countTier2);
             }
         }
 

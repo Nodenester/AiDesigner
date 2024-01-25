@@ -92,15 +92,14 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
-        // GET Admin/NonZeroSubscriptionCount
-        [HttpGet("NonZeroSubscriptionCount")]
-        public async Task<ActionResult> GetNonZeroSubscriptionCount()
+        [HttpGet("SubscriptionCountsByTier")]
+        public async Task<ActionResult> GetSubscriptionCountsByTier()
         {
             try
             {
-                int count = await _dbConnection.GetNonZeroSubscriptionCountAsync();
+                var (countTier1, countTier2) = await _dbConnection.GetSubscriptionCountsByTierAsync();
 
-                return Ok(new { NonZeroSubscriptionCount = count });
+                return Ok(new { Tier1Count = countTier1, Tier2Count = countTier2 });
             }
             catch (Exception ex)
             {

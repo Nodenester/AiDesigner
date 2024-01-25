@@ -6,18 +6,21 @@
         <p style="font-size: 1.5rem;">Total Users: @totalUsers</p>
     </div>
     <div class="text-white">
-        <p style="font-size: 1.5rem;">Users with Subscriptions: @usersWithSubscriptions</p>
+        <p style="font-size: 1.5rem;">Tier 1 Subs: @Subscribers.Tier1Count</p>
+    </div>
+    <div class="text-white">
+        <p style="font-size: 1.5rem;">Tier 2 Subs: @Subscribers.Tier2Count</p>
     </div>
 </div>
 
 @code {
     private int totalUsers = 0;
-    private int usersWithSubscriptions = 0;
+    private SubscriptionCountResponse Subscribers = new SubscriptionCountResponse();
 
     protected override async Task OnInitializedAsync()
     {
         totalUsers = await GetTotalUsersCount();
-        usersWithSubscriptions = await GetNonZeroSubscriptionCount();
+        Subscribers = await GetNonZeroSubscriptionCount();
     }
 
     private async Task<int> GetTotalUsersCount()
@@ -35,18 +38,18 @@
         }
     }
 
-    private async Task<int> GetNonZeroSubscriptionCount()
+    private async Task<SubscriptionCountResponse> GetNonZeroSubscriptionCount()
     {
-        var response = await Http.GetAsync("Admin/NonZeroSubscriptionCount");
+        var response = await Http.GetAsync("Admin/SubscriptionCountsByTier");
         if (response.IsSuccessStatusCode)
         {
             var responseBody = await response.Content.ReadAsStringAsync();
             var subscriptionCountResponse = JsonConvert.DeserializeObject<SubscriptionCountResponse>(responseBody);
-            return subscriptionCountResponse.NonZeroSubscriptions;
+            return subscriptionCountResponse;
         }
         else
         {
-            return 0;
+            return new SubscriptionCountResponse();
         }
     }
 
@@ -57,7 +60,8 @@
 
     public class SubscriptionCountResponse
     {
-        public int NonZeroSubscriptions { get; set; }
+        public int Tier1Count { get; set; }
+        public int Tier2Count { get; set; }
     }
 
 }
