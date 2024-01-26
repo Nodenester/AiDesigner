@@ -806,7 +806,7 @@ window.initializeContextMenu = function () {
         var relativeX = (pageX - canvasX - 50) / currentZoom;
         var relativeY = (pageY - canvasY) / currentZoom;
 
-        if (elementUnderCursor.textContent.includes("‎") && elementUnderCursor.classList.contains('small-font')) {
+        if (elementUnderCursor.textContent.includes("\u200B") && elementUnderCursor.classList.contains('small-font')) {
             inputContextMenu.style.display = "block";
             inputContextMenu.style.left = `${pageX}px`;
             inputContextMenu.style.top = `${pageY}px`;
