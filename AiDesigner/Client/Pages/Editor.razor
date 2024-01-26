@@ -185,7 +185,7 @@
                                                         @output.Value.Name
                                                         @if (output.Index > 1)
                                                         {
-                                                            <text>‎</text>
+                                                            <text>&#8203;</text>
                                                         }
                                                     </span>
                                                     <div id="@output.Value.Id" class="@GetShape(output.Value.Type.ToString(), output.Value.IsList) @GetColor(output.Value.Type.ToString()) Connection" @onclick="() => SelectOutput(output.Value)"></div>
@@ -217,9 +217,9 @@
                                                 <div id="@input.Value.Id" class="@GetShape(input.Value.Type.ToString(), input.Value.IsList) @GetColor(input.Value.Type.ToString()) Connection" @onclick="() => TryConnect(input.Value)"></div>
                                                 <span class="small-font">
                                                     @input.Value.Name
-                                                    @if (input.Index != 0) // Adding the character for all but the first item
+                                                    @if (input.Index != 0) 
                                                     {
-                                                        <text>‎</text> <!-- Replace 'YourCharacter' with the desired character -->
+                                                        <text>&#8203;</text>
                                                     }
                                                 </span>
                                             </div>
@@ -378,7 +378,13 @@
                                                          class="@GetShape(input.Type.ToString(), input.IsList) @GetColor(input.Type.ToString()) Connection"
                                                          @onclick="() => TryConnect(input)">
                                                     </div>
-                                                    <span class="small-font">@input.Name</span>
+                                                    @if (input.Name.Contains(" &#8203;"))
+                                                    {
+                                                        <span class="small-font">@input.Name.Replace(" &#8203;", "\u200B")</span>
+                                                    }
+                                                    else{
+                                                        <span class="small-font">@input.Name</span>
+                                                    }
                                                 </div>
                                             }
                                             @if (node.Block.Name == "Select")
@@ -1346,7 +1352,7 @@
         int idx = node.Block.Outputs.Count();
         node.Block.Outputs.Add(new Output
         {
-            Name = $"Case‎ {idx}",
+            Name = $"Case &#8203; {idx}",
             Type = NodeBaseApi.Version2.Type.Trigger,
             Description = $"Triggered for case {idx}.",
         });
@@ -1363,7 +1369,7 @@
         node.Block.Inputs.Add(new Input
             {
                 Id = Guid.NewGuid(),
-                Name = $"{text.Split(' ')[0]}‎ {idx}",
+                Name = $"{text.Split(' ')[0]} &#8203; {idx}",
                 Type = node.Block.Inputs[1].Type,
                 Description = $"{text} {idx}.",
             });
