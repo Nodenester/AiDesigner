@@ -1,4 +1,5 @@
-﻿@using NodeBaseApi.Version2
+﻿@using Newtonsoft.Json
+@using NodeBaseApi.Version2
 @using AiDesigner.Shared
 @using System.ComponentModel.DataAnnotations
 @using AiDesigner.Client.Modals
@@ -120,7 +121,6 @@
             switch (SelectedLanguage)
             {
                 case "curl":
-                    // cURL variant
                     code = $"# cURL command for {(SelectedProgram?.Name ?? "Untitled")}\n";
                     string curlUrl = $"{baseUrl}/api/Program/execute?programKey={programKey}&apiKey={apiKey}";
 
@@ -129,9 +129,30 @@
                         curlUrl += $"&sessionId={sessionId}";
                     }
 
+                    // Initialize JSON input values as a dictionary
+                    Dictionary<string, object> inputValues = new Dictionary<string, object>();
+                    if (SelectedProgram?.ProgramStructure?.ProgramStart != null)
+                    {
+                        foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
+                        {
+                            if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
+                            {
+                                inputValues[input.Id.ToString()] = "value";
+                            }
+                            else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
+                            {
+                                inputValues[input.Id.ToString()] = "Chathistory";
+                            }
+                        }
+                    }
+
+                    // Convert inputValues dictionary to a JSON string
+                    string jsonPayload = JsonConvert.SerializeObject(inputValues);
+
+                    // Construct the cURL command
                     code += $"curl -X POST \"{curlUrl}\" \\\n"; // Break line here
                     code += $"  -H 'Content-Type: application/json' \\\n"; // Break line here
-                    code += $"  -d '{jsonInputValues}'\n"; // Assuming jsonInputValues is a JSON string
+                    code += $"  -d '{jsonPayload}'\n"; // Using the JSON payload
                     break;
                 case "csharp":
                     code = code = $"// C# Code for {(SelectedProgram?.Name ?? "Untitled")}\n " +
@@ -171,9 +192,13 @@ Dictionary<Guid, object> inputValues = new Dictionary<Guid, object>();
                     {
                         foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
                         {
-                            if (input.Type.ToString() != "Trigger")
+                            if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
                             {
                                 code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //value is {input.Type}\n";
+                            }
+                            else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
+                            {
+                                code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //Chathistoy is list of {input.Type}s\n";
                             }
 
                         }
@@ -206,23 +231,17 @@ api_key = 'your_api_key'
 session_id = 'your_session_id' # or None if not available
 ";
                     code += @"
-input_values = {}
+input_values = {}                                                   
 ";
                     foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
                     {
-                        if (input.Type.ToString() != "Trigger")
+                        if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
                         {
                             code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
                         }
-                    }
-                    code += @"
-result = execute_program(program_key, api_key, input_values, session_id)
-";
-                    foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
-                    {
-                        if (input.Type.ToString() != "Trigger")
+                        else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
                         {
-                            code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
+                            code += $"input_values['{input.Id}'] = value  # Chathistoy is list of {input.Type}s\n";
                         }
                     }
                     code += @"
@@ -258,10 +277,15 @@ const inputValues =";
 {}";
                     foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
                     {
-                        if (input.Type.ToString() != "Trigger")
+                        if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
                         {
                             code += $"inputValues['{input.Id}'] = value;  // value is {input.Type}\n";
                         }
+                        else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
+                        {
+                            code += $"inputValues['{input.Id}'] = value;  // Chathistoy is list of {input.Type}s\n";
+                        }
+
                     }
                     code += @"
 const result = await executeProgram(programKey, apiKey, inputValues, sessionId);

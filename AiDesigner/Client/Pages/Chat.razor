@@ -305,6 +305,20 @@
         {
             if (selectedProgram.SupportsChat)
             {
+                var userInputValues = selectedProgram.ProgramStructure.InputValues
+                    .Where(kvp => kvp.Value != null && kvp.Key != selectedProgram.ProgramStructure.ProgramStart[1].Id)
+                    .Select(kvp => kvp.Value)
+                    .ToList();
+
+                if (!ProgramChatOutput.ContainsKey(selectedProgram.Id))
+                {
+                    ProgramChatOutput[selectedProgram.Id] = new List<object>();
+                }
+
+                // Add the extracted user input values to the ProgramChatOutput
+                ProgramChatOutput[selectedProgram.Id].AddRange(userInputValues);
+
+                // Set the appropriate InputValue to contain the entire chat history
                 selectedProgram.ProgramStructure.InputValues[selectedProgram.ProgramStructure.ProgramStart[1].Id] = ProgramChatOutput.Values;
             }
 
