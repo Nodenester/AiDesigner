@@ -32,29 +32,6 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
-    public class DALLEBlock : Block
-    {
-        public DALLEBlock()
-        {
-            Id = Guid.NewGuid();
-            Name = "DALL-E Block";
-            Description = "Generates images using the DALL-E model";
-
-            Inputs = new List<Input>
-        {
-            new Input { Name = "API Key", Type = Type.String, IsRequired = true, Description = "Your OpenAI API key" },
-            new Input { Name = "Prompt", Type = Type.String, IsRequired = true, Description = "The text prompt to generate an image from" }
-        };
-
-            Outputs = new List<Output>
-        {
-            new Output { Name = "Generated Image", Type = Type.Picture, Description = "The generated image" }
-        };
-        }
-
-        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
-    }
-
     //public class WhisperASRBlock : Block
     //{
     //    public WhisperASRBlock()

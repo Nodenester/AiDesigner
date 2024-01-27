@@ -36,7 +36,6 @@ JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
-
 //builder.Services.AddIdentityServer()
 //    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
