@@ -61,6 +61,25 @@
             </ul>
         </div>
 
+        <!-- Mixtral8x7b Block -->
+        <div class="mb-4 bg-gray-700 p-4 rounded">
+            <h3 class="text-xl font-bold mb-2">Llama213b Block</h3>
+            <p>Mixtral 8x7b API integration block.</p>
+            <h4 class="font-bold mt-2">Inputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>Query: The input query for the Mixtral 8x7b API (Type: String) <span class="text-red-500">*</span></li>
+                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number)</li>
+                <li>TopP: Top P value for controlling randomness (Type: Number)</li>
+                <li>Temperature: Temperature value for controlling creativity (Type: Number)</li>
+                <li>StopWords: List of words where the AI should stop generating text (Type: String) [List]</li>
+                <li>ReturnFullText: Whether to include the input prompt in the API response (Type: Boolean)</li>
+            </ul>
+            <h4 class="font-bold">Outputs:</h4>
+            <ul class="list-disc pl-4 ml-6 mb-2">
+                <li>ApiResponse: The API response from Mixtral 8x7b (Type: String)</li>
+            </ul>
+        </div>
+
         <!-- Llama270b Block -->
         <div class="mb-4 bg-gray-700 p-4 rounded">
             <h3 class="text-xl font-bold mb-2">Llama270b Block</h3>
@@ -83,10 +102,15 @@
         <!-- CodeLlama34b Block -->
         <div class="mb-4 bg-gray-700 p-4 rounded">
             <h3 class="text-xl font-bold mb-2">CodeLlama34b Block</h3>
-            <p>CodeLlama 34b API Integration.</p>
+            <p>CodeLlama 34b API integration block.</p>
             <h4 class="font-bold mt-2">Inputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
                 <li>Query: The input query for the CodeLlama 34b API (Type: String) <span class="text-red-500">*</span></li>
+                <li>MaxNewTokens: Maximum new tokens to be generated (Type: Number)</li>
+                <li>TopP: Top P value for controlling randomness (Type: Number)</li>
+                <li>Temperature: Temperature value for controlling creativity (Type: Number)</li>
+                <li>StopWords: List of words where the AI should stop generating text (Type: String) [List]</li>
+                <li>ReturnFullText: Whether to include the input prompt in the API response (Type: Boolean)</li>
             </ul>
             <h4 class="font-bold">Outputs:</h4>
             <ul class="list-disc pl-4 ml-6 mb-2">
