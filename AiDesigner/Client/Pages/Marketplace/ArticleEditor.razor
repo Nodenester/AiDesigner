@@ -87,6 +87,18 @@
                         Update
                     </button>
                 }
+                @if (SelectedArticle.ProgramImage != null && !generating)
+                {
+                    <button @onclick="GenerateImage" class="bg-blue-600 hover:bg-blue-700 text-white font-bold ml-4 py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
+                        Regenerate image
+                    </button>
+                }
+                else if (generating)
+                {
+                    <button class="bg-gray-500 text-white font-bold py-2 px-4 rounded mt-4 ml-4 transition duration-200 ease-in-out">
+                        Loading...
+                    </button>
+                }
             </div>
         }
     </div>
@@ -101,6 +113,7 @@
 
     bool isLoading { get; set; } = false;
     bool gettingImage, gettingDescription;
+    bool generating { get; set; } = false;
 
     protected override async Task OnParametersSetAsync()
     {
@@ -168,6 +181,7 @@
 
     private async Task GenerateImage()
     {
+        generating = true;
         HttpResponseMessage response = await Http.PostAsJsonAsync("Workshop/generate-article-image", SelectedArticle);
         if (response.IsSuccessStatusCode)
         {
@@ -180,6 +194,7 @@
             var errorResponse = await response.Content.ReadAsStringAsync();
             Console.WriteLine("Error generating image: " + response.StatusCode + ", Details: " + errorResponse);
         }
+        generating = false;
     }
 
     private async Task GenerateDescription()
