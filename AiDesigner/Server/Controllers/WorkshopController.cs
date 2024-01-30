@@ -283,7 +283,11 @@ namespace AiDesigner.Server.Controllers
 
                 var program = await _dbConnection.LoadProgramAsync(Guid.Parse(article.ProgramId)); // Ensure this is awaited
 
-                string prompt = $"Create a logo for the program named '{program.Name}' described as: {program.Description}";
+                // Generate a random character to append to the prompt to avoid caching
+                Random random = new Random();
+                char randomChar = (char)('a' + random.Next(0, 26)); // Generate a random lowercase letter (a-z)
+
+                string prompt = $"Create a logo for the program named '{program.Name}' described as: {program.Description} {randomChar}";
 
                 var content = new StringContent(
                     System.Text.Json.JsonSerializer.Serialize(new { inputs = prompt }),
@@ -312,7 +316,6 @@ namespace AiDesigner.Server.Controllers
                 return StatusCode(500, new { Message = "An error occurred while processing your request" });
             }
         }
-
 
         [HttpPost("generate-article-description")]
         public async Task<IActionResult> GenerateArticleDescription([FromBody] WorkshopArticle article)

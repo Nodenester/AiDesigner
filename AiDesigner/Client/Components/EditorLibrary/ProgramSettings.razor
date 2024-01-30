@@ -50,7 +50,14 @@
             *@      <button @onclick="ReleaseProgram" class="ml-4 px-4 py-2 text-white bg-gray-600 hover:bg-gray-500 rounded" type="button">
                         Release Program
                     </button>
-                    <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
+                    @if (!Saving)
+                    {
+                        <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
+                    }
+                    else
+                    {
+                        <button class="ml-4 px-4 py-2 text-white bg-gray-500 rounded">Saving</button>
+                    }
                 </div>
             }
             else if (localProgram is CustomBlockProgram)
@@ -61,7 +68,14 @@
                     <button @onclick="ReleaseProgram" class="ml-4 px-4 py-2 text-white bg-gray-600 hover:bg-gray-500 rounded" type="button">
                         Release Program
                     </button>
-                    <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
+                    @if(!Saving)
+                    {
+                        <button @onclick="SaveSettingsProgram" class="ml-4 px-4 py-2 text-white bg-green-600 hover:bg-green-700 rounded">Save</button>
+                    }
+                    else
+                    {
+                        <button class="ml-4 px-4 py-2 text-white bg-gray-500 rounded">Saving</button>
+                    }
                 </div>
             }
         </div>
@@ -321,10 +335,13 @@ const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
         await SelectedProgramChanged.InvokeAsync(newProgram);
     }
 
+    bool Saving = false;
     private async Task SaveSettingsProgram()
     {
-        // Update SelectedProgram with localProgram and notify the parent component
+        Saving = true;
         await UpdateSelectedProgram(Clone(localProgram));
+        await Task.Delay(200);
+        Saving = false;
     }
 
     // Clone method
@@ -408,6 +425,11 @@ const result = await executeProgram(programKey, apiKey, inputValues, sessionId);
                     Status = "",
                     IsPublic = localProgram.IsPublic,
                 };
+        }
+        else
+        {
+            workshopArticle.IsPublic = SelectedProgram.IsPublic;
+            workshopArticle.Image = SelectedProgram.Image;
         }
 
         // Conditional logic to set specific properties

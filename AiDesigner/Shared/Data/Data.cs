@@ -640,5 +640,10 @@ namespace NodeBaseApi.Version2
         public int SubscriptionTier { get; set; }
     }
 
+    public class TokenDeductionRequest
+    {
+        public Guid UserId { get; set; }
+        public int TokensToDeduct { get; set; }
+    }
 }
 
