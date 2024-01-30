@@ -90,7 +90,7 @@
                 @if (SelectedArticle.ProgramImage != null && !generating)
                 {
                     <button @onclick="GenerateImage" class="bg-blue-600 hover:bg-blue-700 text-white font-bold ml-4 py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
-                        Regenerate image
+                        Remake image(160t)
                     </button>
                 }
                 else if (generating)
@@ -110,6 +110,9 @@
 
     [CascadingParameter(Name = "CascAuth")]
     public AuthenticationState CascAuth { get; set; }
+
+    [CascadingParameter(Name = "Settokens")]
+    protected EventCallback<Wallet> SetTokens { get; set; }
 
     bool isLoading { get; set; } = false;
     bool gettingImage, gettingDescription;
@@ -186,7 +189,15 @@
         if (response.IsSuccessStatusCode)
         {
             var base64Image = await response.Content.ReadAsStringAsync();
-            SelectedArticle.ProgramImage = Convert.FromBase64String(base64Image);
+            var Image = Convert.FromBase64String(base64Image);
+
+            if (SelectedArticle.ProgramImage != null && SelectedArticle.ProgramImage != Image)
+            {
+                await BuyImage();
+                await GetTokens();
+            }
+
+            SelectedArticle.ProgramImage = Image;
             StateHasChanged();
         }
         else
@@ -235,4 +246,71 @@
         return false;
     }
 
+    private async Task BuyImage()
+    {
+        var user = CascAuth.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    var url = $"Chat/Wallet/DeductTokens";
+
+                    var requestBody = new { userId, tokensToDeduct = 160 };
+                    var content = JsonContent.Create(requestBody);
+
+                    var response = await Http.PostAsync(url, content);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                    }
+                    else
+                    {
+                        Console.WriteLine($"Error: {response.ReasonPhrase}");
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    private async Task GetTokens()
+    {
+        var user = CascAuth.User;
+        if (user.Identity.IsAuthenticated)
+        {
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    var response = await Http.PostAsJsonAsync<Guid>("Chat/Wallet/GetCreateWallet", userId);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        await SetTokens.InvokeAsync(await response.Content.ReadFromJsonAsync<Wallet>());
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    // Handle or log the HTTP request exception here...
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+                catch (JsonException ex)
+                {
+                    // Handle or log the deserialization exception here...
+                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                }
+            }
+        }
+    }
 }

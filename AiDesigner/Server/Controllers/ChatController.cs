@@ -118,6 +118,21 @@ namespace NodeBaseApi.Controllers
             }
         }
 
+        [HttpPost("Wallet/DeductTokens")]
+        public async Task<ActionResult> DeductTokens([FromBody] TokenDeductionRequest request)
+        {
+            try
+            {
+                await _dbConnection.UpdateUserTokensAsync(request.UserId, request.TokensToDeduct);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                // Handle exception
+                return StatusCode(500, ex.Message);
+            }
+        }
+
         //Call stuff
         // POST api/Chat/Call/GetCreateCall
         [HttpGet("Call/GetCalls/{Key}")]

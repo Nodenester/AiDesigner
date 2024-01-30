@@ -998,6 +998,56 @@ namespace AiDesigner.Server.Data
             }
         }
 
+        public async Task UpdateUserTokensAsync(Guid userId, int tokensToDeduct)
+        {
+            try
+            {
+                using (var connection = new SqlConnection(_connectionString))
+                {
+                    await connection.OpenAsync(); // Ensure the connection is opened
+
+                    var updateTokensQuery = @"
+                DECLARE @Tokens INT;
+                DECLARE @BoughtTokens INT;
+
+                SELECT @Tokens = Tokens, @BoughtTokens = BoughtTokens
+                FROM Ludde.TokenWallet
+                WHERE UserId = @UserId;
+
+                IF (@Tokens >= @TokensToDeduct)
+                BEGIN
+                    UPDATE Ludde.TokenWallet
+                    SET Tokens = @Tokens - @TokensToDeduct
+                    WHERE UserId = @UserId;
+                END
+                ELSE
+                BEGIN
+                    SET @TokensToDeduct = @TokensToDeduct - @Tokens;
+                    UPDATE Ludde.TokenWallet
+                    SET Tokens = 0, 
+                        BoughtTokens = CASE 
+                                         WHEN @BoughtTokens >= @TokensToDeduct THEN @BoughtTokens - @TokensToDeduct
+                                         ELSE 0 
+                                       END
+                    WHERE UserId = @UserId;
+                END
+            ";
+
+                    await connection.ExecuteAsync(updateTokensQuery, new { UserId = userId, TokensToDeduct = tokensToDeduct });
+                }
+            }
+            catch (SqlException sqlEx)
+            {
+                Console.WriteLine($"SQL Exception occurred: {sqlEx.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"An error occurred: {ex.Message}");
+                throw;
+            }
+        }
+
         //Api Calls handeling
         public async Task<IEnumerable<Call>> GetApiCallsAsync(string Key)
         {

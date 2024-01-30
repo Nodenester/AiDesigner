@@ -197,6 +197,14 @@
                             <span>Execute Program</span>
                         }
                     </button>
+
+                    <!-- Session dropdown -->
+                    @if (selectedProgram != null && selectedProgram.SupportsSessions)
+                    {
+                        <div class="ml-2">
+                            <SelectSession IsDark="true" SelectSessions="setCurrentSession" ProgramId="@selectedProgram.Id.ToString()"></SelectSession>
+                        </div>
+                    }
                 </div>
             </div>
         }
