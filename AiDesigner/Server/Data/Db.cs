@@ -1628,6 +1628,38 @@ ORDER BY
             }
         }
 
+        public async Task<int> GetTotalSessionsByUserAsync(Guid userId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                try
+                {
+                    var query = @"
+                SELECT COUNT(*) 
+                FROM Ludde.sessions
+                WHERE UserId = @UserId
+            ";
+
+                    var parameters = new DynamicParameters();
+                    parameters.Add("UserId", userId);
+
+                    return await connection.QuerySingleAsync<int>(query, parameters);
+                }
+                catch (SqlException sqlEx)
+                {
+                    // Handle SQL specific exceptions
+                    Console.WriteLine($"SQL Error: {sqlEx.Message} \n StackTrace: {sqlEx.StackTrace}");
+                    throw;  // Re-throw the exception so the caller is aware something went wrong
+                }
+                catch (Exception ex)
+                {
+                    // Handle general exceptions
+                    Console.WriteLine($"Error: {ex.Message} \n StackTrace: {ex.StackTrace}");
+                    throw;  // Re-throw the exception so the caller is aware something went wrong
+                }
+            }
+        }
+
         public async Task<int> DeleteSessionAsync(string sessionId)
         {
             using (var connection = new SqlConnection(_connectionString))

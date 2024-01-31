@@ -77,17 +77,36 @@
     public List<Session> sessions { get; set; } = new List<Session>();
     public Session selectedSession { get; set; } = new Session { SessionName = "Session" };
 
+    int totalSessions { get; set; }
+
     AddSession addSession = new AddSession();
 
     protected override async Task OnInitializedAsync()
     {
         await GetUserSessions();
+        await GetUserTotalSessionsCount();
     }
 
     // protected override async Task OnParametersSetAsync()
     // {
     //     await GetUserSessions();
     // }
+
+    private async Task OpenAddSession()
+    {
+        if (wallet.SubscriptionTier == 0 && (totalSessions != 5 || totalSessions !> 5))
+        {
+            addSession.Open();
+        }
+        else if (wallet.SubscriptionTier == 1 && (totalSessions != 20 || totalSessions! > 20))
+        {
+            addSession.Open();
+        }
+        else if (wallet.SubscriptionTier == 2 && (totalSessions != 50 || totalSessions! > 50))
+        {
+            addSession.Open();
+        }
+    }
 
     private async Task SelectOption(string sessionName)
     {
@@ -134,6 +153,51 @@
                         else
                         {
                             Console.WriteLine($"Failed to get user sessions: {response.StatusCode}");
+                        }
+                    }
+                    catch (HttpRequestException ex)
+                    {
+                        Console.WriteLine($"Request error: {ex.Message}");
+                    }
+                }
+                catch (HttpRequestException ex)
+                {
+                    Console.WriteLine($"HTTP request exception: {ex.Message}");
+                }
+                catch (JsonException ex)
+                {
+                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                }
+            }
+        }
+    }
+
+    private async Task GetUserTotalSessionsCount()
+    {
+        if (CascAuth != null)
+        {
+            var user = CascAuth.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
+            {
+                try
+                {
+                    // Construct the URL with query parameters
+                    var url = $"Chat/Session/GetUserTotalSessions?userId={userId}";
+
+                    try
+                    {
+                        var response = await Http.GetAsync(url);
+                        Console.WriteLine(await response.Content.ReadAsStringAsync());
+                        if (response.IsSuccessStatusCode)
+                        {
+                            var json = await response.Content.ReadAsStringAsync();
+                            // Assuming the endpoint returns an integer
+                            totalSessions = JsonConvert.DeserializeObject<int>(json);
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Failed to get total sessions count: {response.StatusCode}");
                         }
                     }
                     catch (HttpRequestException ex)

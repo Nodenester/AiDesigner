@@ -9,6 +9,7 @@ using AiDesigner.Shared.Blocks;
 using AiDesigner.Shared.Data;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Data.SqlClient;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NodeBaseApi.Version2;
@@ -290,6 +291,31 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
+
+        // GET api/Session/GetUserTotalSessions
+        [HttpGet("Session/GetUserTotalSessions")]
+        public async Task<ActionResult<int>> GetUserTotalSessions([FromQuery] Guid userId)
+        {
+            try
+            {
+                // Assuming _dbConnection is an instance variable that provides access to database operations
+                var totalSessions = await _dbConnection.GetTotalSessionsByUserAsync(userId);
+                return Ok(totalSessions);
+            }
+            catch (SqlException sqlEx)
+            {
+                // Handle SQL specific exceptions elegantly
+                Console.WriteLine($"SQL Error: {sqlEx.Message}");
+                return StatusCode(500, "A database error occurred.");
+            }
+            catch (Exception ex)
+            {
+                // Handle general exceptions
+                Console.WriteLine(ex);
+                return StatusCode(500, ex.Message + " (from: " + ex.TargetSite + ")");
+            }
+        }
+
 
         // DELETE api/Session/Delete/{sessionId}
         [HttpDelete("Session/Delete/{sessionId}")]
