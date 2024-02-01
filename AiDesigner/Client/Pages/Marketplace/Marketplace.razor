@@ -201,15 +201,34 @@ else
         }
         else
         {
-            if(WorkshopLists == null)
+            if (WorkshopLists == null)
             {
-                var PopularArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-popular");
-                var NodeNestorArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/author");
-                var NewArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/newest");
-                var MostDownloadedArticles = await Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-downloaded/top");
+                // Initialize an empty tuple or a structure to hold the results
+                WorkshopLists = Tuple.Create(default(List<WorkshopArticle>), default(List<WorkshopArticle>), default(List<WorkshopArticle>), default(List<WorkshopArticle>));
 
-                WorkshopLists = Tuple.Create(PopularArticles, NodeNestorArticles, NewArticles, MostDownloadedArticles);
-                StateHasChanged();
+                Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-popular").ContinueWith(task =>
+                {
+                    WorkshopLists = Tuple.Create(task.Result, WorkshopLists.Item2, WorkshopLists.Item3, WorkshopLists.Item4);
+                    StateHasChanged(); 
+                });
+
+                Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/author").ContinueWith(task =>
+                {
+                    WorkshopLists = Tuple.Create(WorkshopLists.Item1, task.Result, WorkshopLists.Item3, WorkshopLists.Item4);
+                    StateHasChanged(); 
+                });
+
+                Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/most-downloaded/top").ContinueWith(task =>
+                {
+                    WorkshopLists = Tuple.Create(WorkshopLists.Item1, WorkshopLists.Item2, WorkshopLists.Item3, task.Result);
+                    StateHasChanged();
+                });
+
+                Http.GetFromJsonAsync<List<WorkshopArticle>>("Workshop/newest").ContinueWith(task =>
+                {
+                    WorkshopLists = Tuple.Create(WorkshopLists.Item1, WorkshopLists.Item2, task.Result, WorkshopLists.Item4);
+                    StateHasChanged();
+                });
             }
             // await RefreshData();
         }
