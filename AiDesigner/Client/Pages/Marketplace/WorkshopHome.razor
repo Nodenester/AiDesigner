@@ -8,7 +8,7 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">Popular</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (WorkshopLists != null && WorkshopLists.Item1.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item1 != null && WorkshopLists.Item1.Count > 0)
             {
                 @foreach (var article in WorkshopLists.Item1)
                 {
@@ -57,7 +57,7 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">Made by NodeNestor</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (WorkshopLists != null && WorkshopLists.Item2.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item2 != null && WorkshopLists.Item2.Count > 0)
             {
                 @foreach (var article in WorkshopLists.Item2)
                 {
@@ -106,7 +106,7 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">Most downloaded</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (WorkshopLists != null && WorkshopLists.Item4.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item4 != null && WorkshopLists.Item4.Count > 0)
             {
                 @foreach (var article in WorkshopLists.Item4)
                 {
@@ -155,7 +155,7 @@
     <div style="width: 83%;" class="content-center">
         <span class="text-2xl font-bold mt-2">New releases</span>
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
-            @if (WorkshopLists != null && WorkshopLists.Item3.Count > 0)
+            @if (WorkshopLists != null && WorkshopLists.Item3 != null && WorkshopLists.Item3.Count > 0)
             {
                 @foreach (var article in WorkshopLists.Item3)
                 {
