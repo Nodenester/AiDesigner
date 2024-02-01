@@ -44,7 +44,7 @@ jobs:
       name: 'Development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write #This is required for requesting the JWT
+      id-token: write 
 
     steps:
       - name: Download artifact from build job
@@ -64,6 +64,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'NodeNestor'
-          slot-name: 'Development'
+          slot-name: 'Production'
           package: .
           
