@@ -37,15 +37,14 @@ jobs:
           name: .net-app
           path: ${{env.DOTNET_ROOT}}/myapp
 
-
   deploy:
     runs-on: windows-latest
     needs: build
     environment:
-      name: 'Development'
+      name: 'Production'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
-      id-token: write 
+      id-token: write #This is required for requesting the JWT
 
     steps:
       - name: Download artifact from build job
