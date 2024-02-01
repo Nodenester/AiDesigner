@@ -47,7 +47,7 @@ namespace AiDesigner.Server.Data
                     string programDataJson = JsonConvert.SerializeObject(programObject, _jsonSerializerSettings);
 
                     var query = @"
-                        INSERT INTO Ludde.programs (Id, Name, Description, Author, AuthorName, ApiKey, IsCustomBlock, IsPublic, ProgramData, SupportsSessions, Image, LastOpened )
+                        INSERT INTO NodeNestor.programs (Id, Name, Description, Author, AuthorName, ApiKey, IsCustomBlock, IsPublic, ProgramData, SupportsSessions, Image, LastOpened )
                         VALUES (@Id, @Name, @Description, @Author, @AuthorName, @ApiKey, @IsCustomBlock, @IsPublic, @ProgramData, @SupportsSessions, @Image, @LastOpened);
                     ";
 
@@ -105,7 +105,7 @@ namespace AiDesigner.Server.Data
             {
                 var query = @"
                     SELECT ProgramData, IsCustomBlock
-                    FROM Ludde.programs
+                    FROM NodeNestor.programs
                     WHERE Id = @Id;
                 ";
 
@@ -131,7 +131,7 @@ namespace AiDesigner.Server.Data
             {
                 var query = @"
                     SELECT COUNT(*)
-                    FROM user_program_connections
+                    FROM NodeNestor.user_program_connections
                     WHERE ProgramId = @ProgramId AND UserId = @UserId;
                 ";
 
@@ -147,8 +147,8 @@ namespace AiDesigner.Server.Data
             {
                 var query = @"
                     SELECT p.ProgramData, p.IsCustomBlock
-                    FROM Ludde.programs p
-                    JOIN Ludde.user_program_connections upc ON p.Id = upc.ProgramId
+                    FROM NodeNestor.programs p
+                    JOIN NodeNestor.user_program_connections upc ON p.Id = upc.ProgramId
                     WHERE upc.UserId = @UserId;
                 ";
 
@@ -173,8 +173,8 @@ namespace AiDesigner.Server.Data
         {
             var query = @"
                 SELECT p.ProgramData
-                FROM programs p
-                JOIN user_program_connections upc ON p.Id = upc.ProgramId
+                FROM NodeNestor.programs p
+                JOIN NodeNestor.user_program_connections upc ON p.Id = upc.ProgramId
                 WHERE upc.UserId = @UserId AND p.IsCustomBlock = 0;
             ";
 
@@ -191,8 +191,8 @@ namespace AiDesigner.Server.Data
             {
                 var query = @"
                     SELECT p.ProgramData
-                    FROM programs p
-                    JOIN user_program_connections upc ON p.Id = upc.ProgramId
+                    FROM NodeNestor.programs p
+                    JOIN NodeNestor.user_program_connections upc ON p.Id = upc.ProgramId
                     WHERE upc.UserId = @UserId AND p.IsCustomBlock = 1;
                 ";
 
@@ -210,7 +210,7 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    INSERT INTO Ludde.user_program_connections (UserId, ProgramId, IsCustomBlock)
+                    INSERT INTO NodeNestor.user_program_connections (UserId, ProgramId, IsCustomBlock)
                     VALUES (@UserId, @ProgramId, @IsCustomBlock);
                 ";
 
@@ -222,7 +222,7 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    DELETE FROM Ludde.user_program_connections
+                    DELETE FROM NodeNestor.user_program_connections
                     WHERE UserId = @UserId AND ProgramId = @ProgramId;
                 ";
 
@@ -234,19 +234,19 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    DELETE FROM Ludde.user_program_connections
+                    DELETE FROM NodeNestor.user_program_connections
                     WHERE ProgramId = @Id;
 
-                    DELETE FROM Ludde.programs
+                    DELETE FROM NodeNestor.programs
                     WHERE Id = @Id AND Author = @userId;
 
-                    DELETE FROM Ludde.Workshop_Article
+                    DELETE FROM NodeNestor.Workshop_Article
                     WHERE ProgramId = @Id;
 
-                    DELETE FROM Ludde.User_Article
+                    DELETE FROM NodeNestor.User_Article
                     WHERE ArticleId IN (
                         SELECT Id
-                        FROM Ludde.Workshop_Article
+                        FROM NodeNestor.Workshop_Article
                         WHERE ProgramId = @Id
                     );
                 ";
@@ -260,7 +260,7 @@ namespace AiDesigner.Server.Data
             {
                 var query = @"
                     SELECT ProgramData, IsCustomBlock
-                    FROM Ludde.programs
+                    FROM NodeNestor.programs
                     WHERE IsPublic = 1 AND (Name LIKE @SearchTerm OR Description LIKE @SearchTerm);
                 ";
 
@@ -288,7 +288,7 @@ namespace AiDesigner.Server.Data
                 string programDataJson = JsonConvert.SerializeObject(programObject, _jsonSerializerSettings);
 
                 var query = @"
-                    UPDATE Ludde.programs
+                    UPDATE NodeNestor.programs
                     SET Name = @Name, Description = @Description, Author = @Author, AuthorName = @AuthorName, ApiKey = @ApiKey, IsCustomBlock = @IsCustomBlock, IsPublic = @IsPublic, ProgramData = @ProgramData, Image = @Image, SupportsSessions = @SupportsSessions, LastOpened = GETDATE(), SupportsChat = @SupportsChat
                     WHERE Id = @Id;
                 ";
@@ -353,7 +353,7 @@ namespace AiDesigner.Server.Data
         //Search Articles
         public async Task<int> GetArticleCountForSearchAsync(string searchTerm = null, string searchClass = null, string type = null)
         {
-            StringBuilder query = new StringBuilder(@"SELECT COUNT(*) FROM Ludde.Workshop_Article a WHERE 1=1 AND Status = 'Accepted'");
+            StringBuilder query = new StringBuilder(@"SELECT COUNT(*) FROM NodeNestor.Workshop_Article a WHERE 1=1 AND Status = 'Accepted'");
 
             var parameters = new DynamicParameters();
             if (!string.IsNullOrEmpty(searchTerm) && searchTerm != "")
@@ -381,9 +381,9 @@ namespace AiDesigner.Server.Data
         {
             StringBuilder query = new StringBuilder(@"
                 SELECT a.*, p.IsPublic, p.Image, AVG(CASE WHEN u.Rating > 0 THEN u.Rating END) as Rating
-                FROM Ludde.Workshop_Article a
-                LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-                LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+                FROM NodeNestor.Workshop_Article a
+                LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
+                LEFT JOIN NodeNestor.programs p ON a.ProgramId = p.Id
                 WHERE 1=1 AND a.Status = 'Accepted'"
             );
 
@@ -435,9 +435,9 @@ namespace AiDesigner.Server.Data
             StringBuilder query = new StringBuilder(@"
         SELECT a.*, p.IsPublic, p.Image, 
             AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating
-        FROM Ludde.Workshop_Article a
-        LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-        LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+        FROM NodeNestor.Workshop_Article a
+        LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
+        LEFT JOIN NodeNestor.programs p ON a.ProgramId = p.Id
         WHERE a.AuthorId = @AuthorId
         GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
         ORDER BY a.Created DESC;
@@ -463,7 +463,7 @@ namespace AiDesigner.Server.Data
         {
             const string query = @"
                 SELECT COUNT(*)
-                FROM Ludde.Workshop_Article;
+                FROM NodeNestor.Workshop_Article;
             ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -473,8 +473,8 @@ namespace AiDesigner.Server.Data
         {
             const string query = @"
             SELECT a.*, AVG(ISNULL(u.Rating, 0)) as AverageRating
-            FROM Ludde.Workshop_Article a
-            LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+            FROM NodeNestor.Workshop_Article a
+            LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
             GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
             ORDER BY a.Downloads DESC
             OFFSET @Start ROWS
@@ -490,8 +490,8 @@ namespace AiDesigner.Server.Data
         {
             const string query = @"
                 SELECT COUNT(DISTINCT a.Id)
-                FROM Ludde.Workshop_Article a
-                JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                FROM NodeNestor.Workshop_Article a
+                JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
                 WHERE u.Rating IS NOT NULL;
             ";
 
@@ -502,8 +502,8 @@ namespace AiDesigner.Server.Data
         {
             const string query = @"
                 SELECT a.*, AVG(u.Rating) as AverageRating
-                FROM Ludde.Workshop_Article a
-                JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                FROM NodeNestor.Workshop_Article a
+                JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
                 WHERE u.Rating IS NOT NULL
                 GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads
                 ORDER BY AverageRating DESC, a.Downloads DESC
@@ -525,9 +525,9 @@ namespace AiDesigner.Server.Data
         ((1.0 / (DATEDIFF(day, a.Created, GETDATE()) + 1) * 0.1) + 
         (COALESCE(a.Downloads, 0) * 0.4) + 
         (COALESCE(AVG(ISNULL(u.Rating, 0)), 0) * 0.5)) as PopularityScore
-    FROM Ludde.Workshop_Article a
-    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    FROM NodeNestor.Workshop_Article a
+    LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
+    LEFT JOIN NodeNestor.programs p ON a.ProgramId = p.Id
     WHERE a.Status = 'Accepted'
     GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
     ORDER BY PopularityScore DESC
@@ -542,9 +542,9 @@ namespace AiDesigner.Server.Data
             const string query = @"
     SELECT TOP 5 a.*, p.IsPublic, p.Image, 
         AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating 
-    FROM Ludde.Workshop_Article a
-    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    FROM NodeNestor.Workshop_Article a
+    LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
+    LEFT JOIN NodeNestor.programs p ON a.ProgramId = p.Id
     WHERE a.Status = 'Accepted'
     GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
     ORDER BY a.Downloads DESC
@@ -567,9 +567,9 @@ namespace AiDesigner.Server.Data
             const string query = @"
     SELECT TOP 15 a.*, p.IsPublic, p.Image, 
         AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating
-    FROM Ludde.Workshop_Article a
-    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    FROM NodeNestor.Workshop_Article a
+    LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
+    LEFT JOIN NodeNestor.programs p ON a.ProgramId = p.Id
     WHERE a.Status = 'Accepted'
     GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
     ORDER BY a.Created DESC
@@ -592,9 +592,9 @@ namespace AiDesigner.Server.Data
             StringBuilder query = new StringBuilder(@"
     SELECT TOP 5 a.*, p.IsPublic, p.Image, 
         AVG(CASE WHEN u.Rating > 0 THEN u.Rating ELSE NULL END) as Rating
-    FROM Ludde.Workshop_Article a
-    LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-    LEFT JOIN Ludde.programs p ON a.ProgramId = p.Id
+    FROM NodeNestor.Workshop_Article a
+    LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
+    LEFT JOIN NodeNestor.programs p ON a.ProgramId = p.Id
     WHERE a.AuthorId = @AuthorId
     GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.Status, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, p.Image, a.Type, a.Created, a.Downloads, p.IsPublic
     ORDER BY a.Created DESC
@@ -621,7 +621,7 @@ namespace AiDesigner.Server.Data
         {
             var queryArticles = @"
                 SELECT * 
-                FROM Ludde.Workshop_Article
+                FROM NodeNestor.Workshop_Article
                 WHERE Status = 'Pending'
                 ORDER BY Created ASC;
             ";
@@ -644,7 +644,7 @@ namespace AiDesigner.Server.Data
         public async Task<string> SaveArticleAsync(WorkshopArticle article)
         {
             var query = @"
-                INSERT INTO Ludde.Workshop_Article (Id, Name, Description, SearchClass, AuthorId, AuthorName, ProgramId, ApiKey, ProgramImage, Type, Created, Downloads, Status)
+                INSERT INTO NodeNestor.Workshop_Article (Id, Name, Description, SearchClass, AuthorId, AuthorName, ProgramId, ApiKey, ProgramImage, Type, Created, Downloads, Status)
                 VALUES (@Id, @Name, @Description, @SearchClass, @AuthorId, @AuthorName, @ProgramId, @ApiKey, @ProgramImage, @Type, @Created, @Downloads, 'Accepted');
             ";
 
@@ -656,8 +656,8 @@ namespace AiDesigner.Server.Data
         {
             const string query = @"
                 SELECT a.*, AVG(u.Rating) as AverageRating
-                FROM Ludde.Workshop_Article a
-                LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                FROM NodeNestor.Workshop_Article a
+                LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
                 WHERE a.Id = @Id
                 GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status;
             ";
@@ -668,8 +668,8 @@ namespace AiDesigner.Server.Data
         {
             const string query = @"
                 SELECT a.*, AVG(u.Rating) as AverageRating
-                FROM Ludde.Workshop_Article a
-                LEFT JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                FROM NodeNestor.Workshop_Article a
+                LEFT JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
                 WHERE a.ProgramId = @ProgramId
                 GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status;
             ";
@@ -680,7 +680,7 @@ namespace AiDesigner.Server.Data
         public async Task UpdateArticleAsync(WorkshopArticle article)
         {
             var query = @"
-                UPDATE Ludde.Workshop_Article 
+                UPDATE NodeNestor.Workshop_Article 
                 SET Name = @Name, Description = @Description, SearchClass = @SearchClass, AuthorId = @AuthorId, AuthorName = @AuthorName, ProgramId = @ProgramId, ApiKey = @ApiKey, ProgramImage = @ProgramImage, Type = @Type, Created = @Created, Downloads = @Downloads, Status = 'Accepted'
                 WHERE Id = @Id;
             ";
@@ -691,7 +691,7 @@ namespace AiDesigner.Server.Data
         public async Task UpdateArticleStatusAsync(string articleId, string status)
         {
             var query = @"
-                UPDATE Ludde.Workshop_Article
+                UPDATE NodeNestor.Workshop_Article
                 SET Status = @Status
                 WHERE Id = @Id;
             ";
@@ -708,7 +708,7 @@ namespace AiDesigner.Server.Data
 
         public async Task DeleteArticleAsync(Guid id)
         {
-            const string query = "DELETE FROM Ludde.Workshop_Article WHERE Id = @Id;";
+            const string query = "DELETE FROM NodeNestor.Workshop_Article WHERE Id = @Id;";
             await using SqlConnection connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, new { Id = id });
         }
@@ -716,10 +716,10 @@ namespace AiDesigner.Server.Data
         {
             const string query = @"
                 SELECT a.*, p.IsPublic, u.IsCreator, u.Rating, u.Review, u.IsFavorite, AVG(ua.Rating) as AverageRating
-                FROM Ludde.Workshop_Article a
-                INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
-                LEFT JOIN Ludde.User_Article ua ON a.Id = ua.ArticleId
-                Left JOIN Ludde.programs p ON a.ProgramId = p.Id
+                FROM NodeNestor.Workshop_Article a
+                INNER JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
+                LEFT JOIN NodeNestor.User_Article ua ON a.Id = ua.ArticleId
+                Left JOIN NodeNestor.programs p ON a.ProgramId = p.Id
                 WHERE u.UserId = @UserId
                 GROUP BY a.Id, a.Name, a.Description, a.SearchClass, a.AuthorId, a.AuthorName, a.ProgramId, a.ApiKey, a.ProgramImage, a.Type, a.Created, a.Downloads, a.Status, u.IsCreator, u.Rating, u.Review, u.IsFavorite, p.IsPublic;
             ";
@@ -736,7 +736,7 @@ namespace AiDesigner.Server.Data
                 return "Invalid Parameters";
             }
 
-            const string query = @"DELETE FROM Ludde.Article_Images WHERE ArticleId = @ArticleId;";
+            const string query = @"DELETE FROM NodeNestor.Article_Images WHERE ArticleId = @ArticleId;";
 
             try
             {
@@ -763,13 +763,13 @@ namespace AiDesigner.Server.Data
         public async Task ConnectArticleToUserAsync(UserArticle userArticle)
         {
             var query = @"
-        IF NOT EXISTS (SELECT 1 FROM Ludde.User_Article WHERE UserId = @UserId AND ArticleId = @ArticleId)
+        IF NOT EXISTS (SELECT 1 FROM NodeNestor.User_Article WHERE UserId = @UserId AND ArticleId = @ArticleId)
         BEGIN
-            INSERT INTO Ludde.User_Article (UserId, ArticleId, IsCreator, Rating, Review, IsFavorite)
+            INSERT INTO NodeNestor.User_Article (UserId, ArticleId, IsCreator, Rating, Review, IsFavorite)
             VALUES (@UserId, @ArticleId, @IsCreator, @Rating, @Review, @IsFavorite);
             
             -- Increase the downloads count for the article by 1
-            UPDATE Ludde.Workshop_Article
+            UPDATE NodeNestor.Workshop_Article
             SET Downloads = Downloads + 1
             WHERE Id = @ArticleId;
         END
@@ -790,12 +790,12 @@ namespace AiDesigner.Server.Data
         public async Task UpdateUserArticleAsync2(UserArticle userArticle, string programId)
         {
             var query = @"
-        UPDATE Ludde.User_Article 
+        UPDATE NodeNestor.User_Article 
         SET Rating = @Rating, Review = @Review
-        FROM Ludde.User_Article 
-        INNER JOIN Ludde.Workshop_Article ON Ludde.User_Article.ArticleId = Ludde.Workshop_Article.Id
-        WHERE Ludde.User_Article.UserId = @UserId 
-        AND Ludde.Workshop_Article.ProgramId = @ProgramId;
+        FROM NodeNestor.User_Article 
+        INNER JOIN NodeNestor.Workshop_Article ON NodeNestor.User_Article.ArticleId = NodeNestor.Workshop_Article.Id
+        WHERE NodeNestor.User_Article.UserId = @UserId 
+        AND NodeNestor.Workshop_Article.ProgramId = @ProgramId;
     ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -819,7 +819,7 @@ namespace AiDesigner.Server.Data
         public async Task UpdateUserArticleAsync(UserArticle userArticle)
         {
             var query = @"
-                UPDATE Ludde.User_Article 
+                UPDATE NodeNestor.User_Article 
                 SET IsCreator = @IsCreator, Rating = @Rating, Review = @Review, IsFavorite = @IsFavorite
                 WHERE UserId = @UserId AND ArticleId = @ArticleId;
             ";
@@ -831,11 +831,11 @@ namespace AiDesigner.Server.Data
             var query = @"
         BEGIN TRANSACTION
 
-        DELETE FROM Ludde.User_Article 
+        DELETE FROM NodeNestor.User_Article 
         WHERE UserId = @UserId AND ArticleId = @ArticleId;
 
         -- Decrease the downloads count for the article by 1
-        UPDATE Ludde.Workshop_Article
+        UPDATE NodeNestor.Workshop_Article
         SET Downloads = CASE WHEN Downloads > 0 THEN Downloads - 1 ELSE 0 END
         WHERE Id = @ArticleId;
 
@@ -869,8 +869,8 @@ namespace AiDesigner.Server.Data
             const string query = @"
                 SELECT p.ProgramData, u.Rating
                 FROM programs p
-                INNER JOIN Ludde.Workshop_Article a ON p.Id = a.ProgramId
-                INNER JOIN Ludde.User_Article u ON a.Id = u.ArticleId
+                INNER JOIN NodeNestor.Workshop_Article a ON p.Id = a.ProgramId
+                INNER JOIN NodeNestor.User_Article u ON a.Id = u.ArticleId
                 WHERE u.UserId = @UserId
                 AND p.IsCustomBlock = 0;
             ";
@@ -890,7 +890,7 @@ namespace AiDesigner.Server.Data
         //News article handeling
         public async Task<IEnumerable<NewsArticle>> GetLatestArticlesAsync()
         {
-            string query = @"SELECT TOP 4 * FROM Ludde.News_Article 
+            string query = @"SELECT TOP 4 * FROM NodeNestor.News_Article 
                      ORDER BY PublishDate DESC";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -898,7 +898,7 @@ namespace AiDesigner.Server.Data
         }
         public async Task CreateArticleAsync(string id, string title, string content, byte[] imageData)
         {
-            string query = @"INSERT INTO Ludde.News_Article (Id, Title, Content, PublishDate, ImageData)
+            string query = @"INSERT INTO NodeNestor.News_Article (Id, Title, Content, PublishDate, ImageData)
                      VALUES (@Id, @Title, @Content, @PublishDate, @ImageData)";
 
             var parameters = new DynamicParameters();
@@ -926,22 +926,22 @@ namespace AiDesigner.Server.Data
                         WHEN 1 THEN 2000
                         WHEN 2 THEN 8000
                         ELSE 500 
-                    END FROM Ludde.TokenWallet WHERE UserId = @UserId;
+                    END FROM NodeNestor.TokenWallet WHERE UserId = @UserId;
 
-                    IF NOT EXISTS (SELECT 1 FROM Ludde.TokenWallet WHERE UserId = @UserId)
+                    IF NOT EXISTS (SELECT 1 FROM NodeNestor.TokenWallet WHERE UserId = @UserId)
                     BEGIN
-                        INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens, LastRefill, BoughtTokens, SubscriptionTier)
+                        INSERT INTO NodeNestor.TokenWallet (Id, UserId, Tokens, LastRefill, BoughtTokens, SubscriptionTier)
                         OUTPUT inserted.Tokens, inserted.BoughtTokens
                         VALUES (NEWID(), @UserId, @TokensToAdd, @Today, 0, 0);
                     END
                     ELSE
                     BEGIN
-                        UPDATE Ludde.TokenWallet
+                        UPDATE NodeNestor.TokenWallet
                         SET Tokens = @TokensToAdd, LastRefill = @Today
                         WHERE UserId = @UserId AND LastRefill <> @Today;
 
                         SELECT Tokens, BoughtTokens, SubscriptionTier
-                        FROM Ludde.TokenWallet
+                        FROM NodeNestor.TokenWallet
                         WHERE UserId = @UserId;
                     END
                 ";
@@ -955,7 +955,7 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-                    UPDATE Ludde.TokenWallet
+                    UPDATE NodeNestor.TokenWallet
                     SET BoughtTokens = BoughtTokens + @TokensToAdd
                     WHERE UserId = @UserId;
 
@@ -979,7 +979,7 @@ namespace AiDesigner.Server.Data
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-            UPDATE Ludde.TokenWallet
+            UPDATE NodeNestor.TokenWallet
             SET SubscriptionTier = @SubscriptionTier
             WHERE UserId = @UserId;
 
@@ -1011,19 +1011,19 @@ namespace AiDesigner.Server.Data
                 DECLARE @BoughtTokens INT;
 
                 SELECT @Tokens = Tokens, @BoughtTokens = BoughtTokens
-                FROM Ludde.TokenWallet
+                FROM NodeNestor.TokenWallet
                 WHERE UserId = @UserId;
 
                 IF (@Tokens >= @TokensToDeduct)
                 BEGIN
-                    UPDATE Ludde.TokenWallet
+                    UPDATE NodeNestor.TokenWallet
                     SET Tokens = @Tokens - @TokensToDeduct
                     WHERE UserId = @UserId;
                 END
                 ELSE
                 BEGIN
                     SET @TokensToDeduct = @TokensToDeduct - @Tokens;
-                    UPDATE Ludde.TokenWallet
+                    UPDATE NodeNestor.TokenWallet
                     SET Tokens = 0, 
                         BoughtTokens = CASE 
                                          WHEN @BoughtTokens >= @TokensToDeduct THEN @BoughtTokens - @TokensToDeduct
@@ -1051,7 +1051,7 @@ namespace AiDesigner.Server.Data
         //Api Calls handeling
         public async Task<IEnumerable<Call>> GetApiCallsAsync(string Key)
         {
-            string query = @"SELECT * FROM Ludde.Call WHERE [Api/UserId] = @Key";
+            string query = @"SELECT * FROM NodeNestor.Call WHERE [Api/UserId] = @Key";
             await using SqlConnection connection = new SqlConnection(_connectionString);
             return await connection.QueryAsync<Call>(query, new { Key });
         }
@@ -1060,7 +1060,7 @@ namespace AiDesigner.Server.Data
         public async Task<int> AddApiKeyAsync(string apiKey, string userId, DateTime created, string name)
         {
             var query = @"
-                INSERT INTO Ludde.ApiKeys (ApiKey, UserId, Created, Name)
+                INSERT INTO NodeNestor.ApiKeys (ApiKey, UserId, Created, Name)
                 VALUES (@ApiKey, @UserId, @Created, @Name);
             ";
 
@@ -1079,7 +1079,7 @@ namespace AiDesigner.Server.Data
         public async Task<IEnumerable<ApiKey>> GetApiKeysByUserIdAsync(Guid userId)
         {
             var query = @"
-                SELECT * FROM Ludde.ApiKeys
+                SELECT * FROM NodeNestor.ApiKeys
                 WHERE UserId = @UserId;
             ";
 
@@ -1098,7 +1098,7 @@ namespace AiDesigner.Server.Data
         public async Task<int> DeleteApiKeyAsync(string apiKey)
         {
             var query = @"
-                DELETE FROM Ludde.ApiKeys
+                DELETE FROM NodeNestor.ApiKeys
                 WHERE ApiKey = @ApiKey;
             ";
 
@@ -1119,7 +1119,7 @@ WITH CombinedCalls AS (
         EndTime,
         Cost
     FROM
-        Ludde.Calls
+        NodeNestor.Calls
     WHERE
         [Api/UserId] = @UserId
 
@@ -1133,9 +1133,9 @@ WITH CombinedCalls AS (
         c.EndTime,
         c.Cost
     FROM
-        Ludde.Calls c
+        NodeNestor.Calls c
     INNER JOIN
-        Ludde.ApiKeys ak ON c.[Api/UserId] = ak.UserId
+        NodeNestor.ApiKeys ak ON c.[Api/UserId] = ak.UserId
     WHERE
         ak.UserId = @UserId
 )
@@ -1173,7 +1173,7 @@ ORDER BY
                         c.Cost,
                         ROW_NUMBER() OVER (ORDER BY c.StartTime DESC) as RowNum
                     FROM
-                        Ludde.Calls c
+                        NodeNestor.Calls c
                 )
                 SELECT
                     *
@@ -1229,7 +1229,7 @@ ORDER BY
                         COUNT(*) AS CallCount,
                         SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
                     FROM
-                        Ludde.Calls c
+                        NodeNestor.Calls c
                     WHERE
                         c.[Api/UserId] = @UserId
                         AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
@@ -1266,7 +1266,7 @@ ORDER BY
                 COUNT(*) AS CallCount,
                 SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
             FROM
-                Ludde.Calls c
+                NodeNestor.Calls c
             WHERE
                 c.[Api/UserId] = @UserId
                 AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
@@ -1305,7 +1305,7 @@ ORDER BY
                     COUNT(*) AS CallCount,
                     SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
                 FROM
-                    Ludde.Calls c
+                    NodeNestor.Calls c
                 WHERE
                     c.[Api/UserId] = @UserId
                     AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
@@ -1344,7 +1344,7 @@ ORDER BY
                     COUNT(*) AS CallCount,
                     SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
                 FROM
-                    Ludde.Calls c
+                    NodeNestor.Calls c
                 WHERE
                     c.[Api/UserId] = @UserId
                     AND (c.ProgramId = @ProgramId OR @ProgramId IS NULL OR @ProgramId = 'All')
@@ -1419,7 +1419,7 @@ ORDER BY
                     COUNT(*) AS CallCount,
                     SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
                 FROM
-                    Ludde.Calls c
+                    NodeNestor.Calls c
                 WHERE
                     c.StartTime >= @FirstDayOfMonth AND c.StartTime < DATEADD(DAY, 1, @LastDayOfMonth)
                 GROUP BY
@@ -1455,7 +1455,7 @@ ORDER BY
                     COUNT(*) AS CallCount,
                     SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
                 FROM
-                    Ludde.Calls c
+                    NodeNestor.Calls c
                 WHERE
                     c.StartTime >= @Today AND c.StartTime < DATEADD(DAY, 1, @Today)
                 GROUP BY
@@ -1492,7 +1492,7 @@ ORDER BY
                     COUNT(*) AS CallCount,
                     SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
                 FROM
-                    Ludde.Calls c
+                    NodeNestor.Calls c
                 WHERE
                     c.StartTime >= @FirstDayOfYear AND c.StartTime < DATEADD(YEAR, 1, @FirstDayOfYear)
                 GROUP BY
@@ -1529,7 +1529,7 @@ ORDER BY
                     COUNT(*) AS CallCount,
                     SUM(CAST(ISNULL(c.Cost, '0') AS decimal(18, 2))) AS TotalRevenue
                 FROM
-                    Ludde.Calls c
+                    NodeNestor.Calls c
                 WHERE
                     c.StartTime >= @StartOfWeek AND c.StartTime < @EndOfWeek
                 GROUP BY
@@ -1575,7 +1575,7 @@ ORDER BY
             using (var connection = new SqlConnection(_connectionString))
             {
                 var query = @"
-            INSERT INTO Ludde.sessions (SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime)
+            INSERT INTO NodeNestor.sessions (SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime)
             VALUES (@SessionId, @UserId, @ProgramId, @Variables, @SessionName, GETUTCDATE(), GETUTCDATE());
         ";
 
@@ -1593,7 +1593,7 @@ ORDER BY
                 {
                     var query = @"
                 SELECT SessionId, UserId, ProgramId, Variables, SessionName, CreatedTime, LastEditedTime
-                FROM Ludde.sessions
+                FROM NodeNestor.sessions
                 WHERE 1=1
             ";
 
@@ -1636,7 +1636,7 @@ ORDER BY
                 {
                     var query = @"
                 SELECT COUNT(*) 
-                FROM Ludde.sessions
+                FROM NodeNestor.sessions
                 WHERE UserId = @UserId
             ";
 
@@ -1667,7 +1667,7 @@ ORDER BY
                 try
                 {
                     var query = @"
-                DELETE FROM Ludde.sessions
+                DELETE FROM NodeNestor.sessions
                 WHERE SessionId = @SessionId;
             ";
 
@@ -1697,7 +1697,7 @@ ORDER BY
         {
             var query = @"
         SELECT t.*
-        FROM Tutorials t
+        FROM NodeNestor.Tutorials t
         LEFT JOIN UserTutorials ut ON t.TutorialId = ut.TutorialId AND ut.UserId = @UserId
         WHERE ut.UserId IS NULL OR ut.IsCompleted = 0;
     ";
@@ -1717,14 +1717,14 @@ ORDER BY
         public async Task<int> MarkTutorialAsCompletedForUserAsync(int tutorialId, string userId)
         {
             var insertQuery = @"
-            IF NOT EXISTS (SELECT 1 FROM UserTutorials WHERE UserId = @UserId AND TutorialId = @TutorialId)
+            IF NOT EXISTS (SELECT 1 FROM NodeNestor.UserTutorials WHERE UserId = @UserId AND TutorialId = @TutorialId)
             BEGIN
-                INSERT INTO UserTutorials (UserId, TutorialId, IsCompleted, CompletionDate)
+                INSERT INTO NodeNestor.UserTutorials (UserId, TutorialId, IsCompleted, CompletionDate)
                 VALUES (@UserId, @TutorialId, 1, GETUTCDATE())
             END
             ELSE
             BEGIN
-                UPDATE UserTutorials
+                UPDATE NodeNestor.UserTutorials
                 SET IsCompleted = 1, CompletionDate = GETUTCDATE()
                 WHERE UserId = @UserId AND TutorialId = @TutorialId
             END
@@ -1746,8 +1746,8 @@ ORDER BY
         {
             var query = @"
         SELECT t.*
-        FROM Tutorials t
-        JOIN UserTutorials ut ON t.TutorialId = ut.TutorialId
+        FROM NodeNestor.Tutorials t
+        JOIN NodeNestor.UserTutorials ut ON t.TutorialId = ut.TutorialId
         WHERE ut.UserId = @UserId AND ut.IsCompleted = 1;
     ";
 
@@ -1773,8 +1773,8 @@ ORDER BY
             t.Image, 
             ut.IsCompleted, 
             ut.CompletionDate
-        FROM Tutorials t
-        LEFT JOIN UserTutorials ut ON t.TutorialId = ut.TutorialId AND ut.UserId = @UserId;
+        FROM NodeNestor.Tutorials t
+        LEFT JOIN NodeNestor.UserTutorials ut ON t.TutorialId = ut.TutorialId AND ut.UserId = @UserId;
     ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -1793,7 +1793,7 @@ ORDER BY
         public async Task<int> CreateTutorialAsync(Tutorial tutorial)
         {
             var query = @"
-        INSERT INTO Tutorials (Name, Text, Image)
+        INSERT INTO NodeNestor.Tutorials (Name, Text, Image)
         VALUES (@Name, @Text, @Image);
         SELECT SCOPE_IDENTITY();
     ";
@@ -1815,7 +1815,7 @@ ORDER BY
         public async Task<bool> UpdateTutorialAsync(Tutorial tutorial)
         {
             var query = @"
-        UPDATE Tutorials
+        UPDATE NodeNestor.Tutorials
         SET Name = @Name, Text = @Text, Image = @Image
         WHERE TutorialId = @TutorialId;
     ";
@@ -1837,7 +1837,7 @@ ORDER BY
         public async Task<bool> DeleteTutorialAsync(int tutorialId)
         {
             var query = @"
-        DELETE FROM Tutorials
+        DELETE FROM NodeNestor.Tutorials
         WHERE TutorialId = @TutorialId;
     ";
 
@@ -1858,7 +1858,7 @@ ORDER BY
         public async Task<IEnumerable<Tutorial>> GetAllTutorialsAsync()
         {
             var query = @"
-        SELECT * FROM Tutorials;
+        SELECT * FROM NodeNestor.Tutorials;
     ";
 
             await using SqlConnection connection = new SqlConnection(_connectionString);
@@ -1879,7 +1879,7 @@ ORDER BY
             {
                 var query = @"
                     SELECT COUNT(*)
-                    FROM AspNetUsers;
+                    FROM NodeNestor.AspNetUsers;
                 ";
 
                 int userCount = await connection.ExecuteScalarAsync<int>(query);
@@ -1895,12 +1895,12 @@ ORDER BY
                 await connection.OpenAsync();
                 var queryTier1 = @"
             SELECT COUNT(*)
-            FROM TokenWallet
+            FROM NodeNestor.TokenWallet
             WHERE SubscriptionTier = 1;
         ";
                 var queryTier2 = @"
             SELECT COUNT(*)
-            FROM TokenWallet
+            FROM NodeNestor.TokenWallet
             WHERE SubscriptionTier = 2;
         ";
 
@@ -1910,8 +1910,6 @@ ORDER BY
                 return (countTier1, countTier2);
             }
         }
-
-
     }
 }
 
