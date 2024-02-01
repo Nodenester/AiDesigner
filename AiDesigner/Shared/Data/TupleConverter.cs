@@ -21,10 +21,6 @@ namespace AiDesigner.Shared.Data
             if (reader.TokenType == JsonToken.StartArray)
             {
                 var jArray = JArray.Load(reader);
-                if (jArray.Count != 2)
-                {
-                    throw new JsonSerializationException("Unexpected number of elements in Tuple JSON array.");
-                }
 
                 var item1 = jArray[0].ToObject(objectType.GetGenericArguments()[0], serializer);
                 var item2 = jArray[1].ToObject(objectType.GetGenericArguments()[1], serializer);
@@ -32,7 +28,7 @@ namespace AiDesigner.Shared.Data
                 return Activator.CreateInstance(objectType, item1, item2);
             }
 
-            throw new JsonSerializationException("Invalid JSON for Tuple. Expected StartArray token.");
+            throw new JsonSerializationException("Invalid JSON for Tuple.");
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
@@ -40,8 +36,8 @@ namespace AiDesigner.Shared.Data
             var tuple = (dynamic)value;
 
             writer.WriteStartArray();
-            serializer.Serialize(writer, tuple.Item1);
-            serializer.Serialize(writer, tuple.Item2);
+            writer.WriteValue(tuple.Item1);
+            writer.WriteValue(tuple.Item2);
             writer.WriteEndArray();
         }
     }
