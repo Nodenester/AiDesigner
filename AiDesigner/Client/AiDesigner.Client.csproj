@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Blazorise.Charts" Version="1.4.1" />
+    <PackageReference Include="Blazorise.Charts" Version="1.4.2" />
     <PackageReference Include="Dapper" Version="2.1.28" />
     <PackageReference Include="jsplumb.TypeScript.DefinitelyTyped" Version="0.3.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.1" />
@@ -23,8 +23,8 @@
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
     <PackageReference Include="MySql.Data" Version="8.3.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-    <PackageReference Include="Radzen.Blazor" Version="4.24.1" />
-    <PackageReference Include="Stripe.net" Version="43.11.0" />
+    <PackageReference Include="Radzen.Blazor" Version="4.24.5" />
+    <PackageReference Include="Stripe.net" Version="43.12.0" />
   </ItemGroup>
 
   <ItemGroup>

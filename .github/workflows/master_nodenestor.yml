@@ -41,7 +41,7 @@ jobs:
     runs-on: windows-latest
     needs: build
     environment:
-      name: 'Production'
+      name: 'Development'
       url: ${{ steps.deploy-to-webapp.outputs.webapp-url }}
     permissions:
       id-token: write #This is required for requesting the JWT
@@ -64,6 +64,6 @@ jobs:
         uses: azure/webapps-deploy@v2
         with:
           app-name: 'NodeNestor'
-          slot-name: 'Production'
+          slot-name: 'Development'
           package: .
           
