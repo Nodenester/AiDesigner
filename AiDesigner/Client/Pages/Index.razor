@@ -76,59 +76,58 @@
     private NewsArticle selectedArticle;
 
 
-    protected override async Task OnInitializedAsync()
+    protected override Task OnInitializedAsync()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-
-        if (user.Identity.IsAuthenticated)
+        return AuthenticationStateProvider.GetAuthenticationStateAsync().ContinueWith(authTask =>
         {
-            if (analytics.newsArticle != null && analytics.newsArticle.Count() != 0 && selectedArticle == null)
-            {
-                selectedArticle = analytics.newsArticle[0];
-                Console.WriteLine(selectedArticle.Title);
-            }
-            // Check whether everything is already loaded
-            if ((analytics != null && analytics.newsArticle != null && analytics.workshopArticles != null
-                              && analytics.newsArticle.Count() != 0 && analytics.workshopArticles.Count() != 0))
-            {
-                _ = GetLatestCalls();
-                return;  // Exit early if everything's loaded.
-            }
+            var authState = authTask.Result;
+            var user = authState.User;
 
-            List<Task> tasks = new List<Task>();
-
-            // Load Calls if necessary
-            if (Calls == null)
+            if (user.Identity.IsAuthenticated)
             {
-                //GetLatestCalls();
-                tasks.Add(GetLatestCalls());
-            }
+                if (analytics.newsArticle != null && analytics.newsArticle.Any() && selectedArticle == null)
+                {
+                    selectedArticle = analytics.newsArticle[0];
+                    Console.WriteLine(selectedArticle.Title);
+                }
 
-            // Load LatestArticles if necessary
-            if (LatestArticles == null)
-            {
-                tasks.Add(GetLatestNews());
-            }
+                if (analytics != null && analytics.newsArticle != null && analytics.workshopArticles != null
+                                      && analytics.newsArticle.Any() && analytics.workshopArticles.Any())
+                {
+                    GetLatestCalls();
+                    return;
+                }
 
-            // Load Articles if necessary
-            if (Articles == null)
-            {
-                tasks.Add(GetLatestThreeArticles());
-            }
+                var tasks = new List<Task>();
 
-            await Task.WhenAll(tasks);
+                if (Calls == null)
+                {
+                    tasks.Add(GetLatestCalls());
+                }
 
-            // Only set analytics if all data is available and hasn't been set before
-            if (LatestArticles != null && Articles != null && Calls != null)
-            {
-                await setAnalytics.InvokeAsync(new ChacheAnalytics()
+                if (LatestArticles == null)
+                {
+                    tasks.Add(GetLatestNews());
+                }
+
+                if (Articles == null)
+                {
+                    tasks.Add(GetLatestThreeArticles());
+                }
+
+                Task.WhenAll(tasks).ContinueWith(t =>
+                {
+                    if (LatestArticles != null && Articles != null && Calls != null)
                     {
-                        workshopArticles = Articles,
-                        newsArticle = LatestArticles,
-                    });
+                        setAnalytics.InvokeAsync(new ChacheAnalytics()
+                            {
+                                workshopArticles = Articles,
+                                newsArticle = LatestArticles,
+                            }).ConfigureAwait(false);
+                    }
+                }, TaskScheduler.Current); // Ensure continuation on the current synchronization context if necessary.
             }
-        }
+        }, TaskScheduler.Current);
     }
 
     //Api / db

@@ -107,7 +107,7 @@
         var user = authState.User;
         if (analytics.newsArticle == null || analytics.newsArticle.Count() == 0)
         {
-            await GetTutorials();
+            GetTutorials();
         }
         currentTutorial = CascadingTutorial;
     }
@@ -118,21 +118,29 @@
         _ = SettTutorial.InvokeAsync(clickedTutorial);
     }
 
-    private async Task GetTutorials()
+    private Task GetTutorials()
     {
-        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
-        var user = authState.User;
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        if (Guid.TryParse(userIdClaim, out Guid userId))
+        return AuthenticationStateProvider.GetAuthenticationStateAsync().ContinueWith(authTask =>
         {
-            var response = await Http.GetAsync($"Tutorial/UserData/{userId}");
-            if (response.IsSuccessStatusCode)
+            var user = authTask.Result.User;
+            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            if (Guid.TryParse(userIdClaim, out Guid userId))
             {
-                var content = await response.Content.ReadAsStringAsync();
-                var tutorials = JsonSerializer.Deserialize<List<Tutorial>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-                SettAnalytics.InvokeAsync(new ChacheAnalytics { tutorials = tutorials });
+                var responseTask = Http.GetAsync($"Tutorial/UserData/{userId}");
+                responseTask.ContinueWith(response =>
+                {
+                    if (response.Result.IsSuccessStatusCode)
+                    {
+                        var contentTask = response.Result.Content.ReadAsStringAsync();
+                        contentTask.ContinueWith(content =>
+                        {
+                            var tutorials = JsonSerializer.Deserialize<List<Tutorial>>(content.Result, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                            SettAnalytics.InvokeAsync(new ChacheAnalytics { tutorials = tutorials });
+                        });
+                    }
+                });
             }
-        }
+        });
     }
 
     // bool shouldRender = true;
