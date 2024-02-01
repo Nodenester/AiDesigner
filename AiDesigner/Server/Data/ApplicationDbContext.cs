@@ -20,7 +20,7 @@ namespace AiDesigner.Server.Data
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
-            builder.HasDefaultSchema("NodeNestor");
+            builder.HasDefaultSchema("nestor");
 
             builder.ApplyConfiguration(new RoleConfiguration());
         }
