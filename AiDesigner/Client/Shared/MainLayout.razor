@@ -139,21 +139,22 @@
                         </div>
                     }
                     <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
-                    <AuthorizeView>
-                        <Authorized>
-                            <CascadingValue Value="@CurrentTokens" Name="Wallet">
-                                <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
-                                    <CascadingValue Value="@setTutorial" Name="setTutorial">
-                                        <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
-                                            <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
-                                                <CascadingValue Value="@analytics" Name="analytics"> 
-                                                    <CascadingValue Value="@addApiKey" Name="addApiKey">
-                                                        <CascadingValue Value="@apiKeys" Name="ApiKeys">
-                                                            <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
-                                                                <CascadingValue Value="@passingArticle" Name="passingArticle">
-                                                                    <CascadingValue Value=@setTokens Name="Settokens">
-                                                                        <CascadingValue Value=@NewAps Name="NewAps">
-                                                                            @Body
+                        <AuthorizeView Roles="Administrator">
+                            <Authorized>
+                                <CascadingValue Value="@CurrentTokens" Name="Wallet">
+                                    <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
+                                        <CascadingValue Value="@setTutorial" Name="setTutorial">
+                                            <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
+                                                <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
+                                                    <CascadingValue Value="@analytics" Name="analytics"> 
+                                                        <CascadingValue Value="@addApiKey" Name="addApiKey">
+                                                            <CascadingValue Value="@apiKeys" Name="ApiKeys">
+                                                                <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                                                                    <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                                                        <CascadingValue Value=@setTokens Name="Settokens">
+                                                                            <CascadingValue Value=@NewAps Name="NewAps">
+                                                                                @Body
+                                                                            </CascadingValue>
                                                                         </CascadingValue>
                                                                     </CascadingValue>
                                                                 </CascadingValue>
@@ -165,9 +166,9 @@
                                         </CascadingValue>
                                     </CascadingValue>
                                 </CascadingValue>
-                            </CascadingValue>
-                         </Authorized>
+                            </Authorized>
                             <NotAuthorized>
+                                <AiDesigner.Client.Modals.BetaModal />
                                 @Body
                             </NotAuthorized>
                         </AuthorizeView>

@@ -145,30 +145,61 @@ namespace AiDesigner.Server.Data
         {
             using (var connection = new SqlConnection(_connectionString))
             {
-                var query = @"
-                    SELECT p.ProgramData, p.IsCustomBlock
-                    FROM Ludde.programs p
-                    JOIN Ludde.user_program_connections upc ON p.Id = upc.ProgramId
-                    WHERE upc.UserId = @UserId;
-                ";
+                // First, try to get any existing programs for the user
+                var userProgramsQuery = @"
+            SELECT p.ProgramData, p.IsCustomBlock
+            FROM Ludde.programs p
+            JOIN Ludde.user_program_connections upc ON p.Id = upc.ProgramId
+            WHERE upc.UserId = @UserId;
+        ";
 
-                var result = await connection.QueryAsync<dynamic>(query, new { UserId = userId });
+                var userProgramsResult = await connection.QueryAsync<dynamic>(userProgramsQuery, new { UserId = userId });
+
+                var programs = userProgramsResult.Select(row =>
+                {
+                    string programDataJson = row.ProgramData;
+                    return row.IsCustomBlock
+                        ? JsonConvert.DeserializeObject<CustomBlockProgram>(programDataJson, _jsonSerializerSettings) as ProgramObject
+                        : JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings) as ProgramObject;
+                }).ToList();
+
+                // If the user has no programs, assign starter programs
+                if (!programs.Any())
+                {
+                    var starterPrograms = await GetStarterProgramsAsync();
+                    foreach (var starterProgram in starterPrograms)
+                    {
+                        var newProgramId = await SaveProgramAsync(starterProgram); 
+                        await ConnectUserToProgramAsync(userId, newProgramId);
+                    }
+
+                    programs = starterPrograms.ToList();
+                }
+
+                return programs;
+            }
+        }
+
+        public async Task<IEnumerable<ProgramObject>> GetStarterProgramsAsync()
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+            SELECT ProgramData, IsCustomBlock
+            FROM Ludde.StarterPrograms;";
+
+                var result = await connection.QueryAsync<dynamic>(query);
 
                 return result.Select(row =>
                 {
                     string programDataJson = row.ProgramData;
-
-                    if (row.IsCustomBlock)
-                    {
-                        return JsonConvert.DeserializeObject<CustomBlockProgram>(programDataJson, _jsonSerializerSettings) as ProgramObject;
-                    }
-                    else
-                    {
-                        return JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings) as ProgramObject;
-                    }
-                });
+                    return row.IsCustomBlock
+                        ? JsonConvert.DeserializeObject<CustomBlockProgram>(programDataJson, _jsonSerializerSettings) as ProgramObject
+                        : JsonConvert.DeserializeObject<CustomProgram>(programDataJson, _jsonSerializerSettings) as ProgramObject;
+                }).ToList();
             }
         }
+
         public async Task<IEnumerable<CustomProgram>> GetAllUserCustomProgramsAsync(Guid userId)
         {
             var query = @"
