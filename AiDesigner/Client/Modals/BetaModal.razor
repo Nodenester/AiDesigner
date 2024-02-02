@@ -1,0 +1,34 @@
+﻿<!-- This section ensures the modal is always displayed by removing conditional display logic -->
+<div class="fixed top-0 left-0 right-0 z-50 w-full p-4 overflow-x-hidden overflow-y-auto md:inset-0 h-[calc(100%-1rem)] max-h-full" style="background-color: rgba(0, 0, 0, 0.5);">
+    <div class="relative w-full max-w-2xl max-h-full mx-auto">
+        <!-- Modal content -->
+        <div class="relative bg-white rounded-lg shadow dark:bg-gray-800">
+            <!-- Modal header -->
+            <div class="flex items-start justify-between p-4 border-b rounded-t dark:border-gray-600 dark:bg-gray-800">
+                <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                    Under Development
+                </h3>
+            </div>
+            <!-- Modal body -->
+            <div class="p-6 space-y-6 dark:text-gray-300 dark:bg-gray-600 dark:text-white">
+                <p class="text-lg font-medium text-gray-900 dark:text-white">
+                    Beta Version Under Development!
+                </p>
+                <p>
+                    Thank you for your interest! This project is currently in beta and under active development.
+                </p>
+                <p>
+                    Although not yet open for public use, the release of our public test beta is just on the horizon.
+                </p>
+            </div>
+            <!-- Modal footer -->
+            <div class="flex items-center justify-between p-6 space-x-2 border-t border-gray-200 rounded-b dark:border-gray-600 dark:bg-gray-600">
+                <div class="bg-blue-100 border-l-4 border-blue-500 text-blue-700 p-4 w-full" role="alert">
+                    <p class="font-bold">Be aware!</p>
+                    <p>You can create an account, but access is restricted to administrators only at this time.</p>
+                </div>
+                <a href="/Identity/Account/Login" class="ml-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Login / Register</a>
+            </div>
+        </div>
+    </div>
+</div>
