@@ -34,7 +34,22 @@
     <!-- Navbar -->
     <div class="navbar bg-gray-500 dark:bg-gray-700 text-white px-5 py-2 border-gray-300 dark:border-gray-600">
         <div class="flex justify-between items-center">
-            <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="SaveProgram">Save</button>
+            <button class="mx-1 py-1 px-2 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none @(Saving ? "bg-gray-500" : Saved ? "bg-green-600" : "bg-gray-500") hover:bg-gray-700"
+                    @onclick="SaveProgram"
+                    disabled="@(Saving || Saved)">
+                @if (Saving)
+                {
+                    <span><i class="fas fa-spinner fa-spin"></i></span> <!-- Loading symbol -->
+                }
+                else if (Saved)
+                {
+                    <span><i class="fas fa-check"></i></span> <!-- Checkmark symbol -->
+                }
+                else
+                {
+                    <span>Save</span>
+                }
+            </button>
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="ExecuteProgram">Execute</button>
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="BuildProgram">Build</button>
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="UndoAction">Undo</button>
@@ -45,14 +60,14 @@
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="CutBlock">Cut</button>
             <button class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" @onclick="PasteBlock">Paste</button>*@
             <a class="mx-1 py-1 px-2 bg-gray-500 hover:bg-gray-700 text-white text-sm font-semibold rounded-lg shadow-md focus:outline-none" href="/documentation/help/troubleshooting">Help</a>
-            <div class="w-full content-end py-1">
+@*             <div class="w-full content-end py-1">
                 <input type="number"
                        class="w-10 p-1 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"
                        min="1"
                        max="25"
                        value="5"
                 @onchange="(ChangeEventArgs e) => SetGridSize(e)" />
-            </div>
+            </div> *@
         </div>
     </div>
 
@@ -494,7 +509,7 @@
                                     {
                                         if(input.Name != "Trigger")
                                         {
-                                            <label class="text-gray-200">@input.Name:</label>
+                                            <label class="text-gray-200">@input.Name.Replace("&#8203; ", ""):</label>
                                         }
 
                                         // If the input doesn't exist in DirectInputValues, initialize it
@@ -518,8 +533,6 @@
                                 }
                             </div>
                         }
-
-                        <!-- You can similarly add UI for Outputs and other properties -->
                     </div>
                 }
                 @if (SelectedDetail is Variable variable)
@@ -1376,8 +1389,15 @@
     }
 
     //Navbar logic
+    private bool Saving { get; set; } = false;
+    private bool Saved { get; set; } = false;
+
     private async Task SaveProgram()
     {
+        Saving = true;
+        Saved = false;
+        StateHasChanged();
+
         await Take();
         APO = localProgram;
         if(localProgram is CustomProgram customProgram)
@@ -1403,6 +1423,16 @@
                 //Dont save if there are no blocks
             }
         }
+
+        Saving = false;
+        Saved = true;
+
+        StateHasChanged(); 
+
+        await Task.Delay(2000);
+
+        Saved = false; 
+        StateHasChanged();
     }
 
     private async Task ExecuteProgram()
