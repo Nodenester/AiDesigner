@@ -28,7 +28,6 @@
             </button>
         }
     }
-    {
     @if (wallet.SubscriptionTier == 0 && (totalSessions != 5 || totalSessions !> 5))
     {
         <button @onclick="@addSession.Open" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create New Session</button>
