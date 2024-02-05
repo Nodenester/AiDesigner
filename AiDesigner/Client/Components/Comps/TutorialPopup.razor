@@ -77,7 +77,7 @@
 
             var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
             var user = authState.User;
-            var userIdClaim = user.Claims.First()?.Value;
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 Http.PutAsJsonAsync($"Tutorial/Complete/{tutorial.TutorialId + ":" + userId.ToString()}", tutorial);

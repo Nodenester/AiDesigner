@@ -1,4 +1,3 @@
-using AiDesigner.Server.Data;
 using AiDesigner.Server.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.ResponseCompression;
@@ -13,6 +12,7 @@ using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Authorization;
 using AiDesigner.Areas.Identity;
 using Microsoft.AspNetCore.Components.Authorization;
+using AiDesigner.Server.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -27,24 +27,13 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-//builder.Services.AddIdentityServer()
-//    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt =>
-//    {
-//        opt.IdentityResources["openid"].UserClaims.Add("role");
-//        opt.ApiResources.Single().UserClaims.Add("role");
-//    });
-//JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
-
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
 
-//builder.Services.AddIdentityServer()
-//    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
-
-//builder.Services.AddAuthorization();
+builder.Services.AddAuthorization();
 builder.Services.AddAuthentication();
 
 builder.Services.AddControllersWithViews();
