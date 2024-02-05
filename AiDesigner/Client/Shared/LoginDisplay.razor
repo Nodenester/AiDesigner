@@ -1,7 +1,8 @@
 ﻿@using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.Components.WebAssembly.Authentication
 @using Microsoft.AspNetCore.Authorization
-@inject NavigationManager Navigation
+@inject NavigationManager NavigationManager
+
 @using AiDesigner.Shared
 
 <AuthorizeView>
@@ -18,15 +19,15 @@
             <!-- This is the dropdown that appears when the button is pressed -->
             <div class="absolute right-0 mt-0 w-48 hidden group-hover:block" style="z-index:9999;">
                 <div class="py-1 dark:bg-gray-700 rounded-md" role="menu" aria-orientation="vertical" aria-labelledby="options-menu">
-                    <a href="authentication/profile" class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white block truncate" role="menuitem">
+                    <a href="Identity/Account/Manage" class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white block truncate" role="menuitem">
                         Settings
                     </a>
                     <a href="myworkshop" class="py-2 px-4 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white block truncate" role="menuitem">
                         My workshop
                     </a>
-                    <button @onclick="BeginLogOut" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white block truncate" role="menuitem">
+@*                     <button @onclick="BeginLogOut" class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white block truncate" role="menuitem">
                         Log out
-                    </button>
+                    </button> *@
                     <!-- Add more buttons here as needed -->
                 </div>
             </div>
@@ -48,8 +49,14 @@
 </style>
 
 @code {
+    //this is the goal so make the BeginLogOut   do the same thing ass this form thing yes!
+    // <form class="form-inline" style="margin-bottom: 0rem;" asp-area="Identity" asp-page="Account/Logout" asp-route-returnUrl="/" method="post">
+    //     <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+    // </form>
     private void BeginLogOut()
     {
-        Navigation.NavigateToLogout("authentication/logout");
+        var logoutUrl = "/Identity/Account/Logout"; // Define the logout URL
+        var returnUrl = NavigationManager.ToAbsoluteUri("/").ToString(); // Define the return URL after logout
+        NavigationManager.NavigateTo($"{logoutUrl}?returnUrl={returnUrl}", forceLoad: true);
     }
 }

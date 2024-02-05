@@ -25,10 +25,9 @@ namespace AiDesigner.Areas.Identity
             state = persistentComponentState;
             options = optionsAccessor.Value;
 
-            // Subscribe to authentication state changes.
             AuthenticationStateChanged += OnAuthenticationStateChanged;
 
-            // Register for persisting state, but consider checking here if it's appropriate to persist (e.g., client vs. server).
+            // if this fucntion is of server auth works but if ts on client works?
             subscription = state.RegisterOnPersisting(OnPersistingAsync);
         }
 
@@ -37,8 +36,6 @@ namespace AiDesigner.Areas.Identity
             authenticationStateTask = task;
         }
 
-        //mayby debug and test the state and stuff before this one?   to see if we can find a difference
-        // if this fucntion is of server auth works but if ts on client works?
         private async Task OnPersistingAsync()
         {
             if (authenticationStateTask == null)

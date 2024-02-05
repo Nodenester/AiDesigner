@@ -65,8 +65,8 @@ app.UseRouting();
 
 app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
 
-//app.UseIdentityServer();
 app.UseAuthorization();
+
 app.UseAntiforgery();
 
 app.MapRazorPages();
