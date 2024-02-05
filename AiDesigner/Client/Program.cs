@@ -11,7 +11,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 
 builder.Services.AddAuthorizationCore();
 builder.Services.AddCascadingAuthenticationState();
-builder.Services.AddSingleton<AuthenticationStateProvider, PersistentAuthenticationStateProvider>();
+builder.Services.AddScoped<AuthenticationStateProvider, PersistentAuthenticationStateProvider>();
 
 builder.Services.AddRadzenComponents();
 

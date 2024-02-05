@@ -9,24 +9,26 @@ namespace AiDesigner.Client
     // be fixed for the lifetime of the WebAssembly application. So, if the user needs to log in or out, a full
     // page reload is required.
     //
-    // This only provides a user name and email for display purposes. It does not actually include any tokens
     // that authenticate to the server when making subsequent requests. That works separately using a
     // cookie that will be included on HttpClient requests to the server.
     internal class PersistentAuthenticationStateProvider : AuthenticationStateProvider
     {
+
+        private readonly NavigationManager _navigationManager;
+
         private static readonly Task<AuthenticationState> defaultUnauthenticatedTask =
             Task.FromResult(new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity())));
 
         private readonly Task<AuthenticationState> authenticationStateTask = defaultUnauthenticatedTask;
 
-        public PersistentAuthenticationStateProvider(PersistentComponentState state)
+        public PersistentAuthenticationStateProvider(PersistentComponentState state, NavigationManager navigationManager)
         {
-
-
             if (!state.TryTakeFromJson<UserInfo>(nameof(UserInfo), out var userInfo) || userInfo is null)
             {
                 return;
             }
+
+            _navigationManager = navigationManager; // Ensure NavigationManager is initialized here
 
             Claim[] claims = [
                 new Claim(ClaimTypes.NameIdentifier, userInfo.UserId),
@@ -40,6 +42,16 @@ namespace AiDesigner.Client
                     authenticationType: nameof(PersistentAuthenticationStateProvider)))));
         }
 
-        public override Task<AuthenticationState> GetAuthenticationStateAsync() => authenticationStateTask;
+        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        {
+            if (_navigationManager != null && (_navigationManager.Uri.Contains("/Identity") || _navigationManager.Uri.Contains("/authentication")))
+            {
+                return defaultUnauthenticatedTask;
+            }
+            else
+            {
+                return authenticationStateTask;
+            }
+        }
     }
 }

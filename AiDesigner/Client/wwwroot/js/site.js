@@ -909,3 +909,23 @@ window.registerGlobalKeyPress = (dotNetObject) => {
     });
 };
 
+function getCsrfToken() {
+    const csrfCookie = document.cookie.split('; ').find(row => row.startsWith('X-CSRF-TOKEN='));
+    return csrfCookie ? csrfCookie.split('=')[1] : null;
+}
+
+
+function submitLogoutForm(logoutUrl, csrfToken) {
+    const form = document.createElement('form');
+    form.action = logoutUrl;
+    form.method = 'POST';
+
+    const tokenInput = document.createElement('input');
+    tokenInput.type = 'hidden';
+    tokenInput.name = '__RequestVerificationToken';
+    tokenInput.value = csrfToken;
+    form.appendChild(tokenInput);
+
+    document.body.appendChild(form);
+    form.submit();
+}
