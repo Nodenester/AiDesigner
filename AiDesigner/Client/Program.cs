@@ -1,18 +1,25 @@
 using AiDesigner.Client;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
-builder.Services.AddHttpClient("AiDesigner.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
-    .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+// Register HttpClient for making HTTP requests to the server API
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 
-// Supply HttpClient instances that include access tokens when making requests to the server project
-builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("AiDesigner.ServerAPI"));
+// Commenting out IHttpClientFactory registration as it's not typically used in Blazor WASM apps
+// builder.Services.AddScoped(sp => sp.GetRequiredService<IHttpClientFactory>().CreateClient("AiDesigner.ServerAPI"));
 
-builder.Services.AddApiAuthorization();
+// Optional: Remove AddHttpMessageHandler if not using a custom message handler
+// builder.Services.AddHttpClient("AiDesigner.ServerAPI", client => client.BaseAddress = new Uri(builder.HostEnvironment.BaseAddress))
+//     .AddHttpMessageHandler<BaseAddressAuthorizationMessageHandler>();
+
+builder.Services.AddAuthorizationCore();
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddSingleton<AuthenticationStateProvider, PersistentAuthenticationStateProvider>();
 
 builder.Services.AddRadzenComponents();
 

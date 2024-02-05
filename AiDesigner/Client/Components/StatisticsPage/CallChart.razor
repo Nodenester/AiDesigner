@@ -154,7 +154,7 @@
     private async Task GetCalls()
     {
         var user = CascAuth.User;
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        var userIdClaim = user.Claims.First()?.Value;
         if (Guid.TryParse(userIdClaim, out Guid userId))
         {
             var useId = userId.ToString();
@@ -288,7 +288,7 @@
         else if (SelectedApi == "Account")
         {
             var user = CascAuth.User;
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var userIdClaim = user.Claims.First()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 currentCalls = selectedProgramId != null ?
