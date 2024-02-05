@@ -84,7 +84,7 @@
     public async Task GetArticles()
     {
         var user = authState.User;
-        var userIdClaim = user.Claims.First()?.Value;
+        var userIdClaim = user.Claims.FirstOrDefault()?.Value;
         if (Guid.TryParse(userIdClaim, out Guid userId))
         {
             var response = await Http.GetAsync($"Workshop/articles/pending");

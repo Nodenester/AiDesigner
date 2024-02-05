@@ -67,7 +67,7 @@
         if (CascAuth != null)
         {
             var user = CascAuth.User;
-            var userIdClaim = user.Claims.First()?.Value;
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 apiKey.Created = DateTime.Now;

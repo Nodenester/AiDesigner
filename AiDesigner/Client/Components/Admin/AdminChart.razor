@@ -104,7 +104,7 @@
     private async Task GetCalls()
     {
         var user = CascAuth.User;
-        var userIdClaim = user.Claims.First()?.Value;
+        var userIdClaim = user.Claims.FirstOrDefault()?.Value;
         if (Guid.TryParse(userIdClaim, out Guid userId))
         {
             var useId = userId.ToString();

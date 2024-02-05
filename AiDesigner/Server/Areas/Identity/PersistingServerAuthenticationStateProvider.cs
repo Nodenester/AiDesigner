@@ -9,8 +9,6 @@ using System.Diagnostics;
 
 namespace AiDesigner.Areas.Identity
 {
-    // This is a server-side AuthenticationStateProvider that uses PersistentComponentState to flow the
-    // authentication state to the client which is then fixed for the lifetime of the WebAssembly application.
     internal sealed class PersistingServerAuthenticationStateProvider : ServerAuthenticationStateProvider, IDisposable
     {
         private readonly PersistentComponentState state;
@@ -27,8 +25,11 @@ namespace AiDesigner.Areas.Identity
             state = persistentComponentState;
             options = optionsAccessor.Value;
 
+            // Subscribe to authentication state changes.
             AuthenticationStateChanged += OnAuthenticationStateChanged;
-            subscription = state.RegisterOnPersisting(OnPersistingAsync, RenderMode.InteractiveWebAssembly);
+
+            // Register for persisting state, but consider checking here if it's appropriate to persist (e.g., client vs. server).
+            subscription = state.RegisterOnPersisting(OnPersistingAsync);
         }
 
         private void OnAuthenticationStateChanged(Task<AuthenticationState> task)
@@ -36,11 +37,14 @@ namespace AiDesigner.Areas.Identity
             authenticationStateTask = task;
         }
 
+
+        // if this fucntion is of server auth works but if ts on client works?
         private async Task OnPersistingAsync()
         {
-            if (authenticationStateTask is null)
+            if (authenticationStateTask == null)
             {
-                throw new UnreachableException($"Authentication state not set in {nameof(OnPersistingAsync)}().");
+                Debug.WriteLine($"Authentication state not set in {nameof(OnPersistingAsync)}().");
+                return; // Early return to avoid throwing an exception.
             }
 
             var authenticationState = await authenticationStateTask;
@@ -53,7 +57,8 @@ namespace AiDesigner.Areas.Identity
                 var name = principal.FindFirst(options.ClaimsIdentity.UserNameClaimType)?.Value;
                 var role = principal.FindFirst(options.ClaimsIdentity.RoleClaimType)?.Value;
 
-                if (userId != null && email != null)
+                // Only persist user info if there's meaningful data to persist.
+                if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(email))
                 {
                     state.PersistAsJson(nameof(UserInfo), new UserInfo
                     {
@@ -68,6 +73,7 @@ namespace AiDesigner.Areas.Identity
 
         public void Dispose()
         {
+            // Clean up by disposing the subscription and detaching the event handler.
             subscription.Dispose();
             AuthenticationStateChanged -= OnAuthenticationStateChanged;
         }

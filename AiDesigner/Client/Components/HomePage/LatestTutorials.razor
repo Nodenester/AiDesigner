@@ -123,7 +123,7 @@
         return AuthenticationStateProvider.GetAuthenticationStateAsync().ContinueWith(authTask =>
         {
             var user = authTask.Result.User;
-            var userIdClaim = user.Claims.First()?.Value;
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 var responseTask = Http.GetAsync($"Tutorial/UserData/{userId}");

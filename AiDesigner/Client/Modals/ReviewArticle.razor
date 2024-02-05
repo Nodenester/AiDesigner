@@ -87,7 +87,7 @@
                 if (CascAuth != null)
                 {
                     var user = CascAuth.User;
-                    var userIdClaim = user.Claims.First()?.Value;
+                    var userIdClaim = user.Claims.FirstOrDefault()?.Value;
                     if (Guid.TryParse(userIdClaim, out Guid userId))
                     {
                         userArticle.ArticleId = Guid.NewGuid().ToString(); // Make sure this should really be a new Guid

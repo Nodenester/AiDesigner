@@ -336,7 +336,7 @@
         {
             isSingleClick = false;
             var user = CascAuth.User;
-            var userIdClaim = user.Claims.First()?.Value;
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 var response = await Http.DeleteAsync($"Programs/{userId}/{id}");
@@ -372,7 +372,7 @@
 
     //         if (user.Identity.IsAuthenticated)
     //         {
-    //             var userIdClaim = user.Claims.First()?.Value;
+    //             var userIdClaim = user.Claims.FirstOrDefault()?.Value;
     //             if (Guid.TryParse(userIdClaim, out Guid userId))
     //             {
     //                 try
@@ -408,7 +408,7 @@
         try
         {
             var user = CascAuth.User;
-            var userIdClaim = user.Claims.First()?.Value;
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 var response = await Http.DeleteAsync($"Workshop/remove-user-article/{userId}/{id}");

@@ -437,7 +437,7 @@
         var user = AuthState.User;
         if (user.Identity.IsAuthenticated)
         {
-            var userIdClaim = user.Claims.First()?.Value;
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
             {
                 try
@@ -490,8 +490,7 @@
         if (user.Identity.IsAuthenticated)
         {
             //var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-            var userIdClaim = user.Claims.First()?.Value;
-
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
             {
                 try
@@ -522,7 +521,7 @@
         if (AuthState != null)
         {
             var user = AuthState.User;
-            var userIdClaim = user.Claims.First()?.Value;
+            var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 var response = await Http.GetAsync($"Chat/ApiKey/GetByUserId/{userId}");
@@ -620,7 +619,7 @@
 
             if (user.Identity.IsAuthenticated)
             {
-                var userIdClaim = user.Claims.First()?.Value;
+                var userIdClaim = user.Claims.FirstOrDefault()?.Value;
                 if (Guid.TryParse(userIdClaim, out Guid userId))
                 {
                     try
