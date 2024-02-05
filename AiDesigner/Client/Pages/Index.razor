@@ -191,7 +191,7 @@
     {
         var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         var user = authState.User;
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        var userIdClaim = user.Claims.First()?.Value;
         if (Guid.TryParse(userIdClaim, out Guid userId))
         {
             var response = await Http.GetAsync($"Chat/Call/GetByUserId/{userId}");

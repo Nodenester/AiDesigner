@@ -296,7 +296,7 @@
         var user = authState.User;
         if (user != null)
         {
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var userIdClaim = user.Claims.First()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 await GetCustomPrograms(userId.ToString());
@@ -304,8 +304,6 @@
             }
         }
     }
-
-    ApiService apiService = new ApiService("https://localhost:44313/");
 
     private async Task ExecuteProgram()
     {
@@ -337,10 +335,9 @@
             if (CascAuth != null)
             {
                 var user = CascAuth.User;
-                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                var userIdClaim = user.Claims.First()?.Value;
                 if (Guid.TryParse(userIdClaim, out Guid userId))
                 {
-                    //ProgramOutput = await apiService.ExecuteProgramAsync(selectedProgram.ApiKey, nonNullInputValues, userId.ToString(), null, true);
                     var url = $"Execute?programKey={selectedProgram.ApiKey}&apiKey={userId}";
 
                     if (true)
@@ -418,7 +415,7 @@
         var user = CascAuth.User;
         if (user.Identity.IsAuthenticated)
         {
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var userIdClaim = user.Claims.First()?.Value;
             if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
             {
                 try

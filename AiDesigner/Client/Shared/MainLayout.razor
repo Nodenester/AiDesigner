@@ -11,6 +11,7 @@
 @inject AuthenticationStateProvider AuthenticationStateProvider;
 @inject HttpClient Http;
 @using Microsoft.AspNetCore.Components.Authorization;
+@using Microsoft.AspNetCore.Authorization
 @using Newtonsoft.Json;
 @using AiDesigner.Client.Pages.Documents;
 
@@ -311,7 +312,7 @@
 
     public Wallet CurrentTokens { get; set; } = new Wallet();
 
-    public AuthenticationState AuthState { get; set; }
+    public AuthenticationState AuthState { get; set; } = null;
 
     private bool isDarkMode = true;
 
@@ -400,6 +401,11 @@
 
     protected override async Task OnInitializedAsync()
     {
+        // if(AuthState == null)
+        // {
+        //     AuthState = AuthenticationStateProvider.GetAuthenticationStateAsync().Result;
+        // }
+
         Http.Timeout = TimeSpan.FromMinutes(10);
         //NavigationManagers.LocationChanged += HandleLocationChanged;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
@@ -431,7 +437,7 @@
         var user = AuthState.User;
         if (user.Identity.IsAuthenticated)
         {
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var userIdClaim = user.Claims.First()?.Value;
             if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
             {
                 try
@@ -483,7 +489,9 @@
         var user = AuthState.User;
         if (user.Identity.IsAuthenticated)
         {
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            //var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var userIdClaim = user.Claims.First()?.Value;
+
             if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
             {
                 try
@@ -514,7 +522,7 @@
         if (AuthState != null)
         {
             var user = AuthState.User;
-            var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+            var userIdClaim = user.Claims.First()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
                 var response = await Http.GetAsync($"Chat/ApiKey/GetByUserId/{userId}");
@@ -612,7 +620,7 @@
 
             if (user.Identity.IsAuthenticated)
             {
-                var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+                var userIdClaim = user.Claims.First()?.Value;
                 if (Guid.TryParse(userIdClaim, out Guid userId))
                 {
                     try

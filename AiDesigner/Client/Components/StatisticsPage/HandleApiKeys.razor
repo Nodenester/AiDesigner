@@ -74,7 +74,7 @@
     private async Task RemoveApiKey(ApiKey key)
     {
         var user = CascAuth.User;
-        var userIdClaim = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
+        var userIdClaim = user.Claims.First()?.Value;
         if (Guid.TryParse(userIdClaim, out Guid userId))
         {
             var response = await Http.DeleteAsync($"Chat/ApiKey/Delete/{key.apiKey}");

@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using AiDesigner.Server.Data;
 using AiDesigner.Shared.Blocks;
 using AiDesigner.Shared.Data;
-using IdentityModel.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;

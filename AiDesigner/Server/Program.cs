@@ -11,6 +11,8 @@ using Stripe;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Authorization;
+using AiDesigner.Areas.Identity;
+using Microsoft.AspNetCore.Components.Authorization;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -25,22 +27,25 @@ builder.Services.AddDefaultIdentity<ApplicationUser>(options => options.SignIn.R
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
 
-builder.Services.AddIdentityServer()
-    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt =>
-    {
-        opt.IdentityResources["openid"].UserClaims.Add("role");
-        opt.ApiResources.Single().UserClaims.Add("role");
-    });
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
+//builder.Services.AddIdentityServer()
+//    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>(opt =>
+//    {
+//        opt.IdentityResources["openid"].UserClaims.Add("role");
+//        opt.ApiResources.Single().UserClaims.Add("role");
+//    });
+//JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Remove("role");
 
 builder.Services.AddRazorComponents()
     .AddInteractiveWebAssemblyComponents();
 
+builder.Services.AddCascadingAuthenticationState();
+builder.Services.AddScoped<AuthenticationStateProvider, PersistingServerAuthenticationStateProvider>();
+
 //builder.Services.AddIdentityServer()
 //    .AddApiAuthorization<ApplicationUser, ApplicationDbContext>();
 
-builder.Services.AddAuthentication()
-    .AddIdentityServerJwt();
+//builder.Services.AddAuthorization();
+builder.Services.AddAuthentication();
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
@@ -51,16 +56,15 @@ builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AiDesigner.
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+//Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.UseMigrationsEndPoint();
     app.UseWebAssemblyDebugging();
+    app.UseMigrationsEndPoint();
 }
 else
 {
-    app.UseExceptionHandler("/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
+    app.UseExceptionHandler("/Error", createScopeForErrors: true);
     app.UseHsts();
 }
 
@@ -72,7 +76,7 @@ app.UseRouting();
 
 app.UseStatusCodePagesWithReExecute("/StatusCode/{0}");
 
-app.UseIdentityServer();
+//app.UseIdentityServer();
 app.UseAuthorization();
 app.UseAntiforgery();
 
