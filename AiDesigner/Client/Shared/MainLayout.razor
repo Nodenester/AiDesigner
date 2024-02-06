@@ -475,6 +475,11 @@
                     var response = await Http.GetAsync($"Programs/user/{userId}");
                     if (response.IsSuccessStatusCode)
                     {
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        // Log the response content for debugging
+                        Console.WriteLine("Response Content: ");
+                        Console.WriteLine(responseContent.Substring(0, Math.Min(responseContent.Length, 500))); // Log a portion of the response content to avoid overflow
+
                         var settings = new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.Auto,
@@ -487,12 +492,9 @@
                                 ObjectCreationHandling = ObjectCreationHandling.Replace
                             };
 
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        //Console.WriteLine(responseContent);
-
                         var userPrograms = JsonConvert.DeserializeObject<List<ProgramObject>>(responseContent, settings);
                         EAPs = userPrograms.ToList();
-                        Console.WriteLine(EAPs.Count);   // this happens but it dont show in the pagese under it just when the page is changed 
+                        Console.WriteLine(EAPs.Count); // This happens but it doesn't show on the pages under it just when the page is changed
                     }
                     else
                     {
@@ -500,7 +502,6 @@
                         var errorMessage = await response.Content.ReadAsStringAsync();
                         Console.WriteLine($"HTTP request failed with status code: {response.StatusCode}, message: {errorMessage}");
                     }
-
                 }
                 catch (HttpRequestException ex)
                 {
@@ -509,19 +510,25 @@
                 }
                 catch (JsonException ex)
                 {
-                    // Log the exception with more context
+                    // Log detailed error information
                     Console.WriteLine($"Failed to deserialize response: {ex.Message}");
-                    Console.WriteLine($"Exception Details: {ex}");
+                    Console.WriteLine($"Exception StackTrace: {ex.StackTrace}");
+
+                    // Log detailed type information
+                    Console.WriteLine($"Expected type information: {typeof(List<ProgramObject>).FullName}");
+
+                    // If possible, log detailed inner exception info
                     if (ex.InnerException != null)
                     {
                         Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                        Console.WriteLine($"Inner Exception StackTrace: {ex.InnerException.StackTrace}");
                     }
-
-                    // Attempt to log the problematic JSON, if accessible here
-                    Console.WriteLine($"Response content causing error: {responseContent}");
-
-                    // Optionally, log the type information of the expected deserialized object
-                    Console.WriteLine($"Expected type information: {typeof(List<ProgramObject>).FullName}");
+                }
+                catch (Exception ex)
+                {
+                    // Catch-all for any other unexpected exceptions
+                    Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                    Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 }
             }
         }

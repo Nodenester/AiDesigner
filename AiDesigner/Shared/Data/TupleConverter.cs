@@ -13,38 +13,52 @@ namespace AiDesigner.Shared.Data
     {
         public override bool CanConvert(System.Type objectType)
         {
-            return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Tuple<,>);
+            return objectType.IsGenericType &&
+                   objectType.GetGenericTypeDefinition().FullName.StartsWith("System.Tuple`");
         }
 
         public override object ReadJson(JsonReader reader, System.Type objectType, object existingValue, JsonSerializer serializer)
         {
-            if (reader.TokenType == JsonToken.StartArray)
+            if (reader.TokenType != JsonToken.StartArray)
             {
-                var jArray = JArray.Load(reader);
-                if (jArray.Count != 2)
-                {
-                    throw new JsonSerializationException("Unexpected number of elements in Tuple JSON array.");
-                }
-
-                var item1 = jArray[0].ToObject(objectType.GetGenericArguments()[0], serializer);
-                var item2 = jArray[1].ToObject(objectType.GetGenericArguments()[1], serializer);
-
-                return Activator.CreateInstance(objectType, item1, item2);
+                throw new JsonSerializationException("Expected StartArray token");
             }
 
-            throw new JsonSerializationException("Invalid JSON for Tuple. Expected StartArray token.");
+            JArray jArray = JArray.Load(reader);
+            System.Type[] tupleTypes = objectType.GetGenericArguments();
+            if (jArray.Count != tupleTypes.Length)
+            {
+                throw new JsonSerializationException($"Expected {tupleTypes.Length} elements in tuple.");
+            }
+
+            object[] tupleValues = new object[tupleTypes.Length];
+            for (int i = 0; i < tupleTypes.Length; i++)
+            {
+                tupleValues[i] = jArray[i].ToObject(tupleTypes[i], serializer);
+            }
+
+            // Construct the tuple using reflection
+            object tuple = Activator.CreateInstance(objectType, args: tupleValues);
+            return tuple;
         }
 
         public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
         {
-            var tuple = (dynamic)value;
+            System.Type tupleType = value.GetType();
+            System.Type[] tupleElementTypes = tupleType.GetGenericArguments();
 
             writer.WriteStartArray();
-            serializer.Serialize(writer, tuple.Item1);
-            serializer.Serialize(writer, tuple.Item2);
+
+            for (int i = 1; i <= tupleElementTypes.Length; i++)
+            {
+                object item = tupleType.GetProperty($"Item{i}").GetValue(value, null);
+                serializer.Serialize(writer, item);
+            }
+
             writer.WriteEndArray();
         }
     }
+
     public class BlockJsonConverter : JsonConverter
     {
         public override bool CanConvert(System.Type objectType)
