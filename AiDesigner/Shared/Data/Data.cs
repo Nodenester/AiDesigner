@@ -205,7 +205,7 @@ namespace NodeBaseApi.Version2
                     {
                         inputProgramBlock.Inputs = new List<Guid>(new Guid[inputProgramBlock.Block.Inputs.Count]);
                     }
-                    if (inputProgramBlock.Inputs.Count() -1 >= index )
+                    if (inputProgramBlock.Inputs.Count() - 1 >= index)
                     {
                         inputProgramBlock.Inputs[index] = outputId;
                     }
@@ -256,7 +256,7 @@ namespace NodeBaseApi.Version2
                     InputValues.Remove(inputId);
                     removed = block.Inputs.Remove(inputId);
                 }
-            }   
+            }
             if (!removed)
             {
                 var keyToRemove = ProgramEndConnections.FirstOrDefault(pair => pair.Value == inputId).Key;
@@ -646,4 +646,5 @@ namespace NodeBaseApi.Version2
         public int TokensToDeduct { get; set; }
     }
 }
+
 

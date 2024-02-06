@@ -44,7 +44,7 @@ namespace AiDesigner.Client
 
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            if (_navigationManager != null && (_navigationManager.Uri.Contains("/Identity") || _navigationManager.Uri.Contains("/authentication")))
+            if (_navigationManager != null && (_navigationManager.Uri.Contains("/Identity")))
             {
                 return defaultUnauthenticatedTask;
             }

@@ -52,7 +52,7 @@ namespace AiDesigner.Areas.Identity
                 var userId = principal.FindFirst(options.ClaimsIdentity.UserIdClaimType)?.Value;
                 var email = principal.FindFirst(options.ClaimsIdentity.EmailClaimType)?.Value;
                 var name = principal.FindFirst(options.ClaimsIdentity.UserNameClaimType)?.Value;
-                var role = principal.FindFirst(options.ClaimsIdentity.RoleClaimType)?.Value;
+                var role = principal.FindFirst(options.ClaimsIdentity.RoleClaimType)?.Value ?? "DefaultRole"; // Assign default role if null
 
                 // Only persist user info if there's meaningful data to persist.
                 if (!string.IsNullOrEmpty(userId) && !string.IsNullOrEmpty(email))
