@@ -475,8 +475,6 @@
                     var response = await Http.GetAsync($"Programs/user/{userId}");
                     if (response.IsSuccessStatusCode)
                     {
-                        var responseContent = await response.Content.ReadAsStringAsync();
-                        //Console.WriteLine(responseContent);
                         var settings = new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.Auto,
@@ -488,6 +486,10 @@
                                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                                 ObjectCreationHandling = ObjectCreationHandling.Replace
                             };
+
+                        var responseContent = await response.Content.ReadAsStringAsync();
+                        //Console.WriteLine(responseContent);
+
                         var userPrograms = JsonConvert.DeserializeObject<List<ProgramObject>>(responseContent, settings);
                         EAPs = userPrograms.ToList();
                         Console.WriteLine(EAPs.Count);   // this happens but it dont show in the pagese under it just when the page is changed 
@@ -507,8 +509,19 @@
                 }
                 catch (JsonException ex)
                 {
-                    // Handle or log the deserialization exception here...
+                    // Log the exception with more context
                     Console.WriteLine($"Failed to deserialize response: {ex.Message}");
+                    Console.WriteLine($"Exception Details: {ex}");
+                    if (ex.InnerException != null)
+                    {
+                        Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+                    }
+
+                    // Attempt to log the problematic JSON, if accessible here
+                    Console.WriteLine($"Response content causing error: {responseContent}");
+
+                    // Optionally, log the type information of the expected deserialized object
+                    Console.WriteLine($"Expected type information: {typeof(List<ProgramObject>).FullName}");
                 }
             }
         }
