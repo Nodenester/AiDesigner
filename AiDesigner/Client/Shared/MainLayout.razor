@@ -423,10 +423,26 @@
         Http.Timeout = TimeSpan.FromMinutes(10);
         //NavigationManagers.LocationChanged += HandleLocationChanged;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
-        await UpdatePrograms();
-        await GetTokens();
-        await GetApiKeys();
-        await UpdateVault();
+        UpdatePrograms().ContinueWith(t =>
+        {
+            StateHasChanged(); // Direct call should be safe in Blazor WebAssembly
+        }, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+
+        // Repeat for other operations
+        GetTokens().ContinueWith(t =>
+        {
+            StateHasChanged();
+        }, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+
+        GetApiKeys().ContinueWith(t =>
+        {
+            StateHasChanged();
+        }, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
+
+        UpdateVault().ContinueWith(t =>
+        {
+            StateHasChanged();
+        }, CancellationToken.None, TaskContinuationOptions.OnlyOnRanToCompletion, TaskScheduler.Current);
 
         // var uri = new Uri(NavigationManagers.Uri); // Get the current URL
         // if (uri.AbsolutePath == "/library" || uri.AbsolutePath == "/editor" || uri.AbsolutePath == "/marketplace")
@@ -460,6 +476,7 @@
                     if (response.IsSuccessStatusCode)
                     {
                         var responseContent = await response.Content.ReadAsStringAsync();
+                        //Console.WriteLine(responseContent);
                         var settings = new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.Auto,
