@@ -70,7 +70,6 @@ namespace NodeBaseApi.Version2
             }
             );
 
-        [JsonProperty("programStartLocation")]
         public Tuple<int, int> ProgramStartLocation { get; set; } = new Tuple<int, int>(0, 200);
 
         public List<Input> ProgramEnd { get; set; } = new List<Input>(
@@ -88,11 +87,9 @@ namespace NodeBaseApi.Version2
             );
         public Dictionary<Guid, Guid> ProgramEndConnections { get; set; } = new Dictionary<Guid, Guid>();
 
-        [JsonProperty("programEndLocation")]
         public Tuple<int, int> ProgramEndLocation { get; set; } = new Tuple<int, int>(300, 200);
         public float zoom { get; set; } = 1;
 
-        [JsonProperty("cameraPos")]
         public Tuple<double, double> CameraPos { get; set; } = new Tuple<double, double>(0, 0);
         public Dictionary<Guid, object> InputValues { get; set; } = new Dictionary<Guid, object>();
         public Dictionary<Guid, object> OutputValues { get; set; } = new Dictionary<Guid, object>();
