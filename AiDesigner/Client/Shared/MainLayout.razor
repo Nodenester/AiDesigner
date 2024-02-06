@@ -14,11 +14,10 @@
 @using Microsoft.AspNetCore.Authorization
 @using Newtonsoft.Json;
 @using AiDesigner.Client.Pages.Documents;
+@using System.Reflection
 
 <CascadingValue Value="@AuthState" Name="CascAuth">
-<CascadingValue Value="@EAPs" Name="EAPs">
-    <CascadingValue Value="@APs" Name="APs">
-        <CascadingValue Value="@AP" Name="AP">
+
             <div class="page h-screen flex">
                 @if (Title == "home" || Title == "library" || Title == "statistics")
                 {
@@ -140,21 +139,31 @@
                         </div>
                     }
                     <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
-                        <AuthorizeView Roles="Administrator">
+                        <AuthorizeView>
                             <Authorized>
-                                <CascadingValue Value="@CurrentTokens" Name="Wallet">
-                                    <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
-                                        <CascadingValue Value="@setTutorial" Name="setTutorial">
-                                            <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
-                                                <CascadingValue Value="@setAnalytic" Name="setAnalytics"> 
-                                                    <CascadingValue Value="@analytics" Name="analytics"> 
-                                                        <CascadingValue Value="@addApiKey" Name="addApiKey">
-                                                            <CascadingValue Value="@apiKeys" Name="ApiKeys">
-                                                                <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
-                                                                    <CascadingValue Value="@passingArticle" Name="passingArticle">
-                                                                        <CascadingValue Value=@setTokens Name="Settokens">
-                                                                            <CascadingValue Value=@NewAps Name="NewAps">
-                                                                                @Body
+                            @{
+                            var user = AuthState?.User; 
+                            if (user.IsInRole("Administrator"))
+                                {
+                                <CascadingValue Value="@EAPs" Name="EAPs">
+                                    <CascadingValue Value="@APs" Name="APs">
+                                        <CascadingValue Value="@AP" Name="AP">
+                                            <CascadingValue Value="@CurrentTokens" Name="Wallet">
+                                                <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
+                                                    <CascadingValue Value="@setTutorial" Name="setTutorial">
+                                                        <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
+                                                            <CascadingValue Value="@setAnalytic" Name="setAnalytics">
+                                                                <CascadingValue Value="@analytics" Name="analytics">
+                                                                    <CascadingValue Value="@addApiKey" Name="addApiKey">
+                                                                        <CascadingValue Value="@apiKeys" Name="ApiKeys">
+                                                                            <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                                                                                <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                                                                    <CascadingValue Value=@setTokens Name="Settokens">
+                                                                                        <CascadingValue Value=@NewAps Name="NewAps">
+                                                                                            @Body
+                                                                                        </CascadingValue>
+                                                                                    </CascadingValue>
+                                                                                </CascadingValue>
                                                                             </CascadingValue>
                                                                         </CascadingValue>
                                                                     </CascadingValue>
@@ -167,6 +176,13 @@
                                         </CascadingValue>
                                     </CascadingValue>
                                 </CascadingValue>
+                                }
+                                else
+                                {
+                                    <AiDesigner.Client.Modals.BetaModal />
+                                    @Body
+                                }
+                            }
                             </Authorized>
                             <NotAuthorized>
                                 <AiDesigner.Client.Modals.BetaModal />
@@ -181,9 +197,7 @@
                 </main>
             </div>
         </CascadingValue>
-    </CascadingValue>
-</CascadingValue>
-</CascadingValue>
+
 
 <RadzenComponents />
 
@@ -449,7 +463,7 @@
                         var settings = new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.Auto,
-                                Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                                Converters = new List<JsonConverter> { new TupleConverter2(), new BlockJsonConverter() },
                                 ContractResolver = new DefaultContractResolver
                                 {
                                     NamingStrategy = new CamelCaseNamingStrategy()
@@ -670,6 +684,45 @@
     //     // It's important to unsubscribe from the event to prevent memory leaks
     //     NavigationManagers.LocationChanged -= HandleLocationChanged;
     // }
+    //-----------------------------------
+
+    public class TupleConverter2 : JsonConverter
+    {
+        public override bool CanConvert(System.Type objectType)
+        {
+            return objectType.IsGenericType && objectType.GetGenericTypeDefinition() == typeof(Tuple<,>);
+        }
+
+        public override object ReadJson(JsonReader reader, System.Type objectType, object existingValue, JsonSerializer serializer)
+        {
+            if (reader.TokenType == JsonToken.StartArray)
+            {
+                var jArray = JArray.Load(reader);
+                if (jArray.Count != 2)
+                {
+                    throw new JsonSerializationException("Unexpected number of elements in Tuple JSON array.");
+                }
+
+                var item1 = jArray[0].ToObject(objectType.GetGenericArguments()[0], serializer);
+                var item2 = jArray[1].ToObject(objectType.GetGenericArguments()[1], serializer);
+
+                return Activator.CreateInstance(objectType, item1, item2);
+            }
+
+            throw new JsonSerializationException("Invalid JSON for Tuple. Expected StartArray token.");
+        }
+
+        public override void WriteJson(JsonWriter writer, object value, JsonSerializer serializer)
+        {
+            var tuple = (dynamic)value;
+
+            writer.WriteStartArray();
+            serializer.Serialize(writer, tuple.Item1);
+            serializer.Serialize(writer, tuple.Item2);
+            writer.WriteEndArray();
+        }
+    }
+
 }
 
 
