@@ -149,11 +149,11 @@
                     {
                         foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
                         {
-                            if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
+                            if (input.Type.ToString() != "Trigger" && input.Name.ToString() != "Chat History")
                             {
                                 inputValues[input.Id.ToString()] = "value";
                             }
-                            else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
+                            else if (input.Name.ToString() == "Chat History" && SelectedProgram.SupportsChat)
                             {
                                 inputValues[input.Id.ToString()] = "Chathistory";
                             }
@@ -206,11 +206,11 @@ Dictionary<Guid, object> inputValues = new Dictionary<Guid, object>();
                     {
                         foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
                         {
-                            if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
+                            if (input.Type.ToString() != "Trigger" && input.Name.ToString() != "Chat History")
                             {
                                 code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //value is {input.Type}\n";
                             }
-                            else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
+                            else if (input.Name.ToString() == "Chat History" && SelectedProgram.SupportsChat)
                             {
                                 code += $"inputValues.Add(Guid.Parse(\"{input.Id}\"), Value); //Chathistoy is list of {input.Type}s\n";
                             }
@@ -249,11 +249,11 @@ input_values = {}
 ";
                     foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
                     {
-                        if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
+                        if (input.Type.ToString() != "Trigger" && input.Name.ToString() != "Chat History")
                         {
                             code += $"input_values['{input.Id}'] = value  # value is {input.Type}\n";
                         }
-                        else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
+                        else if (input.Name.ToString() == "Chat History" && SelectedProgram.SupportsChat)
                         {
                             code += $"input_values['{input.Id}'] = value  # Chathistoy is list of {input.Type}s\n";
                         }
@@ -291,11 +291,11 @@ const inputValues =";
 {}";
                     foreach (var input in SelectedProgram.ProgramStructure.ProgramStart)
                     {
-                        if (input.Type.ToString() != "Trigger" && input.Type.ToString() != "Chat History")
+                        if (input.Type.ToString() != "Trigger" && input.Name.ToString() != "Chat History")
                         {
                             code += $"inputValues['{input.Id}'] = value;  // value is {input.Type}\n";
                         }
-                        else if (input.Type.ToString() == "Chat History" && SelectedProgram.SupportsChat)
+                        else if (input.Name.ToString() == "Chat History" && SelectedProgram.SupportsChat)
                         {
                             code += $"inputValues['{input.Id}'] = value;  // Chathistoy is list of {input.Type}s\n";
                         }
