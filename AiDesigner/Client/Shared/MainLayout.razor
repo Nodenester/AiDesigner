@@ -142,8 +142,8 @@
                         <AuthorizeView>
                             <Authorized>
                             @{
-                            var user = AuthState?.User; 
-                            if (user.IsInRole("Administrator"))
+                            var user = AuthState?.User;
+                                if (user.IsInRole("Administrator") || user.IsInRole("BetaTester"))
                                 {
                                 <CascadingValue Value="@EAPs" Name="EAPs">
                                     <CascadingValue Value="@APs" Name="APs">
