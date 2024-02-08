@@ -16,7 +16,7 @@
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
                         <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
                         <div class="w-full flex items-start">
-                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                            <a class="text-left dark:text-white ml-2 clickable" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
                         </div>
                         <br />
                         <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
@@ -55,7 +55,14 @@
 
 <div class="flex justify-center items-center mt-4">
     <div style="width: 83%;" class="content-center">
-        <span class="text-2xl font-bold mt-2">Made by NodeNestor</span>
+        @if (WorkshopLists != null && WorkshopLists.Item2 != null && WorkshopLists.Item2.Count > 0)
+        {
+            <span class="text-2xl font-bold mt-2 clickable" @onclick="() => SelectAuthor.InvokeAsync(WorkshopLists.Item2[0].AuthorId)" @onclick:stopPropagation="true">Made by NodeNestor</span>
+        }
+        else
+        {
+            <span class="text-2xl font-bold mt-2">Made by NodeNestor</span>
+        }
         <div class="flex flex-wrap gap-4 mt-2 ml-0">
             @if (WorkshopLists != null && WorkshopLists.Item2 != null && WorkshopLists.Item2.Count > 0)
             {
@@ -65,7 +72,7 @@
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
                         <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
                         <div class="w-full flex items-start">
-                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                            <a class="text-left dark:text-white ml-2 clickable" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
                         </div>
                         <br />
                         <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
@@ -114,7 +121,7 @@
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
                         <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
                         <div class="w-full flex items-start">
-                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                            <a class="text-left dark:text-white ml-2 clickable" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
                         </div>
                         <br />
                         <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
@@ -163,7 +170,7 @@
                         <img src="@($"data:image/png;base64,{Convert.ToBase64String(article.ProgramImage)}")" alt="@article.Name" style="width: 100%; height: 16.25rem; object-fit: cover; border-radius: 0.25rem; margin-bottom: 0.5rem;" loading="lazy" />
                         <h1 class="w-full text-left dark:text-white mb-0 text-xl ml-4">@article.Name</h1>
                         <div class="w-full flex items-start">
-                            <a class="text-left dark:text-white ml-2" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
+                            <a class="text-left dark:text-white ml-2 clickable" @onclick="() => SelectAuthor.InvokeAsync(article.AuthorId)" @onclick:stopPropagation="true">@article.AuthorName</a>
                         </div>
                         <br />
                         <hr style="width: 100%; margin-left: auto; margin-right: auto; margin-top: -1rem;">
@@ -200,6 +207,16 @@
     </div>
 </div>
 
+<style>
+    .clickable {
+        cursor: pointer;
+        text-decoration: none; /* Ensures text is not underlined by default */
+    }
+
+        .clickable:hover {
+            text-decoration: underline; /* Applies an underline on hover */
+        }
+</style>
 
 @code {
     [Parameter]
