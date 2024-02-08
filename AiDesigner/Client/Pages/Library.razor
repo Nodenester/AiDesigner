@@ -4,6 +4,7 @@
 @inject NavigationManager NavigationManager
 @using AiDesigner.Shared.Data;
 @using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq
 @using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2;
 @using System.Linq;
@@ -438,48 +439,93 @@
         {
             var responseContent = await response.Content.ReadAsStringAsync();
             var settings = new JsonSerializerSettings
+            {
+                TypeNameHandling = TypeNameHandling.Auto,
+                Converters = new List<JsonConverter> { new BlockJsonConverter() },
+                ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
+                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+
+            var jobject = JObject.Parse(responseContent);
+            var programStructureToken = jobject["programStructure"] as JObject;
+
+            // Initialize default values for locations and positions
+            Tuple<int, int> programStartLocation = null, programEndLocation = null;
+            Tuple<double, double> cameraPos = null;
+
+            if (programStructureToken != null)
+            {
+                // Extract programStartLocation
+                var startLocationArray = programStructureToken["programStartLocation"] as JArray;
+                if (startLocationArray != null && startLocationArray.Count >= 2)
                 {
-                    TypeNameHandling = TypeNameHandling.Auto,
-                    Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
-                    ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = new CamelCaseNamingStrategy()
-                    },
-                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                    ObjectCreationHandling = ObjectCreationHandling.Replace
-                };
+                    programStartLocation = new Tuple<int, int>(startLocationArray[0].Value<int>(), startLocationArray[1].Value<int>());
+                    // Remove the property after extraction
+                    programStructureToken.Remove("programStartLocation");
+                }
 
+                // Extract programEndLocation
+                var endLocationArray = programStructureToken["programEndLocation"] as JArray;
+                if (endLocationArray != null && endLocationArray.Count >= 2)
+                {
+                    programEndLocation = new Tuple<int, int>(endLocationArray[0].Value<int>(), endLocationArray[1].Value<int>());
+                    // Remove the property after extraction
+                    programStructureToken.Remove("programEndLocation");
+                }
 
+                // Extract cameraPos
+                var cameraPosArray = programStructureToken["cameraPos"] as JArray;
+                if (cameraPosArray != null && cameraPosArray.Count >= 2)
+                {
+                    cameraPos = new Tuple<double, double>(cameraPosArray[0].Value<double>(), cameraPosArray[1].Value<double>());
+                    // Remove the property after extraction
+                    programStructureToken.Remove("cameraPos");
+                }
+            }
+
+            ProgramObject userProgram;
             if (responseContent.Contains("\"apiKey\":"))
             {
-                var userProgram = JsonConvert.DeserializeObject<CustomProgram>(responseContent, settings);
-                if (userProgram.IsPublic)
-                {
-                    ap.Open();
-                    NewProgram = userProgram;
-                }
-                else
-                {
-                    Console.WriteLine("CustomProgram is not public");
-                }
+                userProgram = JsonConvert.DeserializeObject<CustomProgram>(jobject.ToString(), settings);
             }
             else
             {
-                var userBlockProgram = JsonConvert.DeserializeObject<CustomBlockProgram>(responseContent, settings);
-                if (userBlockProgram.IsPublic)
+                userProgram = JsonConvert.DeserializeObject<CustomBlockProgram>(jobject.ToString(), settings);
+            }
+
+
+            // Assign the tuples directly to the ProgramObject's structure
+            if (userProgram != null && userProgram.ProgramStructure != null)
+            {
+                userProgram.ProgramStructure.ProgramStartLocation = programStartLocation;
+                userProgram.ProgramStructure.ProgramEndLocation = programEndLocation;
+                userProgram.ProgramStructure.CameraPos = cameraPos;
+            }
+
+            if (userProgram is CustomProgram customProgram)
+            {
+                if (customProgram.IsPublic)
                 {
-                    acb.Open();
-                    NewBlockProgram = userBlockProgram;
+                    ap.Open();
+                    NewProgram = customProgram;
                 }
                 else
                 {
                     Console.WriteLine("CustomProgram is not public");
                 }
             }
-
-            if (true)
+            else if(userProgram is CustomBlockProgram customBlockProgram)
             {
-                string jsonuserProgram = JsonConvert.SerializeObject(NewProgram, settings);
+                if (customBlockProgram.IsPublic)
+                {
+                    ap.Open();
+                    NewBlockProgram = customBlockProgram;
+                }
+                else
+                {
+                    Console.WriteLine("Custom¨BlockProgram is not public");
+                }
             }
         }
         else
