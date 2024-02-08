@@ -950,7 +950,7 @@ namespace AiDesigner.Server.Data
             {
                 var query = @"
                     DECLARE @Today DATE = CAST(GETDATE() AS DATE);
-                    DECLARE @TokensToAdd INT;
+                    DECLARE @TokensToAdd INT = 500;
 
                     SELECT @TokensToAdd = CASE SubscriptionTier
                         WHEN 0 THEN 500

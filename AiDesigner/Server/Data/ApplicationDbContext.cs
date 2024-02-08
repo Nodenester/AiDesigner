@@ -31,6 +31,13 @@ namespace AiDesigner.Server.Data
                     NormalizedName = "ADMINISTRATOR"
                 }
             );
+            builder.HasData(
+            new IdentityRole
+            {
+                Name = "BetaTester",
+                NormalizedName = "BETATESTER"
+            }
+        );
         }
     }
 

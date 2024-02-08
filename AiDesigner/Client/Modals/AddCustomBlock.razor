@@ -1,5 +1,7 @@
 ﻿@using AiDesigner.Shared.Data;
 @using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq
+@using Newtonsoft.Json.Serialization
 @using NodeBaseApi.Version2;
 @using Microsoft.AspNetCore.Components.Authorization
 @using System.Security.Claims
@@ -76,36 +78,76 @@
     private async Task HandleNextButtonClick()
     {
         var user = AuthState.User;
-        NewCustomBlock.Id = Guid.NewGuid();
-        NewCustomBlock.Author = user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value;
-        NewCustomBlock.AuthorName = user.Identity.Name;
-        NewCustomBlock.ProgramStructure = new ProgramStructure();
-
-        var settings = new JsonSerializerSettings
+        var userIdClaim = user.Claims.FirstOrDefault()?.Value;
+        if (!string.IsNullOrEmpty(userIdClaim) && Guid.TryParse(userIdClaim, out Guid userId))
+        {
+            NewCustomBlock.Id = Guid.NewGuid();
+            NewCustomBlock.Author = userId.ToString();
+            NewCustomBlock.AuthorName = user.Identity.Name;
+            NewCustomBlock.LastOpened = DateTime.Now;
+            if (NewCustomBlock.ProgramStructure == null)
             {
-                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                TypeNameHandling = TypeNameHandling.Auto,
-                Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
-                ObjectCreationHandling = ObjectCreationHandling.Replace
-            };
+                NewCustomBlock.ProgramStructure = new ProgramStructure();
+            }
 
-        var json = JsonConvert.SerializeObject(NewCustomBlock, settings);
-        var content = new StringContent(json, Encoding.UTF8, "application/json");
+            //convert to json: -------------------------------
+            NewCustomBlock.ProgramStructure.ProgramStartLocation = null;
+            NewCustomBlock.ProgramStructure.ProgramEndLocation = null;
+            NewCustomBlock.ProgramStructure.CameraPos = null;
 
-        var response = await Http.PostAsync("Programs", content);
+            // Serialize the ProgramObject without the tuples
+            var settings = new JsonSerializerSettings
+                {
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = new List<JsonConverter> { new BlockJsonConverter() },
+                    ContractResolver = new DefaultContractResolver
+                    {
+                        NamingStrategy = new CamelCaseNamingStrategy()
+                    },
+                    ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                    ObjectCreationHandling = ObjectCreationHandling.Replace
+                };
 
-        if (response.IsSuccessStatusCode)
-        {
-            var programId = NewCustomBlock.Id;
-            var userId = Guid.Parse(user.Claims.FirstOrDefault(c => c.Type == "sub")?.Value);
-            var connectUserResponse = await Http.PostAsync($"Programs/connect/{userId}/{programId}", null);
+            var json = JsonConvert.SerializeObject(NewCustomBlock, settings);
+
+            Console.WriteLine(json);
+
+            // Parse the JSON to a JObject
+            var jsonObject = JObject.Parse(json);
+
+            // Manually reinsert the tuples into the JSON object
+            // Assuming you have the tuples stored or accessible
+            var programStartLocationTuple = new Tuple<int, int>(0, 200);
+            var programEndLocationTuple = new Tuple<int, int>(300, 200);
+            var cameraPosTuple = new Tuple<double, double>(0, 0);
+
+            // Insert tuples back into the JSON
+            jsonObject["programStructure"]["programStartLocation"] = new JArray(programStartLocationTuple.Item1, programStartLocationTuple.Item2);
+            jsonObject["programStructure"]["programEndLocation"] = new JArray(programEndLocationTuple.Item1, programEndLocationTuple.Item2);
+            jsonObject["programStructure"]["cameraPos"] = new JArray(cameraPosTuple.Item1, cameraPosTuple.Item2);
+            Console.WriteLine(jsonObject.ToString());
+
+            // Convert the JObject back to string JSON
+            var modifiedJson = jsonObject.ToString();
+
+            // Create StringContent and send
+            var content = new StringContent(modifiedJson, Encoding.UTF8, "application/json");
+            var response = await Http.PostAsync("Programs", content);
+
+            //--------------------------------------------------------------
+
+            if (response.IsSuccessStatusCode)
+            {
+                var programId = NewCustomBlock.Id;
+                var connectUserResponse = await Http.PostAsync($"Programs/connect/{userId}/{programId}", null);
+            }
+            else
+            {
+                Console.WriteLine(response.StatusCode);
+            }
+
+            await CreateNew.InvokeAsync();
+            Close();
         }
-        else
-        {
-            Console.WriteLine(response.StatusCode);
-        }
-
-        await CreateNew.InvokeAsync();
-        Close();
     }
 }
