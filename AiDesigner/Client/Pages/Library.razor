@@ -224,11 +224,7 @@
         await Task.Delay(250);
         if (isSingleClick)
         {
-            if (AP == eap)
-            {
-                AP = null;
-            }
-            else
+            if (AP != eap)
             {
                 AP = eap;
             }
