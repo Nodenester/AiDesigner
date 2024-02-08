@@ -476,58 +476,81 @@
                     if (response.IsSuccessStatusCode)
                     {
                         var responseContent = await response.Content.ReadAsStringAsync();
-                        // Log the response content for debugging
-                        Console.WriteLine("Response Content: ");
-                        Console.WriteLine(responseContent.Substring(0, Math.Min(responseContent.Length, 500))); // Log a portion of the response content to avoid overflow
+                        var jsonArray = JArray.Parse(responseContent);
 
+                        List<ProgramObject> userPrograms = new List<ProgramObject>();
                         var settings = new JsonSerializerSettings
                             {
                                 TypeNameHandling = TypeNameHandling.Auto,
-                                Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
-                                ContractResolver = new DefaultContractResolver
-                                {
-                                    NamingStrategy = new CamelCaseNamingStrategy()
-                                },
+                                Converters = new List<JsonConverter> { new BlockJsonConverter() },
+                                ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
                                 ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                                 ObjectCreationHandling = ObjectCreationHandling.Replace
                             };
 
-                        var userPrograms = JsonConvert.DeserializeObject<List<ProgramObject>>(responseContent, settings);
-                        EAPs = userPrograms.ToList();
-                        Console.WriteLine(EAPs.Count); // This happens but it doesn't show on the pages under it just when the page is changed
+                        foreach (var item in jsonArray)
+                        {
+                            var jobject = JObject.Parse(item.ToString());
+                            var programStructureToken = jobject["programStructure"] as JObject;
+
+                            // Initialize default values for locations and positions
+                            Tuple<int, int> programStartLocation = null, programEndLocation = null;
+                            Tuple<double, double> cameraPos = null;
+
+                            if (programStructureToken != null)
+                            {
+                                // Extract programStartLocation
+                                var startLocationArray = programStructureToken["programStartLocation"] as JArray;
+                                if (startLocationArray != null && startLocationArray.Count >= 2)
+                                {
+                                    programStartLocation = new Tuple<int, int>(startLocationArray[0].Value<int>(), startLocationArray[1].Value<int>());
+                                    // Remove the property after extraction
+                                    programStructureToken.Remove("programStartLocation");
+                                }
+
+                                // Extract programEndLocation
+                                var endLocationArray = programStructureToken["programEndLocation"] as JArray;
+                                if (endLocationArray != null && endLocationArray.Count >= 2)
+                                {
+                                    programEndLocation = new Tuple<int, int>(endLocationArray[0].Value<int>(), endLocationArray[1].Value<int>());
+                                    // Remove the property after extraction
+                                    programStructureToken.Remove("programEndLocation");
+                                }
+
+                                // Extract cameraPos
+                                var cameraPosArray = programStructureToken["cameraPos"] as JArray;
+                                if (cameraPosArray != null && cameraPosArray.Count >= 2)
+                                {
+                                    cameraPos = new Tuple<double, double>(cameraPosArray[0].Value<double>(), cameraPosArray[1].Value<double>());
+                                    // Remove the property after extraction
+                                    programStructureToken.Remove("cameraPos");
+                                }
+                            }
+
+                            // Now, deserialize the rest of the ProgramObject from the modified jobject
+                            var program = JsonConvert.DeserializeObject<ProgramObject>(jobject.ToString(), settings);
+
+                            // Assign the tuples directly to the ProgramObject's structure
+                            if (program != null && program.ProgramStructure != null)
+                            {
+                                program.ProgramStructure.ProgramStartLocation = programStartLocation;
+                                program.ProgramStructure.ProgramEndLocation = programEndLocation;
+                                program.ProgramStructure.CameraPos = cameraPos;
+                            }
+
+                            userPrograms.Add(program);
+                        }
+                        EAPs = userPrograms;
                     }
                     else
                     {
-                        // Read the response content which should contain the error message
                         var errorMessage = await response.Content.ReadAsStringAsync();
                         Console.WriteLine($"HTTP request failed with status code: {response.StatusCode}, message: {errorMessage}");
                     }
                 }
-                catch (HttpRequestException ex)
-                {
-                    // Handle or log the HTTP request exception here...
-                    Console.WriteLine($"HTTP request exception: {ex.Message}");
-                }
-                catch (JsonException ex)
-                {
-                    // Log detailed error information
-                    Console.WriteLine($"Failed to deserialize response: {ex.Message}");
-                    Console.WriteLine($"Exception StackTrace: {ex.StackTrace}");
-
-                    // Log detailed type information
-                    Console.WriteLine($"Expected type information: {typeof(List<ProgramObject>).FullName}");
-
-                    // If possible, log detailed inner exception info
-                    if (ex.InnerException != null)
-                    {
-                        Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-                        Console.WriteLine($"Inner Exception StackTrace: {ex.InnerException.StackTrace}");
-                    }
-                }
                 catch (Exception ex)
                 {
-                    // Catch-all for any other unexpected exceptions
-                    Console.WriteLine($"An unexpected error occurred: {ex.Message}");
+                    Console.WriteLine($"An error occurred: {ex.Message}");
                     Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 }
             }

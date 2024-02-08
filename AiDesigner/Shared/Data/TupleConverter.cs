@@ -13,8 +13,9 @@ namespace AiDesigner.Shared.Data
     {
         public override bool CanConvert(System.Type objectType)
         {
-            return objectType.IsGenericType &&
+            var Canconvert = objectType.IsGenericType &&
                    objectType.GetGenericTypeDefinition().FullName.StartsWith("System.Tuple`");
+            return Canconvert;
         }
 
         public override object ReadJson(JsonReader reader, System.Type objectType, object existingValue, JsonSerializer serializer)
