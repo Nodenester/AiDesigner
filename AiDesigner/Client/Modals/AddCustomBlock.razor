@@ -91,6 +91,10 @@
             }
 
             //convert to json: -------------------------------
+            var programStartLocationTuple = NewCustomBlock.ProgramStructure.ProgramStartLocation ?? new Tuple<int, int>(0, 200);
+            var programEndLocationTuple = NewCustomBlock.ProgramStructure.ProgramEndLocation ?? new Tuple<int, int>(300, 200);
+            var cameraPosTuple = NewCustomBlock.ProgramStructure.CameraPos ?? new Tuple<double, double>(0, 0);
+
             NewCustomBlock.ProgramStructure.ProgramStartLocation = null;
             NewCustomBlock.ProgramStructure.ProgramEndLocation = null;
             NewCustomBlock.ProgramStructure.CameraPos = null;
@@ -110,22 +114,19 @@
 
             var json = JsonConvert.SerializeObject(NewCustomBlock, settings);
 
-            Console.WriteLine(json);
+            NewCustomBlock.ProgramStructure.ProgramStartLocation = programStartLocationTuple;
+            NewCustomBlock.ProgramStructure.ProgramEndLocation = programEndLocationTuple;
+            NewCustomBlock.ProgramStructure.CameraPos = cameraPosTuple;
+            //Console.WriteLine(json);
 
             // Parse the JSON to a JObject
             var jsonObject = JObject.Parse(json);
-
-            // Manually reinsert the tuples into the JSON object
-            // Assuming you have the tuples stored or accessible
-            var programStartLocationTuple = new Tuple<int, int>(0, 200);
-            var programEndLocationTuple = new Tuple<int, int>(300, 200);
-            var cameraPosTuple = new Tuple<double, double>(0, 0);
 
             // Insert tuples back into the JSON
             jsonObject["programStructure"]["programStartLocation"] = new JArray(programStartLocationTuple.Item1, programStartLocationTuple.Item2);
             jsonObject["programStructure"]["programEndLocation"] = new JArray(programEndLocationTuple.Item1, programEndLocationTuple.Item2);
             jsonObject["programStructure"]["cameraPos"] = new JArray(cameraPosTuple.Item1, cameraPosTuple.Item2);
-            Console.WriteLine(jsonObject.ToString());
+            //Console.WriteLine(jsonObject.ToString());
 
             // Convert the JObject back to string JSON
             var modifiedJson = jsonObject.ToString();
