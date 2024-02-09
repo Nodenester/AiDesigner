@@ -499,30 +499,24 @@
 
                             if (programStructureToken != null)
                             {
-                                // Extract programStartLocation
                                 var startLocationArray = programStructureToken["programStartLocation"] as JArray;
                                 if (startLocationArray != null && startLocationArray.Count >= 2)
                                 {
                                     programStartLocation = new Tuple<int, int>(startLocationArray[0].Value<int>(), startLocationArray[1].Value<int>());
-                                    // Remove the property after extraction
                                     programStructureToken.Remove("programStartLocation");
                                 }
 
-                                // Extract programEndLocation
                                 var endLocationArray = programStructureToken["programEndLocation"] as JArray;
                                 if (endLocationArray != null && endLocationArray.Count >= 2)
                                 {
                                     programEndLocation = new Tuple<int, int>(endLocationArray[0].Value<int>(), endLocationArray[1].Value<int>());
-                                    // Remove the property after extraction
                                     programStructureToken.Remove("programEndLocation");
                                 }
 
-                                // Extract cameraPos
                                 var cameraPosArray = programStructureToken["cameraPos"] as JArray;
                                 if (cameraPosArray != null && cameraPosArray.Count >= 2)
                                 {
                                     cameraPos = new Tuple<double, double>(cameraPosArray[0].Value<double>(), cameraPosArray[1].Value<double>());
-                                    // Remove the property after extraction
                                     programStructureToken.Remove("cameraPos");
                                 }
                             }
