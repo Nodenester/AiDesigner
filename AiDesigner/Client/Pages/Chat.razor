@@ -4,6 +4,7 @@
 @using AiDesigner.Shared.Data;
 @using Microsoft.AspNetCore.Authorization;
 @using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq
 @using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2;
 @using System.Text
@@ -494,11 +495,63 @@
     {
         string requestUri = $"Chat/Programs/{userId}";
         HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
-        if (httpResponse.IsSuccessStatusCode && customPrograms == null)
+        if (httpResponse.IsSuccessStatusCode)
         {
             string content = await httpResponse.Content.ReadAsStringAsync();
-            customPrograms = JsonConvert.DeserializeObject<List<CustomProgram>>(content, settings);
-            //Console.WriteLine("Programs: " + content);
+            var jsonArray = JArray.Parse(content);
+
+            if (customPrograms == null)
+            {
+                customPrograms = new List<CustomProgram>();
+            }
+
+            foreach (var item in jsonArray)
+            {
+                var jobject = JObject.Parse(item.ToString());
+                var programStructureToken = jobject["programStructure"] as JObject;
+
+                // Initialize default values for locations and positions, similar to UpdatePrograms
+                Tuple<int, int> programStartLocation = null, programEndLocation = null;
+                Tuple<double, double> cameraPos = null;
+
+                if (programStructureToken != null)
+                {
+                    // Extract locations and positions, remove from JSON as in UpdatePrograms
+                    var startLocationArray = programStructureToken["programStartLocation"] as JArray;
+                    if (startLocationArray != null && startLocationArray.Count >= 2)
+                    {
+                        programStartLocation = new Tuple<int, int>(startLocationArray[0].Value<int>(), startLocationArray[1].Value<int>());
+                        programStructureToken.Remove("programStartLocation");
+                    }
+
+                    var endLocationArray = programStructureToken["programEndLocation"] as JArray;
+                    if (endLocationArray != null && endLocationArray.Count >= 2)
+                    {
+                        programEndLocation = new Tuple<int, int>(endLocationArray[0].Value<int>(), endLocationArray[1].Value<int>());
+                        programStructureToken.Remove("programEndLocation");
+                    }
+
+                    var cameraPosArray = programStructureToken["cameraPos"] as JArray;
+                    if (cameraPosArray != null && cameraPosArray.Count >= 2)
+                    {
+                        cameraPos = new Tuple<double, double>(cameraPosArray[0].Value<double>(), cameraPosArray[1].Value<double>());
+                        programStructureToken.Remove("cameraPos");
+                    }
+                }
+
+                // Deserialize into CustomProgram (inherits ProgramObject) with the modified JSON
+                var customProgram = JsonConvert.DeserializeObject<CustomProgram>(jobject.ToString(), settings);
+
+                // Reapply the extracted tuples to the CustomProgram's structure
+                if (customProgram != null && customProgram.ProgramStructure != null)
+                {
+                    customProgram.ProgramStructure.ProgramStartLocation = programStartLocation;
+                    customProgram.ProgramStructure.ProgramEndLocation = programEndLocation;
+                    customProgram.ProgramStructure.CameraPos = cameraPos;
+                }
+
+                customPrograms.Add(customProgram);
+            }
         }
         else
         {
