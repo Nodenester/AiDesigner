@@ -28,15 +28,15 @@
             </button>
         }
     }
-    @if (wallet.SubscriptionTier == 0 && (totalSessions != 5 || totalSessions !> 5))
+    @if (wallet.SubscriptionTier == 0 && !(totalSessions > 4))
     {
         <button @onclick="@addSession.Open" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create New Session</button>
     }
-    else if (wallet.SubscriptionTier == 1 && (totalSessions != 20 || totalSessions! > 20))
+    else if (wallet.SubscriptionTier == 1 && !(totalSessions > 19))
     {
         <button @onclick="@addSession.Open" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create New Session</button>
     }
-    else if (wallet.SubscriptionTier == 2 && (totalSessions != 50 || totalSessions! > 50))
+    else if (wallet.SubscriptionTier == 2 && !(totalSessions > 49))
     {
         <button @onclick="@addSession.Open" class="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-600">Create New Session</button>
     }
@@ -97,6 +97,8 @@
     {
         await GetUserSessions();
         await GetUserTotalSessionsCount();
+        Console.WriteLine(wallet.SubscriptionTier);
+        Console.WriteLine(totalSessions);
     }
 
     // protected override async Task OnParametersSetAsync()
@@ -113,6 +115,7 @@
     private void HandleSessionCreated(Session newSession)
     {
         sessions.Add(newSession);
+        totalSessions += 1;
     }
 
     private async Task RemoveSession(Session session)
@@ -121,6 +124,7 @@
         if (response.IsSuccessStatusCode)
         {
             sessions.Remove(session);
+            totalSessions -= 1;
         }
     }
 
