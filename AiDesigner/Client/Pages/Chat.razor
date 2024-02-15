@@ -236,16 +236,13 @@
     private RadzenNotification notifyReference;
 
     JsonSerializerSettings settings = new JsonSerializerSettings
-        {
-            TypeNameHandling = TypeNameHandling.Auto,
-            Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
-            ContractResolver = new DefaultContractResolver
-            {
-                NamingStrategy = new CamelCaseNamingStrategy()
-            },
-            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-            ObjectCreationHandling = ObjectCreationHandling.Replace
-        };
+    {
+        TypeNameHandling = TypeNameHandling.Auto,
+        Converters = new List<JsonConverter> { new BlockJsonConverter() },
+        ContractResolver = new DefaultContractResolver { NamingStrategy = new CamelCaseNamingStrategy() },
+        ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+        ObjectCreationHandling = ObjectCreationHandling.Replace
+    };
 
     List<object> ProgramOutput { get; set; } = new List<object>();
     Dictionary<Guid, List<object>> ProgramChatOutput { get; set; } = new Dictionary<Guid, List<object>>();
@@ -563,14 +560,57 @@
     {
         string requestUri = $"Chat/Workshop/{userId}";
         HttpResponseMessage httpResponse = await Http.GetAsync(requestUri);
-        if (httpResponse.IsSuccessStatusCode && workshopPrograms == null)
+        if (httpResponse.IsSuccessStatusCode)
         {
             string content = await httpResponse.Content.ReadAsStringAsync();
-            workshopPrograms = JsonConvert.DeserializeObject<List<CustomProgram>>(content, settings);
-            Console.WriteLine("------------------------------------Test");
-            foreach (var www in workshopPrograms)
+            var jsonArray = JArray.Parse(content);
+
+            if (workshopPrograms == null)
             {
-                Console.WriteLine(www.Image.Length);
+                workshopPrograms = new List<CustomProgram>();
+            }
+
+            foreach (var item in jsonArray)
+            {
+                var jobject = JObject.Parse(item.ToString());
+                var programStructureToken = jobject["programStructure"] as JObject;
+
+                Tuple<int, int> programStartLocation = null, programEndLocation = null;
+                Tuple<double, double> cameraPos = null;
+
+                if (programStructureToken != null)
+                {
+                    var startLocationArray = programStructureToken["programStartLocation"] as JArray;
+                    if (startLocationArray != null && startLocationArray.Count >= 2)
+                    {
+                        programStartLocation = new Tuple<int, int>(startLocationArray[0].Value<int>(), startLocationArray[1].Value<int>());
+                        programStructureToken.Remove("programStartLocation");
+                    }
+
+                    var endLocationArray = programStructureToken["programEndLocation"] as JArray;
+                    if (endLocationArray != null && endLocationArray.Count >= 2)
+                    {
+                        programEndLocation = new Tuple<int, int>(endLocationArray[0].Value<int>(), endLocationArray[1].Value<int>());
+                        programStructureToken.Remove("programEndLocation");
+                    }
+
+                    var cameraPosArray = programStructureToken["cameraPos"] as JArray;
+                    if (cameraPosArray != null && cameraPosArray.Count >= 2)
+                    {
+                        cameraPos = new Tuple<double, double>(cameraPosArray[0].Value<double>(), cameraPosArray[1].Value<double>());
+                        programStructureToken.Remove("cameraPos");
+                    }
+                }
+
+                var customProgram = JsonConvert.DeserializeObject<CustomProgram>(jobject.ToString(), settings);
+                if (customProgram != null && customProgram.ProgramStructure != null)
+                {
+                    customProgram.ProgramStructure.ProgramStartLocation = programStartLocation;
+                    customProgram.ProgramStructure.ProgramEndLocation = programEndLocation;
+                    customProgram.ProgramStructure.CameraPos = cameraPos;
+                }
+
+                workshopPrograms.Add(customProgram);
             }
         }
         else
