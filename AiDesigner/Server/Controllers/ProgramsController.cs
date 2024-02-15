@@ -148,7 +148,7 @@ namespace NodeBaseApi.Controllers
         }
 
         // DELETE api/programs/{id}
-        [HttpDelete("{userId}/{id}")]
+        [HttpPost("{userId}/{id}")]
         public async Task<IActionResult> DeleteProgram(Guid userId, Guid id)
         {
             await _dbConnection.DeleteProgramAsync(userId, id);

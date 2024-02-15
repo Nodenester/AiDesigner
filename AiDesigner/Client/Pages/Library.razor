@@ -336,7 +336,7 @@
             var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
-                var response = await Http.DeleteAsync($"Programs/{userId}/{id}");
+                var response = await Http.PostAsync($"Programs/{userId}/{id}", null);
                 Console.WriteLine("program id: " + id);
                 if (response.IsSuccessStatusCode)
                 {
