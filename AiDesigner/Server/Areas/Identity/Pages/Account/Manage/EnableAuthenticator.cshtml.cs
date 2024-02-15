@@ -14,6 +14,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.Extensions.Logging;
+using QRCoder;
+using System.IO;
+
 
 namespace AiDesigner.Server.Areas.Identity.Pages.Account.Manage
 {
@@ -145,7 +148,7 @@ namespace AiDesigner.Server.Areas.Identity.Pages.Account.Manage
 
         private async Task LoadSharedKeyAndQrCodeUriAsync(ApplicationUser user)
         {
-            // Load the authenticator key & QR code URI to display on the form
+            // Your existing logic to get the unformatted key and email
             var unformattedKey = await _userManager.GetAuthenticatorKeyAsync(user);
             if (string.IsNullOrEmpty(unformattedKey))
             {
@@ -154,9 +157,20 @@ namespace AiDesigner.Server.Areas.Identity.Pages.Account.Manage
             }
 
             SharedKey = FormatKey(unformattedKey);
-
             var email = await _userManager.GetEmailAsync(user);
             AuthenticatorUri = GenerateQrCodeUri(email, unformattedKey);
+
+            // Generate QR code
+            using (var qrGenerator = new QRCodeGenerator())
+            {
+                var qrCodeData = qrGenerator.CreateQrCode(AuthenticatorUri, QRCodeGenerator.ECCLevel.Q);
+                using (var qrCode = new PngByteQRCode(qrCodeData))
+                {
+                    var qrCodeBytes = qrCode.GetGraphic(20);
+                    var qrCodeBase64 = Convert.ToBase64String(qrCodeBytes);
+                    ViewData["QRCode"] = qrCodeBase64; // Store the QR code image as base64 string
+                }
+            }
         }
 
         private string FormatKey(string unformattedKey)

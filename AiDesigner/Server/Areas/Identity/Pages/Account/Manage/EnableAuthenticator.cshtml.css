@@ -1,0 +1,8 @@
+﻿
+
+
+@media (min-width: 768px) {
+    .qr-code-img {
+        max-width: 200px; /* Larger devices */
+    }
+}
