@@ -26,7 +26,7 @@
                 <p class="text-lg font-semibold mb-4 ml-4 dark:!text-white text-black">Your Programs</p>
                 @foreach (var program in customPrograms)
                 {
-                    <div class="p-2 rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 hover:!bg-white @(selectedProgram == program ? "dark:!bg-gray-600 bg-white" : "dark:!g-gray-800")">
+                    <div class="rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 hover:!bg-white @(selectedProgram == program ? "dark:!bg-gray-600 bg-white" : "dark:!g-gray-800")">
                         <button @ref='programButtonReferences[(program.Id, "custom")]'
                                 @onmouseenter='() => ShowTooltip(program.Id, "custom")'
                                 @onmouseleave="HideTooltip"
@@ -34,7 +34,7 @@
                                 @onclick="() => SetSelectedProgram(program)">
                             @if (program.Image != null)
                             {
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.Image)" class="program-image mr-2">
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.Image)" class="program-image mx-2">
                             }
                             <span class="ml-2 dark:!text-white text-black">
                                 @program.Name
@@ -50,13 +50,13 @@
                     @foreach (var program in workshopArticles.Where(article => article.Type == "Program"))
                     {
                         var isSelected = selectedProgram?.Id.ToString() == program.ProgramId;
-                        <div class="p-2 rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 @(isSelected ? "dark:!bg-gray-600" : "dark:!g-gray-800")">
+                        <div class="rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 @(isSelected ? "dark:!bg-gray-600" : "dark:!g-gray-800")">
                             <button @ref='programButtonReferences[(Guid.Parse(program.ProgramId), "")]'
                                     @onmouseenter='() => ShowTooltip(Guid.Parse(program.ProgramId), "")'
                                     @onmouseleave="HideTooltip"
                                     class="flex items-center text-white w-full h-full"
                                     @onclick="() => SelectWorkshopArticle(program)">
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.ProgramImage)" class="program-image">
+                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.ProgramImage)" class="program-image mx-2">
                                 <span class="ml-2 dark:!text-white text-black">
                                     @program.Name
                                </span>
@@ -270,13 +270,13 @@
             var programsList = source == "custom" ? customPrograms : workshopPrograms;
             var content = programsList.FirstOrDefault(p => p.Id == programId)?.Description;
 
-            if (content != null)
+            if (content != null && !string.IsNullOrWhiteSpace(content))
             {
                 tooltipService.Open(elementReference, content, new TooltipOptions
                     {
                         Position = TooltipPosition.Top,
-                        Style = "max-width: 240px; white-space: normal; word-wrap: break-word;",          
-                        Duration = 5000,
+                        Style = "max-width: 15rem; white-space: normal; word-wrap: break-word;",
+                        Duration = 500000,
                         Delay = 500
                     });
             }
