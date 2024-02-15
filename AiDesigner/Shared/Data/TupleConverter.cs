@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Serialization;
 
 namespace AiDesigner.Shared.Data
 {
@@ -111,6 +112,29 @@ namespace AiDesigner.Shared.Data
                 }
             }
             jo.WriteTo(writer);
+        }
+    }
+
+    public class IgnoreTuplesContractResolver : DefaultContractResolver
+    {
+        protected override JsonProperty CreateProperty(MemberInfo member, MemberSerialization memberSerialization)
+        {
+            var property = base.CreateProperty(member, memberSerialization);
+
+            if (IsTuple(property.PropertyType))
+            {
+                property.ShouldSerialize = instance => false; // Ignore tuple properties.
+            }
+
+            return property;
+        }
+
+        private bool IsTuple(System.Type type)
+        {
+            // Check if the type is a Tuple by checking its definition.
+            // This method can be expanded to include more checks or refined to target specific tuple types.
+            return type.IsGenericType && (type.GetGenericTypeDefinition() == typeof(Tuple<,>)
+                || type.GetGenericTypeDefinition() == typeof(Tuple<,,>)); // Add more as needed
         }
     }
 }

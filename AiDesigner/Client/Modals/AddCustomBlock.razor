@@ -95,38 +95,27 @@
             var programEndLocationTuple = NewCustomBlock.ProgramStructure.ProgramEndLocation ?? new Tuple<int, int>(300, 200);
             var cameraPosTuple = NewCustomBlock.ProgramStructure.CameraPos ?? new Tuple<double, double>(0, 0);
 
-            NewCustomBlock.ProgramStructure.ProgramStartLocation = null;
-            NewCustomBlock.ProgramStructure.ProgramEndLocation = null;
-            NewCustomBlock.ProgramStructure.CameraPos = null;
-
             // Serialize the ProgramObject without the tuples
             var settings = new JsonSerializerSettings
                 {
                     TypeNameHandling = TypeNameHandling.Auto,
                     Converters = new List<JsonConverter> { new BlockJsonConverter() },
-                    ContractResolver = new DefaultContractResolver
-                    {
-                        NamingStrategy = new CamelCaseNamingStrategy()
-                    },
+                    ContractResolver = new IgnoreTuplesContractResolver(),
                     ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                     ObjectCreationHandling = ObjectCreationHandling.Replace
                 };
 
             var json = JsonConvert.SerializeObject(NewCustomBlock, settings);
 
-            NewCustomBlock.ProgramStructure.ProgramStartLocation = programStartLocationTuple;
-            NewCustomBlock.ProgramStructure.ProgramEndLocation = programEndLocationTuple;
-            NewCustomBlock.ProgramStructure.CameraPos = cameraPosTuple;
-            //Console.WriteLine(json);
-
             // Parse the JSON to a JObject
             var jsonObject = JObject.Parse(json);
+            Console.WriteLine(jsonObject.ToString());
+            Console.WriteLine(programStartLocationTuple.Item1 + " " + programStartLocationTuple.Item2);
 
             // Insert tuples back into the JSON
-            jsonObject["programStructure"]["programStartLocation"] = new JArray(programStartLocationTuple.Item1, programStartLocationTuple.Item2);
-            jsonObject["programStructure"]["programEndLocation"] = new JArray(programEndLocationTuple.Item1, programEndLocationTuple.Item2);
-            jsonObject["programStructure"]["cameraPos"] = new JArray(cameraPosTuple.Item1, cameraPosTuple.Item2);
-            //Console.WriteLine(jsonObject.ToString());
+            jsonObject["ProgramStructure"]["ProgramStartLocation"] = new JArray(programStartLocationTuple.Item1, programStartLocationTuple.Item2);
+            jsonObject["ProgramStructure"]["ProgramEndLocation"] = new JArray(programEndLocationTuple.Item1, programEndLocationTuple.Item2);
+            jsonObject["ProgramStructure"]["CameraPos"] = new JArray(cameraPosTuple.Item1, cameraPosTuple.Item2);
 
             // Convert the JObject back to string JSON
             var modifiedJson = jsonObject.ToString();
@@ -139,6 +128,9 @@
 
             if (response.IsSuccessStatusCode)
             {
+                NewCustomBlock.ProgramStructure.ProgramStartLocation = programStartLocationTuple;
+                NewCustomBlock.ProgramStructure.ProgramEndLocation = programEndLocationTuple;
+                NewCustomBlock.ProgramStructure.CameraPos = cameraPosTuple;
                 var programId = NewCustomBlock.Id;
                 var connectUserResponse = await Http.PostAsync($"Programs/connect/{userId}/{programId}", null);
             }
