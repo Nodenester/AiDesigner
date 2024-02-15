@@ -1,6 +1,5 @@
 ﻿@page
 @model EnableAuthenticatorModel
-
 @{
     ViewData["Title"] = "Configure authenticator app";
     ViewData["ActivePage"] = ManageNavPages.TwoFactorAuthentication;
@@ -22,10 +21,12 @@
         </li>
         <li>
             Scan the QR Code or enter the key <kbd>@Model.SharedKey</kbd> into your two-factor authenticator app. Spaces and casing don't matter.
-            <div class="alert customAlert">
-                Learn how to <a href="https://go.microsoft.com/fwlink/?Linkid=852423">enable QR code generation</a>.
-            </div>
-            <div id="qrCode"></div>
+            @if (ViewData["QRCode"] != null)
+            {
+                <div class="text-center mt-4">
+                    <img src="data:image/png;base64,@ViewData["QRCode"]" alt="QR Code" class="img-fluid qr-code-img" />
+                </div>
+            }
             <div id="qrCodeData" data-url="@Model.AuthenticatorUri"></div>
         </li>
         <li>
@@ -48,6 +49,7 @@
 </div>
 
 <style>
+
     .profileContainer {
         background-color: #353535;
         padding: 30px;
@@ -126,6 +128,11 @@
             border: none !important;
             /*          Gives a slight faded effect to indicate it's disabled color: #eaeaea; */
         }
+
+    .qr-code-img {
+        max-width: 180px; 
+        height: auto;
+    }
 </style>
 
 @section Scripts {

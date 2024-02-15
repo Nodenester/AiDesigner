@@ -39,8 +39,8 @@ namespace NodeBaseApi.StripeController
                     },
                 },
                 Mode = "payment",
-                SuccessUrl = "https://localhost:44310",
-                CancelUrl = "https://localhost:44310/paymentoptions",
+                SuccessUrl = "https://nodenestor.com/home",
+                CancelUrl = "https://nodenestor.com/paymentoptions",
 
                 Metadata = new Dictionary<string, string>
                 {
@@ -72,8 +72,8 @@ namespace NodeBaseApi.StripeController
                     },
                 },
                 Mode = "subscription",
-                SuccessUrl = "https://localhost:44310",
-                CancelUrl = "https://localhost:44310/paymentoptions",
+                SuccessUrl = "https://nodenestor.com/home",
+                CancelUrl = "https://nodenestor.com/paymentoptions",
                 Metadata = new Dictionary<string, string>
                 {
                     { "userId", userId }
