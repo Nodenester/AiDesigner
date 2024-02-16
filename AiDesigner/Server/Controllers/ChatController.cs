@@ -316,7 +316,6 @@ namespace NodeBaseApi.Controllers
             }
         }
 
-
         // DELETE api/Session/Delete/{sessionId}
         [HttpDelete("Session/Delete/{sessionId}")]
         public async Task<ActionResult> DeleteSession(string sessionId)
@@ -335,8 +334,5 @@ namespace NodeBaseApi.Controllers
                 return StatusCode(500, ex.Message + " (from: " + ex.TargetSite);
             }
         }
-
-
-
     }
 }
