@@ -391,7 +391,7 @@
                             await Task.Delay(2000);
                             isExecutionFailed = false;
                         }
-                        else if (!selectedProgram.HasReview && selectedProgram is CustomProgram)
+                        else if (!selectedProgram.HasReview && selectedProgram is CustomProgram && IsWorkshopProgram)
                         {
                             Random rnd = new Random();
                             if (rnd.Next(1, 21) == 1) // Generates a random number between 1 and 20
@@ -456,16 +456,16 @@
         selectedProgram.ProgramStructure.InputValues[inputItem.Id] = inputItem.Data;
     }
 
+    bool IsWorkshopProgram {get;set;}
     private void SelectWorkshopArticle(WorkshopArticle workshopArticle)
     {
-
-        SetSelectedProgram(workshopPrograms.Where(program => program.Id.ToString() == workshopArticle.ProgramId).First());
+        SetSelectedProgram(workshopPrograms.Where(program => program.Id.ToString() == workshopArticle.ProgramId).First(), true);
     }
 
-    private void SetSelectedProgram(CustomProgram customProgram)
+    private void SetSelectedProgram(CustomProgram customProgram, bool isWorkshopProgram = false)
     {
         selectedProgram = customProgram;
-
+        IsWorkshopProgram = isWorkshopProgram;
         foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
         {
             if (!selectedProgram.ProgramStructure.InputValues.ContainsKey(input.Id))
