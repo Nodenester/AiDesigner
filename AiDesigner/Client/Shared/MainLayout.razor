@@ -17,152 +17,177 @@
 @using System.Reflection
 
 <CascadingValue Value="@AuthState" Name="CascAuth">
-
-            <div class="page h-screen flex">
-                @if (Title == "home" || Title == "library" || Title == "statistics")
+    <div class="page h-screen flex">
+        @if (Title == "home" || Title == "library" || Title == "statistics")
+        {
+            <div class="flex-none w-48">
+                <NavMenu />
+            </div>
+        }
+        else if (Title.Contains("documentation"))
+        {
+            <div class="flex-none w-48">
+                <DocNavMenu />
+            </div>
+        }
+        <main class="flex-1 flex flex-col">
+            <div class="flex bg-gray-100">
+                @if(Title == "editor")
                 {
-                    <div class="flex-none w-48">
-                        <NavMenu />
-                    </div>
-                }
-                else if (Title.Contains("documentation"))
-                {
-                    <div class="flex-none w-48">
-                        <DocNavMenu />
-                    </div>
-                }
-                <main class="flex-1 flex flex-col">
-
-                    <div class="flex bg-gray-100">
-                        @if(Title == "editor")
-                        {
-                            <div class="text-lg top-row px-3 py-2 dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
-                                <div class="container mx-auto sm:px-4">
-                                    <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">NodeNestor</a>
-                                </div>
-                            </div>
-                        }
-
-                        @* Should documentation seen top nav menu? *@
-                        @if (Title != "home" && Title != "library" && Title != "editor" && Title != "statistics" && !Title.Contains("documentation"))
-                        {
-
-                            <div class="text-lg top-row px-3 py-2 dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
-                                <div class="container mx-auto sm:px-4">
-                                    <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">NodeNestor</a>
-                                </div>
-                            </div>
-
-                            <TopNavMenu/>
-                        }
-                        @if (Title.Contains("documentation"))
-                        {
-                            <TopNavMenu />
-                        }
-
-                        <div style="display: flex; justify-content: flex-end; align-items: center; height: 100%;" class="top-row auth dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow">
-
-                            <!-- This is your conditional content for tutorials. -->
-                            @if (CurrentTutorial != null)
-                            {
-                                <TutorialPopup completeTutorial="Completetutorial" settTutorial="SetTutorial" tutorials="@analytics.tutorials" tutorial="@CurrentTutorial"></TutorialPopup>
-                            }
-
-                            @if (AuthState != null && AuthState.User.Identity != null && AuthState.User.Identity.IsAuthenticated )
-                            {
-                                <!-- Token Count -->
-                                <div class="group bg-gray-100 hover:bg-white dark:!bg-gray-700 hover:dark:!bg-gray-600 p-1 rounded-lg text-white mx-4 items-center relative ">
-                                    <a href="/paymentoptions" class="cursor-pointer block text-white hover:text-white px-1">
-                                        <span class="dark:!text-white text-black">Tokens: @(CurrentTokens.Tokens + CurrentTokens.BoughtTokens)</span>
-                                    </a>
-                                    <div class="absolute hidden group-hover:block bg-gray-100 dark:bg-gray-700 mt-1 p-1 w-32 rounded-md -ml-4 dark:!text-white text-black" style="z-index:9999">
-                                        <div class="px-1 py-1">
-                                            @if (CurrentTokens.SubscriptionTier == 1)
-                                            {
-                                                <p>Profesional: 8000 t/d </p>
-                                            }
-                                            else if (CurrentTokens.SubscriptionTier == 2)
-                                            {
-                                                <p>Casual: 2000 t/d </p>
-                                            }
-                                            else
-                                            {
-                                                <p>Free: 500 t/d </p>
-                                            }
-                                        </div>
-                                        <div class="px-1 py-1">
-                                            Daily: @CurrentTokens.Tokens
-                                        </div>
-                                        <div class="px-1 py-1">
-                                            Extra: @CurrentTokens.BoughtTokens
-                                        </div>
-                                    </div>
-                                </div>
-                            }
-
-
-                            <!-- Toggle Dark Mode -->
-                            <label class="relative inline-flex items-center cursor-pointer border-0">
-                                <input type="checkbox" @bind="isDarkMode" @bind:event="onchange" @onclick="ToggleDarkMode" class="sr-only peer">
-                                <div class="w-11 h-6 bg-gray-200 rounded-full dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-gray-600"></div>
-                            </label>
-
-                            <!-- LoginDisplay Component -->
-                            <LoginDisplay />
-
+                    <div class="md:block hidden text-lg top-row px-3 py-2 dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
+                        <div class="container mx-auto sm:px-4">
+                            <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">NodeNestor</a>
                         </div>
                     </div>
 
-                    @if (Title == "library" || Title == "editor")
+                    <div class="relative md:hidden dark:bg-gray-700 bg-gray-100 flex items-center justify-between">
+                        <button @onclick="ToggleMenu" class="p-4 flex items-center text-gray-800 dark:text-white">
+                            NodeNestor
+                        </button>
+                        <div class="@menuClass absolute left-0 w-full rounded-md shadow-lg" style="top: 100%; z-index:1002;">
+                            <div class="py-1 bg-white dark:!bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="">Home</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="chat">Chat</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="pricing">Pricing</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="documentation/introduction/overview">Docs</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="aboutus">About</NavLink>
+                            </div>
+                        </div>
+                    </div>
+                }
+
+                @* Should documentation seen top nav menu? *@
+                @if (Title != "home" && Title != "library" && Title != "editor" && Title != "statistics" && !Title.Contains("documentation"))
+                {
+                    <div class="md:block hidden text-lg top-row px-3 py-2 dark:!bg-gray-800 border-0 w-48" style="padding-left: 1rem !important; padding-top: 0.9rem !important;">
+                        <div class="container mx-auto sm:px-4">
+                            <a class="text-gray-800 dark:text-white font-bold no-underline" style="text-decoration-line: none !important;" href="">NodeNestor</a>
+                        </div>
+                    </div>
+
+                    <div class="relative md:hidden dark:bg-gray-700 bg-gray-100 flex items-center justify-between">
+                        <button @onclick="ToggleMenu" class="p-4 flex items-center text-gray-800 dark:text-white">
+                            NodeNestor
+                        </button>
+                        <div class="@menuClass absolute left-0 w-full rounded-md shadow-lg" style="top: 100%; z-index:1002;">
+                            <div class="py-1 bg-white dark:!bg-gray-800 ring-1 ring-black ring-opacity-5">
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="">Home</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="chat">Chat</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="pricing">Pricing</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="documentation/introduction/overview">Docs</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="aboutus">About</NavLink>
+                            </div>
+                        </div>
+                    </div>
+
+                    <TopNavMenu/>
+                }
+                @if (Title.Contains("documentation"))
+                {
+                    <TopNavMenu />
+                }
+
+                <div style="display: flex; justify-content: flex-end; align-items: center; height: 100%;" class="top-row auth dark:!bg-gray-700 text-gray-800 dark:text-white flex-grow">
+
+                    <!-- This is your conditional content for tutorials. -->
+                    @if (CurrentTutorial != null)
                     {
-                        <div class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white">
-                            <div id="menu">
-                                <ul>
-                                    <li class="@(AP == null ? "selected" : "") group" @onclick="ResetAP">
-                                        Library
-                                    </li>
-                                    @foreach (var CAP in APs)
+                        <TutorialPopup completeTutorial="Completetutorial" settTutorial="SetTutorial" tutorials="@analytics.tutorials" tutorial="@CurrentTutorial"></TutorialPopup>
+                    }
+
+                    @if (AuthState != null && AuthState.User.Identity != null && AuthState.User.Identity.IsAuthenticated )
+                    {
+                        <!-- Token Count -->
+                        <div class="group bg-gray-100 hover:bg-white dark:!bg-gray-700 hover:dark:!bg-gray-600 p-1 rounded-lg text-white mx-4 items-center relative ">
+                            <a href="/paymentoptions" class="cursor-pointer block text-white hover:text-white px-1">
+                                <span class="dark:!text-white text-black">Tokens: @(CurrentTokens.Tokens + CurrentTokens.BoughtTokens)</span>
+                            </a>
+                            <div class="absolute hidden group-hover:block bg-gray-100 dark:bg-gray-700 mt-1 p-1 w-32 rounded-md -ml-4 dark:!text-white text-black" style="z-index:9999">
+                                <div class="px-1 py-1">
+                                    @if (CurrentTokens.SubscriptionTier == 1)
                                     {
-                                        <li class="@(AP == CAP ? "selected" : "") group" @onclick="() => SetAP(CAP)">
-                                            <div class="flex">
-                                                <div style="overflow: hidden;" class="mr-0">
-                                                    @CAP.Name
-                                                </div>
-                                                <span class="project-remove px-1 py-0.5 text-sm font-semibold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full hidden justify-self-end ml-auto" @onclick="(() => RemoveProject(CAP))" @onclick:stopPropagation @onmouseover:stopPropagation>
-                                                    X
-                                                </span>
-                                            </div>
-                                        </li>
+                                        <p>Profesional: 8000 t/d </p>
                                     }
-                                </ul>
+                                    else if (CurrentTokens.SubscriptionTier == 2)
+                                    {
+                                        <p>Casual: 2000 t/d </p>
+                                    }
+                                    else
+                                    {
+                                        <p>Free: 500 t/d </p>
+                                    }
+                                </div>
+                                <div class="px-1 py-1">
+                                    Daily: @CurrentTokens.Tokens
+                                </div>
+                                <div class="px-1 py-1">
+                                    Extra: @CurrentTokens.BoughtTokens
+                                </div>
                             </div>
                         </div>
                     }
-                    <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
-                        <AuthorizeView>
-                            <Authorized>
-                            @{
-                            var user = AuthState?.User;
-                                if (user.IsInRole("Administrator") || user.IsInRole("BetaTester"))
-                                {
-                                <CascadingValue Value="@EAPs" Name="EAPs">
-                                    <CascadingValue Value="@APs" Name="APs">
-                                        <CascadingValue Value="@AP" Name="AP">
-                                            <CascadingValue Value="@CurrentTokens" Name="Wallet">
-                                                <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
-                                                    <CascadingValue Value="@setTutorial" Name="setTutorial">
-                                                        <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
-                                                            <CascadingValue Value="@setAnalytic" Name="setAnalytics">
-                                                                <CascadingValue Value="@analytics" Name="analytics">
-                                                                    <CascadingValue Value="@addApiKey" Name="addApiKey">
-                                                                        <CascadingValue Value="@apiKeys" Name="ApiKeys">
-                                                                            <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
-                                                                                <CascadingValue Value="@passingArticle" Name="passingArticle">
-                                                                                    <CascadingValue Value=@setTokens Name="Settokens">
-                                                                                        <CascadingValue Value=@NewAps Name="NewAps">
-                                                                                            @Body
-                                                                                        </CascadingValue>
-                                                                                    </CascadingValue>
+
+
+                    <!-- Toggle Dark Mode -->
+                    <label class="relative inline-flex items-center cursor-pointer border-0">
+                        <input type="checkbox" @bind="isDarkMode" @bind:event="onchange" @onclick="ToggleDarkMode" class="sr-only peer">
+                        <div class="w-11 h-6 bg-gray-200 rounded-full dark:bg-gray-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-gray-600"></div>
+                    </label>
+
+                    <!-- LoginDisplay Component -->
+                    <LoginDisplay />
+
+                </div>
+            </div>
+
+            @if (Title == "library" || Title == "editor")
+            {
+                <div class="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-white">
+                    <div id="menu">
+                        <ul>
+                            <li class="@(AP == null ? "selected" : "") group" @onclick="ResetAP">
+                                Library
+                            </li>
+                            @foreach (var CAP in APs)
+                            {
+                                <li class="@(AP == CAP ? "selected" : "") group" @onclick="() => SetAP(CAP)">
+                                    <div class="flex">
+                                        <div style="overflow: hidden;" class="mr-0">
+                                            @CAP.Name
+                                        </div>
+                                        <span class="project-remove px-1 py-0.5 text-sm font-semibold cursor-pointer hover:bg-gray-300 dark:hover:bg-gray-500 rounded-full hidden justify-self-end ml-auto" @onclick="(() => RemoveProject(CAP))" @onclick:stopPropagation @onmouseover:stopPropagation>
+                                            X
+                                        </span>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            }
+            <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
+                <AuthorizeView>
+                    <Authorized>
+                    @{
+                    var user = AuthState?.User;
+                        if (user.IsInRole("Administrator") || user.IsInRole("BetaTester"))
+                        {
+                        <CascadingValue Value="@EAPs" Name="EAPs">
+                            <CascadingValue Value="@APs" Name="APs">
+                                <CascadingValue Value="@AP" Name="AP">
+                                    <CascadingValue Value="@CurrentTokens" Name="Wallet">
+                                        <CascadingValue Value="@workshopArticles" Name="WorkshopArticles">
+                                            <CascadingValue Value="@setTutorial" Name="setTutorial">
+                                                <CascadingValue Value="@CurrentTutorial" Name="currentTutorial">
+                                                    <CascadingValue Value="@setAnalytic" Name="setAnalytics">
+                                                        <CascadingValue Value="@analytics" Name="analytics">
+                                                            <CascadingValue Value="@addApiKey" Name="addApiKey">
+                                                                <CascadingValue Value="@apiKeys" Name="ApiKeys">
+                                                                    <CascadingValue Value="@setPassingArticle" Name="SetPassingArticle">
+                                                                        <CascadingValue Value="@passingArticle" Name="passingArticle">
+                                                                            <CascadingValue Value=@setTokens Name="Settokens">
+                                                                                <CascadingValue Value=@NewAps Name="NewAps">
+                                                                                    @Body
                                                                                 </CascadingValue>
                                                                             </CascadingValue>
                                                                         </CascadingValue>
@@ -176,32 +201,35 @@
                                         </CascadingValue>
                                     </CascadingValue>
                                 </CascadingValue>
-                                }
-                                else
-                                {
-                                    <AiDesigner.Client.Modals.BetaModal />
-                                    @Body
-                                }
-                            }
-                            </Authorized>
-                            <NotAuthorized>
-                                <AiDesigner.Client.Modals.BetaModal />
-                                @Body
-                            </NotAuthorized>
-                        </AuthorizeView>
-                        @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics" && Title != "chat")
-                        {
-                            <Footer></Footer>
+                            </CascadingValue>
+                        </CascadingValue>
                         }
-                    </article>
-                </main>
-            </div>
-        </CascadingValue>
-
+                        else
+                        {
+                            <AiDesigner.Client.Modals.BetaModal />
+                            @Body
+                        }
+                    }
+                    </Authorized>
+                    <NotAuthorized>
+                        <AiDesigner.Client.Modals.BetaModal />
+                        @Body
+                    </NotAuthorized>
+                </AuthorizeView>
+                @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics" && Title != "chat")
+                {
+                    <Footer></Footer>
+                }
+            </article>
+        </main>
+    </div>
+</CascadingValue>
 
 <RadzenComponents />
 
 <style>
+
+
     .footer {
         background-color: #f1f1f1;
         padding: 20px;
@@ -343,6 +371,15 @@
     public EventCallback<WorkshopArticle> setPassingArticle => EventCallback.Factory.Create<WorkshopArticle>(this, SetPassingArticle);
 
     public EventCallback<ApiKey> addApiKey => EventCallback.Factory.Create<ApiKey>(this, AddApiKey);
+
+    private bool isMenuVisible = false;
+    private string menuIcon => isMenuVisible ? "↑" : "↓"; // Change icons as needed
+    private string menuClass => isMenuVisible ? "block" : "hidden";
+
+    private void ToggleMenu()
+    {
+        isMenuVisible = !isMenuVisible;
+    }
 
     public void SetAnalytic(ChacheAnalytics Analytics)
     {

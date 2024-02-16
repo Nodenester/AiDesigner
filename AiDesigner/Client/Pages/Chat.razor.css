@@ -59,7 +59,7 @@
     max-height: 30rem;
     min-height: 30rem;
     overflow-y: auto;
-    z-index: 1002;
+    z-index: 999;
 }
 
 .rz-growl-item-container {
@@ -87,3 +87,7 @@ html, body {
     height: 100%;
     overflow: hidden; 
 }
+
+/*Dropdown stuff --------------------*/
+
+
