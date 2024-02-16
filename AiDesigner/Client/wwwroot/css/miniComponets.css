@@ -55,7 +55,7 @@
 }*/
 
 /* Mobile devices */
-@media screen and (max-width: 1024px) {
+@media screen and (max-width: 768px) {
 
     .pricing-container {
         flex-direction: column; /* Stack elements vertically */
@@ -181,14 +181,14 @@
     }
 
     /*Pricing*/
-        .specific-pricing-container {
+    .specific-pricing-container {
         flex-direction: column; /* Stack children vertically */
         min-height: 30rem;
     }
 
     .specific-pricing-right {
-        width: 100%; 
-        margin-bottom: 2rem; 
+        width: 100%;
+        margin-bottom: 2rem;
         top: 0% !important;
     }
 
