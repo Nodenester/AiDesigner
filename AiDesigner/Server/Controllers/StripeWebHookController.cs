@@ -27,13 +27,15 @@ namespace AiDesigner.Server.Controllers
                 if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
                 {
                     var subscription = stripeEvent.Data.Object as Subscription;
-                    var userId = Guid.Parse(subscription.Metadata["userId"]);
+                    var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                    var userId = Guid.Parse(stripeSession.Metadata["userId"]);
                     await _dbConnection.SetSubscriptionTierAsync(userId, 0);
                 }
                 else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
                 {
                     var subscription = stripeEvent.Data.Object as Subscription;
-                    var userId = Guid.Parse(subscription.Metadata["userId"]);
+                    var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
+                    var userId = Guid.Parse(stripeSession.Metadata["userId"]);
 
                     int subscriptionTier = subscription.Items.Data
                         .FirstOrDefault()?.Price?.Id switch
@@ -45,30 +47,37 @@ namespace AiDesigner.Server.Controllers
 
                     await _dbConnection.SetSubscriptionTierAsync(userId, subscriptionTier);
                 }
-
                 else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {
                     var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
-                    var userId = Guid.Parse(stripeSession.Metadata["userId"]);
 
-                    int tokensToAdd;
-                    switch (stripeSession.AmountTotal)
+                    // Check if the checkout session is for a subscription
+                    if (stripeSession.Subscription != null)
                     {
-                        case 599:
-                            tokensToAdd = 24000;
-                            break;
-                        case 999:
-                            tokensToAdd = 40000;
-                            break;
-                        case 1999:
-                            tokensToAdd = 80000;
-                            break;
-                        default:
-                            tokensToAdd = 0;
-                            break;
+                        return Ok();
                     }
+                    else // This is a one-time purchase
+                    {
+                        var userId = Guid.Parse(stripeSession.Metadata["userId"]);
+                        int tokensToAdd;
+                        switch (stripeSession.AmountTotal)
+                        {
+                            case 599:
+                                tokensToAdd = 24000;
+                                break;
+                            case 999:
+                                tokensToAdd = 40000;
+                                break;
+                            case 1999:
+                                tokensToAdd = 80000;
+                                break;
+                            default:
+                                tokensToAdd = 0;
+                                break;
+                        }
 
-                    await _dbConnection.AddBoughtTokensAsync(userId, tokensToAdd);
+                        await _dbConnection.AddBoughtTokensAsync(userId, tokensToAdd);
+                    }
                 }
 
                 return Ok();
