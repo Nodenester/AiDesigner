@@ -63,7 +63,7 @@ namespace AiDesigner.Server.Controllers
             try
             {
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "REDACTED_WEBHOOK_SECRET");
+                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_qTqoX61icim3gUzWq8oeWdMNb8UCHaWx");
 
                 if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
                 {
