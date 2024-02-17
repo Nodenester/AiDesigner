@@ -22,9 +22,9 @@ namespace AiDesigner.Server.Controllers
             try
             {
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "REDACTED_WEBHOOK_SECRET");
+                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_FhbDyhoqpkHsWvBZHvjEtym20CY0yPv4");
 
-                if (stripeEvent.Type == Events.CheckoutSessionAsyncPaymentSucceeded)
+                if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {
                     var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
                     var userId = Guid.Parse(stripeSession.Metadata["userId"]);
