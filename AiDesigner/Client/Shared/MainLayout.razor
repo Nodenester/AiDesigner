@@ -102,15 +102,15 @@
                             <a href="/paymentoptions" class="cursor-pointer block text-white hover:text-white px-1">
                                 <span class="dark:!text-white text-black">Tokens: @(CurrentTokens.Tokens + CurrentTokens.BoughtTokens)</span>
                             </a>
-                            <div class="absolute hidden group-hover:block bg-gray-100 dark:bg-gray-700 mt-1 p-1 w-32 rounded-md -ml-4 dark:!text-white text-black" style="z-index:9999">
+                            <div class="absolute hidden group-hover:block bg-gray-100 dark:bg-gray-700 mt-1 p-1 w-40 rounded-md -ml-4 dark:!text-white text-black" style="z-index:9999">
                                 <div class="px-1 py-1">
                                     @if (CurrentTokens.SubscriptionTier == 1)
                                     {
-                                        <p>Profesional: 8000 t/d </p>
+                                        <p>Casual: 2000 t/d </p>
                                     }
                                     else if (CurrentTokens.SubscriptionTier == 2)
                                     {
-                                        <p>Casual: 2000 t/d </p>
+                                        <p>Profesional: 8000 t/d </p>
                                     }
                                     else
                                     {

@@ -1011,7 +1011,12 @@ namespace AiDesigner.Server.Data
             {
                 var query = @"
             UPDATE Ludde.TokenWallet
-            SET SubscriptionTier = @SubscriptionTier
+            SET SubscriptionTier = @SubscriptionTier,
+                Tokens = CASE @SubscriptionTier
+                    WHEN 1 THEN 2000
+                    WHEN 2 THEN 8000
+                    ELSE 500 
+                END
             WHERE UserId = @UserId;
 
             SELECT CAST(
@@ -1028,6 +1033,7 @@ namespace AiDesigner.Server.Data
                 return success;
             }
         }
+
 
         public async Task UpdateUserTokensAsync(Guid userId, int tokensToDeduct)
         {
