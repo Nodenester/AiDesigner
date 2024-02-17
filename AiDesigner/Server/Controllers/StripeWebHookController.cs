@@ -24,60 +24,52 @@ namespace AiDesigner.Server.Controllers
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_FhbDyhoqpkHsWvBZHvjEtym20CY0yPv4");
 
-                if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
-                {
-                    var subscription = stripeEvent.Data.Object as Subscription;
-                    var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
-                    var userId = Guid.Parse(stripeSession.Metadata["userId"]);
-                    await _dbConnection.SetSubscriptionTierAsync(userId, 0);
-                }
-                else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
-                {
-                    var subscription = stripeEvent.Data.Object as Subscription;
-                    var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
-                    var userId = Guid.Parse(stripeSession.Metadata["userId"]);
-
-                    int subscriptionTier = subscription.Items.Data
-                        .FirstOrDefault()?.Price?.Id switch
-                    {
-                        "price_1ObX2bGS8y7NleDORuIlzPCO" => 1,
-                        "price_1ObX2bGS8y7NleDOvy9Btv2z" => 2,
-                        _ => 0
-                    };
-
-                    await _dbConnection.SetSubscriptionTierAsync(userId, subscriptionTier);
-                }
-                else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+                if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {
                     var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
 
-                    // Check if the checkout session is for a subscription
-                    if (stripeSession.Subscription != null)
+                    if (stripeSession.Mode == "subscription")
                     {
-                        return Ok();
-                    }
-                    else // This is a one-time purchase
-                    {
-                        var userId = Guid.Parse(stripeSession.Metadata["userId"]);
-                        int tokensToAdd;
+                        var userId2 = Guid.Parse(stripeSession.Metadata["userId"]);
+
+                        int subscriptionTier;
                         switch (stripeSession.AmountTotal)
                         {
-                            case 599:
-                                tokensToAdd = 24000;
-                                break;
                             case 999:
-                                tokensToAdd = 40000;
+                                subscriptionTier = 1;
                                 break;
-                            case 1999:
-                                tokensToAdd = 80000;
+                            case 2999:
+                                subscriptionTier = 2;
                                 break;
                             default:
-                                tokensToAdd = 0;
+                                subscriptionTier = 0;
                                 break;
                         }
 
-                        await _dbConnection.AddBoughtTokensAsync(userId, tokensToAdd);
+                        await _dbConnection.SetSubscriptionTierAsync(userId2, subscriptionTier);
+                        return Ok();
                     }
+
+                    var userId = Guid.Parse(stripeSession.Metadata["userId"]);
+
+                    int tokensToAdd;
+                    switch (stripeSession.AmountTotal)
+                    {
+                        case 599:
+                            tokensToAdd = 24000;
+                            break;
+                        case 999:
+                            tokensToAdd = 40000;
+                            break;
+                        case 1999:
+                            tokensToAdd = 80000;
+                            break;
+                        default:
+                            tokensToAdd = 0;
+                            break;
+                    }
+
+                    await _dbConnection.AddBoughtTokensAsync(userId, tokensToAdd);
                 }
 
                 return Ok();
