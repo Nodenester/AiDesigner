@@ -24,7 +24,29 @@ namespace AiDesigner.Server.Controllers
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
                 var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_FhbDyhoqpkHsWvBZHvjEtym20CY0yPv4");
 
-                if (stripeEvent.Type == Events.CheckoutSessionCompleted)
+                if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
+                {
+                    var subscription = stripeEvent.Data.Object as Subscription;
+                    var userId = Guid.Parse(subscription.Metadata["userId"]);
+                    await _dbConnection.SetSubscriptionTierAsync(userId, 0);
+                }
+                else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
+                {
+                    var subscription = stripeEvent.Data.Object as Subscription;
+                    var userId = Guid.Parse(subscription.Metadata["userId"]);
+
+                    int subscriptionTier = subscription.Items.Data
+                        .FirstOrDefault()?.Price?.Id switch
+                    {
+                        "price_1ObX2bGS8y7NleDORuIlzPCO" => 1,
+                        "price_1ObX2bGS8y7NleDOvy9Btv2z" => 2,
+                        _ => 0
+                    };
+
+                    await _dbConnection.SetSubscriptionTierAsync(userId, subscriptionTier);
+                }
+
+                else if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {
                     var stripeSession = stripeEvent.Data.Object as Stripe.Checkout.Session;
                     var userId = Guid.Parse(stripeSession.Metadata["userId"]);
