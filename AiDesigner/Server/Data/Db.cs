@@ -1034,6 +1034,58 @@ namespace AiDesigner.Server.Data
             }
         }
 
+        public async Task<bool> SetStripeSubscriptionIdAsync(Guid userId, string stripeSubscriptionId)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+            UPDATE Ludde.TokenWallet
+            SET StripeSubscriptionId = @StripeSubscriptionId
+            WHERE UserId = @UserId;
+
+            SELECT CAST(
+                CASE WHEN @@ROWCOUNT = 1 THEN 1 ELSE 0 END
+            AS BIT);
+        ";
+
+                var success = await connection.ExecuteScalarAsync<bool>(query, new
+                {
+                    UserId = userId,
+                    StripeSubscriptionId = stripeSubscriptionId
+                });
+
+                return success;
+            }
+        }
+
+        public async Task<bool> UpdateSubscriptionStateByStripeIdAsync(string stripeSubscriptionId, int subscriptionTier)
+        {
+            using (var connection = new SqlConnection(_connectionString))
+            {
+                var query = @"
+            UPDATE Ludde.TokenWallet
+            SET SubscriptionTier = @SubscriptionTier,
+                Tokens = CASE @SubscriptionTier
+                    WHEN 1 THEN 2000
+                    WHEN 2 THEN 8000
+                    ELSE 500 
+                END
+            WHERE StripeSubscriptionId = @StripeSubscriptionId;
+
+            SELECT CAST(
+                CASE WHEN @@ROWCOUNT = 1 THEN 1 ELSE 0 END
+            AS BIT);
+        ";
+
+                var success = await connection.ExecuteScalarAsync<bool>(query, new
+                {
+                    StripeSubscriptionId = stripeSubscriptionId,
+                    SubscriptionTier = subscriptionTier
+                });
+
+                return success;
+            }
+        }
 
         public async Task UpdateUserTokensAsync(Guid userId, int tokensToDeduct)
         {

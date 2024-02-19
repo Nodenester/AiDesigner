@@ -2,7 +2,8 @@
 @using NodeBaseApi.Version2
 @inject HttpClient Http
 @inject NavigationManager NavMan
-
+@using Microsoft.AspNetCore.Authorization;
+@attribute [Authorize]
 
 <div class="dark:!bg-gray-600 bg-white">
     <div class="container px-6 py-8 mx-auto">

@@ -31,22 +31,24 @@ namespace AiDesigner.Server.Controllers
                     if (stripeSession.Mode == "subscription")
                     {
                         var userId2 = Guid.Parse(stripeSession.Metadata["userId"]);
+                        var subscriptionId = stripeSession.SubscriptionId;
 
-                        int subscriptionTier;
-                        switch (stripeSession.AmountTotal)
-                        {
-                            case 999:
-                                subscriptionTier = 1;
-                                break;
-                            case 2999:
-                                subscriptionTier = 2;
-                                break;
-                            default:
-                                subscriptionTier = 0;
-                                break;
-                        }
+                        //int subscriptionTier;
+                        //switch (stripeSession.AmountTotal)
+                        //{
+                        //    case 999:
+                        //        subscriptionTier = 1;
+                        //        break;
+                        //    case 2999:
+                        //        subscriptionTier = 2;
+                        //        break;
+                        //    default:
+                        //        subscriptionTier = 0;
+                        //        break;
+                        //}
 
-                        await _dbConnection.SetSubscriptionTierAsync(userId2, subscriptionTier);
+                        //await _dbConnection.SetSubscriptionTierAsync(userId2, subscriptionTier);
+                        await _dbConnection.SetStripeSubscriptionIdAsync(userId2, subscriptionId);
                         return Ok();
                     }
 
@@ -86,19 +88,23 @@ namespace AiDesigner.Server.Controllers
             try
             {
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_qTqoX61icim3gUzWq8oeWdMNb8UCHaWx");
+                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_WGGx9bGo1N5diXNbAQZkgSLvrZaJrCaw");
 
-                if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
+                if (stripeEvent.Type == Events.CustomerSubscriptionCreated)
+                {
+
+                }
+                else if (stripeEvent.Type == Events.CustomerSubscriptionDeleted)
                 {
                     var subscription = stripeEvent.Data.Object as Subscription;
-                    var userId = Guid.Parse(subscription.Metadata["userId"]);
-                    await _dbConnection.SetSubscriptionTierAsync(userId, 0);
+                    var SubscriptionId = subscription.Id;
+
+                    await _dbConnection.UpdateSubscriptionStateByStripeIdAsync(SubscriptionId, 0);
                 }
                 else if (stripeEvent.Type == Events.CustomerSubscriptionUpdated)
                 {
                     var subscription = stripeEvent.Data.Object as Subscription;
-                    var userId = Guid.Parse(subscription.Metadata["userId"]);
-
+                    var SubscriptionId = subscription.Id;
                     int subscriptionTier = subscription.Items.Data
                         .FirstOrDefault()?.Price?.Id switch
                     {
@@ -107,7 +113,7 @@ namespace AiDesigner.Server.Controllers
                         _ => 0
                     };
 
-                    await _dbConnection.SetSubscriptionTierAsync(userId, subscriptionTier);
+                    await _dbConnection.UpdateSubscriptionStateByStripeIdAsync(SubscriptionId, subscriptionTier);
                 }
 
                 return Ok();
