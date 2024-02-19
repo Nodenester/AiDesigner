@@ -103,7 +103,7 @@ namespace NodeBaseApi.StripeController
                 {
                     Items = new List<SubscriptionItemOptions>
             {
-                new SubscriptionItemOptions
+                new SubscriptionItemOptions 
                 {
                     Id = currentSubscriptionItemId, 
                     Price = request.NewPriceId, 
@@ -140,12 +140,16 @@ namespace NodeBaseApi.StripeController
                 Subscription subscription = await service.CancelAsync(request.SubscriptionId, options);
                 return Ok(new { Message = "Subscription canceled successfully." });
             }
+            catch (StripeException e)
+            {
+                return BadRequest(new { Error = $"Stripe error: {e.Message}" });
+            }
             catch (Exception e)
             {
-                return BadRequest(new { Error = e.Message });
+                // Providing more detailed error information
+                return BadRequest(new { Error = $"General error: {e.Message}", RequestData = request });
             }
         }
-
 
         private int CalculatePrice(int tokenAmount)
         {

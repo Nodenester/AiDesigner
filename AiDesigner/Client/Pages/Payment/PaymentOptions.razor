@@ -261,7 +261,7 @@
             {
                 // Assuming you want to navigate to a URL returned in the response
                 var sessionData = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                NavMan.NavigateTo(sessionData["url"]);
+                NavMan.NavigateTo("/home");
             }
             else
             {
@@ -276,17 +276,25 @@
 
     private async Task CancelSubscription()
     {
+        var requestData = new
+        {
+            SubscriptionId = wallet.StripeSubscriptionId,
+            InvoiceNow = false,  // Assuming default value
+            Prorate = true       // Assuming default value
+        };
+
         try
         {
-            var requestData = new { SubscriptionId = wallet.StripeSubscriptionId };
             var response = await Http.PostAsJsonAsync("Stripe/cancel-subscription", requestData);
             if (response.IsSuccessStatusCode)
             {
-                // Handle successful cancellation (e.g., navigate to a confirmation page or update UI)
+                NavMan.NavigateTo("/home");
             }
             else
             {
-                // Handle errors
+                // Log or handle the error response for debugging
+                var errorResponse = await response.Content.ReadAsStringAsync();
+                Console.WriteLine($"Failed to cancel subscription: {errorResponse}");
             }
         }
         catch (Exception ex)
