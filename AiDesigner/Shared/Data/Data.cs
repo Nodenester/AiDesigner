@@ -640,6 +640,7 @@ namespace NodeBaseApi.Version2
         public int Tokens { get; set; }
         public int BoughtTokens { get; set; }
         public int SubscriptionTier { get; set; }
+        public string StripeSubscriptionId { get; set; }
     }
 
     public class TokenDeductionRequest
