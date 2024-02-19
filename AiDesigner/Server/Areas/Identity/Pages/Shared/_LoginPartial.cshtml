@@ -15,13 +15,12 @@
     var hasExternalLogins = (await SignInManager.GetExternalAuthenticationSchemesAsync()).Any();
 }
 
-<ul class="navbar-nav" style="height: 4rem;">
+<ul class="navbar-nav2" style="height: 4rem;">
     @if (SignInManager.IsSignedIn(User))
     {
         <!-- Dropdown for logged in user's name and account management options -->
         <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle text-dark dropdown-min-width" href="#" id="userDropdown" role="button" onclick="toggleDropdown()" aria-expanded="false">Hello @User.Identity?.Name!</a>
-
+            <a class="nav-link dropdown-toggle dropdown-min-width text-white" href="#" id="userDropdown" role="button" onclick="toggleDropdown()" aria-expanded="false">Hello @User.Identity?.Name!</a>
             <ul class="dropdown-menu navContainer" aria-labelledby="userDropdown">
                 <li><a class="dropdown-item @ManageNavPages.IndexNavClass(ViewContext)" id="profile" asp-page="./Index">Profile</a></li>
                 <li><a class="dropdown-item @ManageNavPages.NameNavClass(ViewContext)" id="name" asp-page="./Name">Name</a></li>
@@ -39,17 +38,17 @@
         </li>
         <li class="nav-item">
             <form class="form-inline" style="margin-bottom: 0rem;" asp-area="Identity" asp-page="/Account/Logout" asp-route-returnUrl="/" method="post">
-                <button type="submit" class="nav-link btn btn-link text-dark">Logout</button>
+                <button type="submit" class="nav-link btn btn-link text-white">Logout</button>
             </form>
         </li>
     }
     else
     {
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@returnUrl">Register</a>
+            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Register" asp-route-returnUrl="@returnUrl">Register</a>
         </li>
         <li class="nav-item">
-            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@returnUrl">Login</a>
+            <a class="nav-link text-white" asp-area="Identity" asp-page="/Account/Login" asp-route-returnUrl="@returnUrl">Login</a>
         </li>
     }
 </ul>
@@ -90,7 +89,7 @@
                 }
 
     /* Additional styles */
-    .navbar-nav {
+    .navbar-nav2 {
         display: flex;
         align-items: center; /* This centers the items vertically */
     }
@@ -129,6 +128,10 @@
             background-color: #353535;
             color: #ffffff;
         }
+
+    .text-white{
+        color: #eaeaea !important;
+    }
 </style>
 
 <script>
