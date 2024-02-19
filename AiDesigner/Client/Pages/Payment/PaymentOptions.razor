@@ -232,28 +232,45 @@
 
     private async Task UpdateSubscription(int newTokenAmount)
     {
+        // Determine NewPriceId based on newTokenAmount
+        string newPriceId = newTokenAmount switch
+        {
+            2000 => "price_1ObX2bGS8y7NleDORuIlzPCO",
+            8000 => "price_1ObX2bGS8y7NleDOvy9Btv2z",
+            _ => null
+        };
+
+        // Ensure there is a valid price ID before proceeding
+        if (newPriceId == null)
+        {
+            Console.WriteLine("Invalid token amount specified.");
+            return;
+        }
+
+        var requestData = new
+        {
+            SubscriptionId = wallet.StripeSubscriptionId, // Assuming 'wallet' is defined elsewhere in your code
+            NewPriceId = newPriceId
+        };
+
         try
         {
-            var requestData = new
-            {
-                SubscriptionId = wallet.StripeSubscriptionId, // Assuming wallet contains SubscriptionId
-                NewTokenAmount = newTokenAmount
-            };
-
-            var response = await Http.PostAsJsonAsync("Stripe/update-subscription-session", requestData);
+            // Assuming 'Http' is an instance of HttpClient defined elsewhere in your code
+            var response = await Http.PostAsJsonAsync("Stripe/update-subscription", requestData);
             if (response.IsSuccessStatusCode)
             {
+                // Assuming you want to navigate to a URL returned in the response
                 var sessionData = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
                 NavMan.NavigateTo(sessionData["url"]);
             }
             else
             {
-                // Handle errors
+                Console.WriteLine($"Failed to update subscription: {response.StatusCode}");
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine("Error during UpdateSubscription: " + ex.Message);
+            Console.WriteLine($"Error during UpdateSubscription: {ex.Message}");
         }
     }
 

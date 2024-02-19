@@ -93,25 +93,34 @@ namespace NodeBaseApi.StripeController
         public async Task<ActionResult> UpdateSubscription([FromBody] UpdateSubscriptionRequest request)
         {
             var service = new SubscriptionService();
-            var options = new SubscriptionUpdateOptions
-            {
-                Items = new List<SubscriptionItemOptions>
-        {
-            new SubscriptionItemOptions
-            {
-                Id = request.SubscriptionItemId,
-                Price = request.NewPriceId, // New Stripe Price ID for the subscription
-            },
-        },
-            };
 
             try
             {
-                Subscription subscription = await service.UpdateAsync(request.SubscriptionId, options);
+                var currentSubscription = await service.GetAsync(request.SubscriptionId);
+                var currentSubscriptionItemId = currentSubscription.Items.Data[0].Id; 
+
+                var options = new SubscriptionUpdateOptions
+                {
+                    Items = new List<SubscriptionItemOptions>
+            {
+                new SubscriptionItemOptions
+                {
+                    Id = currentSubscriptionItemId, 
+                    Price = request.NewPriceId, 
+                },
+            },
+                };
+
+                var updatedSubscription = await service.UpdateAsync(request.SubscriptionId, options);
                 return Ok(new { Message = "Subscription updated successfully." });
+            }
+            catch (StripeException e)
+            {
+                return BadRequest(new { Error = $"Stripe error: {e.Message}" });
             }
             catch (Exception e)
             {
+                // Handle general exceptions
                 return BadRequest(new { Error = e.Message });
             }
         }
