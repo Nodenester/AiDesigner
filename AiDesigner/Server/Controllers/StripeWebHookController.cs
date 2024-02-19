@@ -33,22 +33,25 @@ namespace AiDesigner.Server.Controllers
                         var userId2 = Guid.Parse(stripeSession.Metadata["userId"]);
                         var subscriptionId = stripeSession.SubscriptionId;
 
-                        //int subscriptionTier;
-                        //switch (stripeSession.AmountTotal)
-                        //{
-                        //    case 999:
-                        //        subscriptionTier = 1;
-                        //        break;
-                        //    case 2999:
-                        //        subscriptionTier = 2;
-                        //        break;
-                        //    default:
-                        //        subscriptionTier = 0;
-                        //        break;
-                        //}
+                        int subscriptionTier;
+                        switch (stripeSession.AmountTotal)
+                        {
+                            case 999:
+                                subscriptionTier = 1;
+                                break;
+                            case 2999:
+                                subscriptionTier = 2;
+                                break;
+                            default:
+                                subscriptionTier = 0;
+                                break;
+                        }
 
                         //await _dbConnection.SetSubscriptionTierAsync(userId2, subscriptionTier);
+
                         await _dbConnection.SetStripeSubscriptionIdAsync(userId2, subscriptionId);
+                        await _dbConnection.UpdateSubscriptionStateByStripeIdAsync(subscriptionId, subscriptionTier);
+
                         return Ok();
                     }
 

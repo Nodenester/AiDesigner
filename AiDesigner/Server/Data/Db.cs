@@ -971,7 +971,7 @@ namespace AiDesigner.Server.Data
                         SET Tokens = @TokensToAdd, LastRefill = @Today
                         WHERE UserId = @UserId AND LastRefill <> @Today;
 
-                        SELECT Tokens, BoughtTokens, SubscriptionTier
+                        SELECT Tokens, BoughtTokens, SubscriptionTier, StripeSubscriptionId
                         FROM Ludde.TokenWallet
                         WHERE UserId = @UserId;
                     END
