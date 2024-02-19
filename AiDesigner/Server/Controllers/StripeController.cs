@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Stripe;
 using Stripe.Checkout;
 using AiDesigner.Server.Data;
+using NodeBaseApi.Version2;
 
 namespace NodeBaseApi.StripeController
 {
@@ -87,6 +88,55 @@ namespace NodeBaseApi.StripeController
 
             return Ok(new { SessionId = session.Id, Url = session.Url });
         }
+
+        [HttpPost("update-subscription")]
+        public async Task<ActionResult> UpdateSubscription([FromBody] UpdateSubscriptionRequest request)
+        {
+            var service = new SubscriptionService();
+            var options = new SubscriptionUpdateOptions
+            {
+                Items = new List<SubscriptionItemOptions>
+        {
+            new SubscriptionItemOptions
+            {
+                Id = request.SubscriptionItemId,
+                Price = request.NewPriceId, // New Stripe Price ID for the subscription
+            },
+        },
+            };
+
+            try
+            {
+                Subscription subscription = await service.UpdateAsync(request.SubscriptionId, options);
+                return Ok(new { Message = "Subscription updated successfully." });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { Error = e.Message });
+            }
+        }
+
+        [HttpPost("cancel-subscription")]
+        public async Task<ActionResult> CancelSubscription([FromBody] CancelSubscriptionRequest request)
+        {
+            var service = new SubscriptionService();
+            var options = new SubscriptionCancelOptions
+            {
+                InvoiceNow = request.InvoiceNow,
+                Prorate = request.Prorate,
+            };
+
+            try
+            {
+                Subscription subscription = await service.CancelAsync(request.SubscriptionId, options);
+                return Ok(new { Message = "Subscription canceled successfully." });
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new { Error = e.Message });
+            }
+        }
+
 
         private int CalculatePrice(int tokenAmount)
         {

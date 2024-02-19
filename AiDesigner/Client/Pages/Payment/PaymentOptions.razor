@@ -31,9 +31,20 @@
                     </li>
                 </ul>
 
-                <a href="home" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
-                    Start free
-                </a>
+                <!-- Start/Cancel Button -->
+                @if (wallet.SubscriptionTier > 0 && wallet.StripeSubscriptionId != null)
+                {
+                    <button @onclick="CancelSubscription"
+                            class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase bg-red-600 rounded-lg hover:bg-red-700 focus:outline-none">
+                        Cancel Subscription
+                    </button>
+                }
+                else
+                {
+                    <a href="home" class="inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors bg-green-600 rounded-lg hover:bg-green-700 focus:outline-none">
+                        Start free
+                    </a>
+                }
             </div>
 
             <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white rounded-lg lg:mx-4 @(wallet.SubscriptionTier == 1 ? "border-4 border-green-500" : "border-0 border-gray-200") dark:!bg-gray-800">
@@ -62,10 +73,10 @@
                     </li>
                 </ul>
 
-                <button @onclick="wallet.SubscriptionTier != 1 ? (() => SubscribeTokens(2000)) : null"
-                        class="@(wallet.SubscriptionTier == 1 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700") inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors rounded-lg focus:outline-none">
-                                @(wallet.SubscriptionTier == 1 ? "Current Plan" : "Start subscription")
-                </button>
+            <button @onclick="() => InvokeAppropriateAction(2000)"
+                    class="@(wallet.SubscriptionTier == 1 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700") inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors rounded-lg focus:outline-none">
+                                @(wallet.SubscriptionTier == 1 ? "Current Plan" : (wallet.SubscriptionTier > 0 ? "Change Plan" : "Start Subscription"))
+            </button>
             </div>
 
             <div class="flex flex-col w-full max-w-sm p-8 space-y-8 text-center bg-white rounded-lg lg:mx-4 @(wallet.SubscriptionTier == 2 ? "border-4 border-green-500" : "border-0 border-gray-200") dark:!bg-gray-800">
@@ -94,10 +105,10 @@
                     </li>
                 </ul>
 
-                <button @onclick="wallet.SubscriptionTier != 2 ? (() => SubscribeTokens(8000)) : null"
-                        class="@(wallet.SubscriptionTier == 2 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700") inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors rounded-lg focus:outline-none">
-                                @(wallet.SubscriptionTier == 2 ? "Current Plan" : "Start subscription")
-                </button>
+            <button @onclick="() => InvokeAppropriateAction(8000)"
+                    class="@(wallet.SubscriptionTier == 2 ? "bg-gray-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700") inline-flex items-center justify-center px-4 py-2 font-semibold text-white uppercase transition-colors rounded-lg focus:outline-none">
+                                @(wallet.SubscriptionTier == 2 ? "Current Plan" : (wallet.SubscriptionTier > 0 ? "Change Plan" : "Start Subscription"))
+            </button>
             </div>
         </div>
     </div>
@@ -164,6 +175,19 @@
     [CascadingParameter(Name = "Wallet")]
     public Wallet wallet { get; set; }
 
+    private async Task InvokeAppropriateAction(int tokenAmount)
+    {
+        if (wallet.SubscriptionTier == 0)
+        {
+            await SubscribeTokens(tokenAmount);
+        }
+        else if (wallet.SubscriptionTier > 0)
+        {
+            await UpdateSubscription(tokenAmount);
+        }
+        // No else case needed, as the button should be disabled for the current plan, preventing this method from being called.
+    }
+
     private async Task PurchaseTokens(int tokenAmount)
     {
         try
@@ -203,6 +227,54 @@
         catch (Exception ex)
         {
             Console.WriteLine("Error during SubscribeTokens: " + ex.Message);
+        }
+    }
+
+    private async Task UpdateSubscription(int newTokenAmount)
+    {
+        try
+        {
+            var requestData = new
+            {
+                SubscriptionId = wallet.StripeSubscriptionId, // Assuming wallet contains SubscriptionId
+                NewTokenAmount = newTokenAmount
+            };
+
+            var response = await Http.PostAsJsonAsync("Stripe/update-subscription-session", requestData);
+            if (response.IsSuccessStatusCode)
+            {
+                var sessionData = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
+                NavMan.NavigateTo(sessionData["url"]);
+            }
+            else
+            {
+                // Handle errors
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error during UpdateSubscription: " + ex.Message);
+        }
+    }
+
+    private async Task CancelSubscription()
+    {
+        try
+        {
+            var requestData = new { SubscriptionId = wallet.StripeSubscriptionId };
+            var response = await Http.PostAsJsonAsync("Stripe/cancel-subscription", requestData);
+            if (response.IsSuccessStatusCode)
+            {
+                // Handle successful cancellation (e.g., navigate to a confirmation page or update UI)
+            }
+            else
+            {
+                // Handle errors
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine("Error during CancelSubscription: " + ex.Message);
         }
     }
 }

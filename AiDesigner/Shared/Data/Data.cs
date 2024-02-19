@@ -648,6 +648,20 @@ namespace NodeBaseApi.Version2
         public Guid UserId { get; set; }
         public int TokensToDeduct { get; set; }
     }
+
+    public class UpdateSubscriptionRequest
+    {
+        public string SubscriptionId { get; set; }
+        public string SubscriptionItemId { get; set; } // Needed to identify which item to update
+        public string NewPriceId { get; set; }
+    }
+
+    public class CancelSubscriptionRequest
+    {
+        public string SubscriptionId { get; set; }
+        public bool InvoiceNow { get; set; } = false;
+        public bool Prorate { get; set; } = true;
+    }
 }
 
 
