@@ -261,7 +261,7 @@
             {
                 // Assuming you want to navigate to a URL returned in the response
                 var sessionData = await response.Content.ReadFromJsonAsync<Dictionary<string, string>>();
-                NavMan.NavigateTo("/home");
+                NavMan.NavigateTo("/home", true);
             }
             else
             {
@@ -279,8 +279,8 @@
         var requestData = new
         {
             SubscriptionId = wallet.StripeSubscriptionId,
-            InvoiceNow = false,  // Assuming default value
-            Prorate = true       // Assuming default value
+            InvoiceNow = false,  
+            Prorate = true       
         };
 
         try
@@ -288,7 +288,7 @@
             var response = await Http.PostAsJsonAsync("Stripe/cancel-subscription", requestData);
             if (response.IsSuccessStatusCode)
             {
-                NavMan.NavigateTo("/home");
+                NavMan.NavigateTo("/home", true);
             }
             else
             {
