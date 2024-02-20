@@ -312,7 +312,7 @@ namespace AiDesigner.Server.Controllers
             {
                 // Log the exception
                 // For example: _logger.LogError(ex, "An error occurred while generating the article image.");
-                return StatusCode(500, new { Message = "An error occurred while processing your request" });
+                return StatusCode(500, new { Message = "An error occurred while processing your request" + ex.Message + " :" + ex.HelpLink });
             }
         }
 
