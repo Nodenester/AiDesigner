@@ -3,6 +3,10 @@ using Microsoft.AspNetCore.Authorization;
 using System.Text;
 using Newtonsoft.Json;
 using OtpNet;
+using System;
+using System.Collections.Generic;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace AiDesigner.Server.Controllers
 {
@@ -15,7 +19,7 @@ namespace AiDesigner.Server.Controllers
 
         public ExecuteController()
         {
-            _httpClient = new HttpClient { BaseAddress = new Uri("https://api.nodenestor.com/") };// You can configure the HttpClient instance here if needed.
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://api.nodenestor.com/") };
             _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
@@ -25,9 +29,10 @@ namespace AiDesigner.Server.Controllers
             [FromBody] Dictionary<Guid, object> inputValues,
             [FromQuery] string apiKey,
             [FromQuery] Guid? sessionId = null,
-            [FromQuery] bool isTest = false,            
+            [FromQuery] bool isTest = false,
             [FromQuery] bool isCustomBlock = false)
-            {
+        {
+            HttpResponseMessage response = new HttpResponseMessage(); // Declare outside of try block
             try
             {
                 // Create request payload
@@ -53,17 +58,8 @@ namespace AiDesigner.Server.Controllers
                 url += $"&testToken={GenerateTOTP()}";
 
                 // Make the API call
-                var response = new HttpResponseMessage();
-                try
-                {
-                    response = await _httpClient.PostAsync(url, requestContent);
-                }
-                catch (Exception ex)
-                {
-                    return Ok(response);
-                }
-
-                response.EnsureSuccessStatusCode(); 
+                response = await _httpClient.PostAsync(url, requestContent);
+                response.EnsureSuccessStatusCode();
 
                 // Parse and return the response
                 var responseContent = await response.Content.ReadAsStringAsync();
@@ -73,19 +69,48 @@ namespace AiDesigner.Server.Controllers
             }
             catch (Exception ex)
             {
-                // Log the exception if needed
-                return StatusCode(500, $"Internal server error: {ex.Message}");
+                var errorDetails = new StringBuilder();
+                errorDetails.AppendLine($"Message: {ex.Message}");
+
+                if (ex.InnerException != null)
+                {
+                    errorDetails.AppendLine($"Inner Exception: {ex.InnerException.Message}");
+                }
+
+                errorDetails.AppendLine($"StackTrace: {ex.StackTrace}");
+
+                string partialData = null;
+                if (response?.Content != null)
+                {
+                    try
+                    {
+                        partialData = await response.Content.ReadAsStringAsync();
+                        if (!string.IsNullOrWhiteSpace(partialData))
+                        {
+                            errorDetails.AppendLine($"Partial Data: {partialData}");
+                        }
+                    }
+                    catch (Exception readEx)
+                    {
+                        errorDetails.AppendLine($"Failed to read partial data: {readEx.Message}");
+                    }
+                }
+
+                var errorInfo = new
+                {
+                    Message = "Failed to execute program.",
+                    Details = errorDetails.ToString()
+                };
+
+                return StatusCode(500, JsonConvert.SerializeObject(errorInfo));
             }
         }
+
         public string GenerateTOTP()
         {
-            //byte[] secretKey = KeyGeneration.GenerateRandomKey(20);
             string secretKeyBase64 = "YOUR_TOTP_SECRET_HERE";
             byte[] secretKey = Convert.FromBase64String(secretKeyBase64);
-
             var totp = new Totp(secretKey);
-
-            // Generate a TOTP token
             return totp.ComputeTotp();
         }
     }
