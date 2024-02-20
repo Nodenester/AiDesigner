@@ -80,7 +80,7 @@ namespace AiDesigner.Server.Controllers
                 errorDetails.AppendLine($"StackTrace: {ex.StackTrace}");
 
                 string partialData = null;
-                if (response?.Content != null)
+                if (response != null)
                 {
                     try
                     {
