@@ -36,11 +36,11 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         {
             Id = Guid.NewGuid();
             Name = "Text to Speech";
-            Description = "This block converts text to speech using the Hugging Face Suno Bark API, supporting multiple languages and voice presets.";
+            Description = "This block converts text to speech using the Hugging Face API, This is just a simple standin and will be replaced with a big system.";
             Inputs = new List<Input>
         {
             new Input { Name = "Text", Type = Type.String, IsList = false, Description = "Text input for speech synthesis" },
-            new Input { Name = "VoicePreset", Type = Type.String, IsList = false, Description = "Optional voice preset for speech synthesis" }
+            //new Input { Name = "VoicePreset", Type = Type.String, IsList = false, Description = "Optional voice preset for speech synthesis" }
         };
             Outputs = new List<Output>
         {
