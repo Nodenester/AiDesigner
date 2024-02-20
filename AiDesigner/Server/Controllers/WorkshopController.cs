@@ -278,7 +278,9 @@ namespace AiDesigner.Server.Controllers
             try
             {
                 var client = new HttpClient();
+                client.Timeout = TimeSpan.FromSeconds(300); 
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", "YOUR_HF_TOKEN_HERE");
+
 
                 var program = await _dbConnection.LoadProgramAsync(Guid.Parse(article.ProgramId)); // Ensure this is awaited
 
