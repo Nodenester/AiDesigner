@@ -134,7 +134,7 @@ namespace AiDesigner.Server.Controllers
             return Ok(article);
         }
 
-        [HttpPut("update-article")]
+        [HttpPost("update-article")]
         public async Task<IActionResult> UpdateArticle(WorkshopArticle article)
         {
             await _dbConnection.UpdateArticleAsync(article);

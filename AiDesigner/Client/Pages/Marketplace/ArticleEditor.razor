@@ -177,7 +177,7 @@
         }
 
         SelectedArticle.Status = "Accepted";
-        HttpResponseMessage response = await Http.PutAsJsonAsync("Workshop/update-article", SelectedArticle);
+        HttpResponseMessage response = await Http.PostAsJsonAsync("Workshop/update-article", SelectedArticle);
         if (!response.IsSuccessStatusCode) { /* Handle error */ }
         isLoading = false;
     }
