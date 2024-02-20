@@ -35,7 +35,7 @@ namespace NodeExacuteApi.Data.Blocks.AiModels
         public TextToSpeech()
         {
             Id = Guid.NewGuid();
-            Name = "Text to Speech";
+            Name = "Text To Speech";
             Description = "This block converts text to speech using the Hugging Face API, This is just a simple standin and will be replaced with a big system.";
             Inputs = new List<Input>
         {
