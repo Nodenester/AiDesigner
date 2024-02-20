@@ -357,6 +357,7 @@
                         var content = await response.Content.ReadAsStringAsync();
 
                         var responseContent = await response.Content.ReadAsStringAsync();
+                        Console.WriteLine(responseContent);
                         var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
 
                         if (response.IsSuccessStatusCode)
