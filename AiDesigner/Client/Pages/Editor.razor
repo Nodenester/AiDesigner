@@ -904,10 +904,23 @@
     }
 
     //System Logic
+
+    private TaskCompletionSource<bool> screenshotCompletionSource;
     public async Task Take()
     {
+        screenshotCompletionSource = new TaskCompletionSource<bool>();
         await JSRuntime.InvokeVoidAsync("takeScreenshot", DotNetObjectReference.Create(this));
+        await screenshotCompletionSource.Task; // This will wait until the screenshot is received
     }
+
+    [JSInvokable]
+    public void ReceiveScreenshot(string dataUrl)
+    {
+        byte[] imageBytes = Convert.FromBase64String(dataUrl.Split(',')[1]);
+        localProgram.Image = imageBytes;
+        screenshotCompletionSource.SetResult(true); // Signal completion
+    }
+
 
     [JSInvokable]
     public async void DeselectBlock()
@@ -944,13 +957,6 @@
         {
 
         }
-    }
-
-    [JSInvokable]
-    public void ReceiveScreenshot(string dataUrl)
-    {
-        byte[] imageBytes = Convert.FromBase64String(dataUrl.Split(',')[1]);
-        localProgram.Image = imageBytes;
     }
 
     public async Task RemovePort()
