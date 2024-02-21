@@ -300,10 +300,6 @@
                 var programEndLocation = matchingProgram.ProgramStructure?.ProgramEndLocation ?? new Tuple<int, int>(300, 200);
                 var cameraPos = matchingProgram.ProgramStructure?.CameraPos ?? new Tuple<double, double>(0, 0);
 
-                matchingProgram.ProgramStructure.ProgramStartLocation = null;
-                matchingProgram.ProgramStructure.ProgramEndLocation = null;
-                matchingProgram.ProgramStructure.CameraPos = null;
-
                 // Serialize without tuples
                 var json = JsonConvert.SerializeObject(matchingProgram, settings);
                 var jsonObject = JObject.Parse(json);

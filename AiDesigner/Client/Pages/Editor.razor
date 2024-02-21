@@ -1747,63 +1747,41 @@
 
     private async Task UpdateDb(ProgramObject Program)
     {
-        if (Program != null)
+        // Assuming Program and Program.ProgramStructure are not null
+
+        var programStartLocation = Program.ProgramStructure.ProgramStartLocation ?? new Tuple<int, int>(0, 200);
+        var programEndLocation = Program.ProgramStructure.ProgramEndLocation ?? new Tuple<int, int>(300, 200);
+        var cameraPos = Program.ProgramStructure.CameraPos ?? new Tuple<double, double>(0, 0);
+
+        var settings = new JsonSerializerSettings
+            {
+                ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                TypeNameHandling = TypeNameHandling.Auto,
+                Converters = new List<JsonConverter> { new BlockJsonConverter() },
+                ContractResolver = new IgnoreTuplesContractResolver(),
+                ObjectCreationHandling = ObjectCreationHandling.Replace
+            };
+
+        var json = JsonConvert.SerializeObject(Program, settings);
+        var jsonObject = JObject.Parse(json);
+
+        // Adjusting case sensitivity for JSON properties to match the actual JSON structure
+        jsonObject["ProgramStructure"]["ProgramStartLocation"] = new JArray(programStartLocation.Item1, programStartLocation.Item2);
+        jsonObject["ProgramStructure"]["ProgramEndLocation"] = new JArray(programEndLocation.Item1, programEndLocation.Item2);
+        jsonObject["ProgramStructure"]["CameraPos"] = new JArray(cameraPos.Item1, cameraPos.Item2);
+
+        var modifiedJson = jsonObject.ToString();
+        var content = new StringContent(modifiedJson, Encoding.UTF8, "application/json");
+
+        var endpoint = Program is CustomProgram ? $"programs/{Program.Id}" : $"customblocks/{Program.Id}";
+
+        // Simplified HTTP call without explicit error logging
+        var response = await Http.PostAsync(endpoint, content);
+
+        if (!response.IsSuccessStatusCode)
         {
-            HttpResponseMessage response = null;
-            try
-            {
-                // Extract tuple data and temporarily set the tuples to null
-                var programStartLocation = Program.ProgramStructure?.ProgramStartLocation ?? new Tuple<int, int>(0, 200);
-                var programEndLocation = Program.ProgramStructure?.ProgramEndLocation ?? new Tuple<int, int>(300, 200);
-                var cameraPos = Program.ProgramStructure?.CameraPos ?? new Tuple<double, double>(0, 0);
-
-                Program.ProgramStructure.ProgramStartLocation = null;
-                Program.ProgramStructure.ProgramEndLocation = null;
-                Program.ProgramStructure.CameraPos = null;
-
-                var settings = new JsonSerializerSettings
-                    {
-                        ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                        TypeNameHandling = TypeNameHandling.Auto,
-                        Converters = new List<JsonConverter> { new BlockJsonConverter() },
-                        ContractResolver = new IgnoreTuplesContractResolver(),
-                        ObjectCreationHandling = ObjectCreationHandling.Replace
-                    };
-
-                // Serialize the object without the tuple data
-                var json = JsonConvert.SerializeObject(Program, settings);
-                var jsonObject = JObject.Parse(json);
-
-                Program.ProgramStructure.ProgramStartLocation = programStartLocation;
-                Program.ProgramStructure.ProgramEndLocation = programEndLocation;
-                Program.ProgramStructure.CameraPos = cameraPos;
-
-                // Manually add tuple data back into the JSON
-                jsonObject["programStructure"]["programStartLocation"] = new JArray(programStartLocation.Item1, programStartLocation.Item2);
-                jsonObject["programStructure"]["programEndLocation"] = new JArray(programEndLocation.Item1, programEndLocation.Item2);
-                jsonObject["programStructure"]["cameraPos"] = new JArray(cameraPos.Item1, cameraPos.Item2);
-
-                var modifiedJson = jsonObject.ToString();
-                var content = new StringContent(modifiedJson, Encoding.UTF8, "application/json");
-
-                // Determine the appropriate endpoint
-                var endpoint = Program is CustomProgram ? $"programs/{Program.Id}" : $"customblocks/{Program.Id}";
-                response = await Http.PostAsync(endpoint, content);
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine("An error occurred while sending the request: " + ex.ToString());
-            }
-
-            if (response == null || !response.IsSuccessStatusCode)
-            {
-                string errorContent = await response.Content.ReadAsStringAsync();
-                throw new Exception($"Failed to update program with ID {Program.Id}. Response: {errorContent}. Code {response.StatusCode}");
-            }
-        }
-        else
-        {
-            throw new Exception("No active program");
+            // Consider logging or handling the error here
+            throw new HttpRequestException($"Failed to update program with ID {Program.Id}. Response code: {response.StatusCode}");
         }
     }
 
