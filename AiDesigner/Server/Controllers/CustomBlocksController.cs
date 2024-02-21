@@ -67,7 +67,7 @@ namespace NodeBaseApi.Controllers
         }
 
         // PUT api/customblocks/{id}
-        [HttpPut("{id}")]
+        [HttpPost("{id}")]
         public async Task<IActionResult> UpdateCustomBlock(Guid id, [FromBody] JsonElement body)
         {
             var settings = new JsonSerializerSettings

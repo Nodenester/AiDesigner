@@ -74,7 +74,7 @@ namespace AiDesigner.Server.Controllers
         }
 
         // PUT api/Tutorial/Complete/{input}
-        [HttpPut("Complete/{input}")]
+        [HttpPost("Complete/{input}")]
         public async Task<ActionResult> MarkTutorialAsCompleted(string input)
         {
             try
@@ -152,7 +152,7 @@ namespace AiDesigner.Server.Controllers
         }
 
         // PUT api/Tutorial/Update
-        [HttpPut("Update")]
+        [HttpPost("Update")]
         public async Task<ActionResult> UpdateTutorial([FromBody] Tutorial tutorial)
         {
             try

@@ -197,7 +197,7 @@
             if (doesExist)
             {
                 // Make the HTTP PUT request
-                response = await Http.PutAsJsonAsync("Workshop/update-article", workshopArticle);
+                response = await Http.PostAsJsonAsync("Workshop/update-article", workshopArticle);
                 if (multipleFileContents.Count() > 0)
                 {
                     string requestUri = $"Workshop/article-images/{workshopArticle.Id}";

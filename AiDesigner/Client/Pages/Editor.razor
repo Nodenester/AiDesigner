@@ -1,6 +1,7 @@
 ﻿@page "/editor"
 @inject IJSRuntime JSRuntime
 @using Newtonsoft.Json;
+@using Newtonsoft.Json.Linq
 @using Newtonsoft.Json.Serialization;
 @using NodeBaseApi.Version2
 @using Microsoft.AspNetCore.Authorization
@@ -1751,32 +1752,46 @@
             HttpResponseMessage response = null;
             try
             {
+                // Extract tuple data and temporarily set the tuples to null
+                var programStartLocation = Program.ProgramStructure?.ProgramStartLocation ?? new Tuple<int, int>(0, 200);
+                var programEndLocation = Program.ProgramStructure?.ProgramEndLocation ?? new Tuple<int, int>(300, 200);
+                var cameraPos = Program.ProgramStructure?.CameraPos ?? new Tuple<double, double>(0, 0);
+
+                Program.ProgramStructure.ProgramStartLocation = null;
+                Program.ProgramStructure.ProgramEndLocation = null;
+                Program.ProgramStructure.CameraPos = null;
+
                 var settings = new JsonSerializerSettings
-                {
+                    {
                         TypeNameHandling = TypeNameHandling.Auto,
-                        Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                        Converters = new List<JsonConverter> { new BlockJsonConverter() },
                         ContractResolver = new DefaultContractResolver
                         {
                             NamingStrategy = new CamelCaseNamingStrategy()
                         },
                         ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                         ObjectCreationHandling = ObjectCreationHandling.Replace
-                };
+                    };
 
-                if (Program is CustomProgram customProgram)
-                {
-                    var json = JsonConvert.SerializeObject(customProgram, settings);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                // Serialize the object without the tuple data
+                var json = JsonConvert.SerializeObject(Program, settings);
+                var jsonObject = JObject.Parse(json);
 
-                    response = await Http.PutAsync($"programs/{customProgram.Id}", content);
-                }
-                else if (Program is CustomBlockProgram customBlockProgram)
-                {
-                    var json = JsonConvert.SerializeObject(customBlockProgram, settings);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                Program.ProgramStructure.ProgramStartLocation = programStartLocation;
+                Program.ProgramStructure.ProgramEndLocation = programEndLocation;
+                Program.ProgramStructure.CameraPos = cameraPos;
 
-                    response = await Http.PutAsync($"customblocks/{customBlockProgram.Id}", content);
-                }
+                // Manually add tuple data back into the JSON
+                jsonObject["programStructure"]["programStartLocation"] = new JArray(programStartLocation.Item1, programStartLocation.Item2);
+                jsonObject["programStructure"]["programEndLocation"] = new JArray(programEndLocation.Item1, programEndLocation.Item2);
+                jsonObject["programStructure"]["cameraPos"] = new JArray(cameraPos.Item1, cameraPos.Item2);
+
+                var modifiedJson = jsonObject.ToString();
+                var content = new StringContent(modifiedJson, Encoding.UTF8, "application/json");
+
+                // Determine the appropriate endpoint
+                var endpoint = Program is CustomProgram ? $"programs/{Program.Id}" : $"customblocks/{Program.Id}";
+                response = await Http.PostAsync(endpoint, content);
             }
             catch (Exception ex)
             {
@@ -1791,7 +1806,7 @@
         }
         else
         {
-            throw new Exception($"No active program");
+            throw new Exception("No active program");
         }
     }
 

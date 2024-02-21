@@ -80,7 +80,7 @@
             var userIdClaim = user.Claims.FirstOrDefault()?.Value;
             if (Guid.TryParse(userIdClaim, out Guid userId))
             {
-                Http.PutAsJsonAsync($"Tutorial/Complete/{tutorial.TutorialId + ":" + userId.ToString()}", tutorial);
+                Http.PostAsJsonAsync($"Tutorial/Complete/{tutorial.TutorialId + ":" + userId.ToString()}", tutorial);
             }
         }
     }
