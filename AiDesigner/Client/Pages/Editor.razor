@@ -1763,13 +1763,10 @@
 
                 var settings = new JsonSerializerSettings
                     {
+                        ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
                         TypeNameHandling = TypeNameHandling.Auto,
                         Converters = new List<JsonConverter> { new BlockJsonConverter() },
-                        ContractResolver = new DefaultContractResolver
-                        {
-                            NamingStrategy = new CamelCaseNamingStrategy()
-                        },
-                        ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+                        ContractResolver = new IgnoreTuplesContractResolver(),
                         ObjectCreationHandling = ObjectCreationHandling.Replace
                     };
 
