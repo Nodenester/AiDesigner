@@ -79,7 +79,7 @@
                     <div>
                         @foreach (var input in selectedProgram.ProgramStructure.ProgramStart)
                         {
-                            if (input.Name == "Start")
+                            if (input.Name == "Start" || input.Name == "Chat History")
                             {
                                 continue;
                             }
@@ -357,7 +357,7 @@
                         var content = await response.Content.ReadAsStringAsync();
 
                         var responseContent = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(responseContent);
+                        //Console.WriteLine(responseContent);
                         var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
 
                         if (response.IsSuccessStatusCode)

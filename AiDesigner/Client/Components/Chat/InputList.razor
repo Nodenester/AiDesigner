@@ -302,7 +302,7 @@ else
         {
             using (var ms = new MemoryStream())
             {
-                await file.OpenReadStream().CopyToAsync(ms);
+                await file.OpenReadStream(2097152).CopyToAsync(ms); // 2 MB limit
                 var bytes = ms.ToArray();
                 // Now 'bytes' is a byte array you can use.
                 Value = bytes;
