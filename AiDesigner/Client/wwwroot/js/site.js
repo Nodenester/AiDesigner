@@ -929,3 +929,13 @@ function submitLogoutForm(logoutUrl, csrfToken) {
     document.body.appendChild(form);
     form.submit();
 }
+function scrollToBottomIfNeeded(elementId) {
+    var element = document.getElementById(elementId);
+    // Check if the user is near the bottom
+    var isAtBottom = element.scrollHeight - element.clientHeight <= element.scrollTop + 50; // 50 is a threshold
+
+    if (isAtBottom) {
+        element.scrollTop = element.scrollHeight;
+    }
+}
+

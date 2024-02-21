@@ -16,6 +16,7 @@
 @using static AiDesigner.Client.Components.Chat.InputList
 @inject TooltipService tooltipService
 @inject NotificationService notificationService
+@inject IJSRuntime JSRuntime
 
 <div class="flex bo" style="height: 100%;">
     <!-- Select Program box -->
@@ -143,7 +144,7 @@
         }
         else if (selectedProgram != null && selectedProgram.SupportsChat)
         {
-            <div class="chat-mode-container">
+            <div id="scrollableDiv" class="chat-mode-container">
                 <!-- Output box for chat -->
                 <div class="chat-mode-output p-4 inputHeight">
                     <p class="text-lg font-semibold mb-2">Chat Outputs</p>
@@ -174,7 +175,7 @@
                 </div>
 
                 <!-- Execute Button for chat -->
-                <div class="chat-mode-button flex justify-around">
+                <div id="scrollableDiv" class="chat-mode-button flex justify-around">
                     <!-- Clear Output Button -->
                     <button class="py-1 rounded px-6 h-12 w-24 bg-blue-600 hover:bg-blue-700 text-white mr-4"
                             @onclick="ClearOutput">
@@ -405,6 +406,10 @@
                 }
             }
             StateHasChanged();
+            if (selectedProgram.SupportsChat)
+            {
+                await JSRuntime.InvokeVoidAsync("scrollToBottomIfNeeded", "scrollableDiv");
+            }
         }
     }
 
