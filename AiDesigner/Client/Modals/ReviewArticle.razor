@@ -99,7 +99,7 @@
                         var jsonContent = JsonSerializer.Serialize(userArticle);
                         var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-                        var response = await Http.PutAsync($"Workshop/update-user-article2/{customProgram.Id.ToString()}", content);
+                        var response = await Http.PostAsync($"Workshop/update-user-article2/{customProgram.Id.ToString()}", content);
                         if (response.IsSuccessStatusCode)
                         {
                             Close(); // Assuming 'Close' is a method to close the review form or dialog

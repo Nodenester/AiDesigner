@@ -78,7 +78,7 @@ namespace NodeBaseApi.Controllers
 
 
         // PUT api/programs/{id}
-        [HttpPut("{id}")]
+        [HttpPost("{id}")]
         public async Task<IActionResult> UpdateProgram(Guid id, [FromBody] JsonElement body)
         {
             var settings = new JsonSerializerSettings

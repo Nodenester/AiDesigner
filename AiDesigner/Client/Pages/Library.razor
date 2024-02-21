@@ -263,8 +263,7 @@
 
         if (matchingProgram != null)
         {
-            // If a matching program is found, update its properties with those of newProgram
-            // You may need to adjust this code based on the exact properties of your ProgramObject class
+            // Update properties
             matchingProgram.Id = newProgram.Id;
             matchingProgram.Name = newProgram.Name;
             matchingProgram.Description = newProgram.Description;
@@ -274,7 +273,7 @@
             matchingProgram.SupportsSessions = newProgram.SupportsSessions;
             matchingProgram.SupportsChat = newProgram.SupportsChat;
 
-            // If the ProgramObject is a CustomProgram
+            // Handle CustomProgram and CustomBlockProgram
             if (matchingProgram is CustomProgram customProgram && newProgram is CustomProgram newCustomProgram)
             {
                 customProgram.ApiKey = newCustomProgram.ApiKey;
@@ -285,30 +284,40 @@
                 customBlockProgram.ProgramStructure = newCustomBlockProgram.ProgramStructure;
             }
 
+            // Prepare for serialization without tuples
             var settings = new JsonSerializerSettings
                 {
                     ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-                    TypeNameHandling = TypeNameHandling.Auto, // Preserve type information during serialization
-                    Converters = new List<JsonConverter> { new TupleConverter(), new BlockJsonConverter() },
+                    TypeNameHandling = TypeNameHandling.Auto,
+                    Converters = new List<JsonConverter> { new BlockJsonConverter() },
+                    ContractResolver = new IgnoreTuplesContractResolver(),
                     ObjectCreationHandling = ObjectCreationHandling.Replace
                 };
 
             try
             {
-                if (newProgram is CustomProgram)
-                {
-                    var json = JsonConvert.SerializeObject(matchingProgram, settings);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                var programStartLocation = matchingProgram.ProgramStructure?.ProgramStartLocation ?? new Tuple<int, int>(0, 200);
+                var programEndLocation = matchingProgram.ProgramStructure?.ProgramEndLocation ?? new Tuple<int, int>(300, 200);
+                var cameraPos = matchingProgram.ProgramStructure?.CameraPos ?? new Tuple<double, double>(0, 0);
 
-                    response = await Http.PutAsync($"programs/{matchingProgram.Id}", content);
-                }
-                else if (newProgram is CustomBlockProgram)
-                {
-                    var json = JsonConvert.SerializeObject(matchingProgram, settings);
-                    var content = new StringContent(json, Encoding.UTF8, "application/json");
+                matchingProgram.ProgramStructure.ProgramStartLocation = null;
+                matchingProgram.ProgramStructure.ProgramEndLocation = null;
+                matchingProgram.ProgramStructure.CameraPos = null;
 
-                    response = await Http.PutAsync($"customblocks/{matchingProgram.Id}", content);
-                }
+                // Serialize without tuples
+                var json = JsonConvert.SerializeObject(matchingProgram, settings);
+                var jsonObject = JObject.Parse(json);
+
+                jsonObject["ProgramStructure"]["ProgramStartLocation"] = new JArray(programStartLocation.Item1, programStartLocation.Item2);
+                jsonObject["ProgramStructure"]["ProgramEndLocation"] = new JArray(programEndLocation.Item1, programEndLocation.Item2);
+                jsonObject["ProgramStructure"]["CameraPos"] = new JArray(cameraPos.Item1, cameraPos.Item2);
+
+                var modifiedJson = jsonObject.ToString();
+                var content = new StringContent(modifiedJson, Encoding.UTF8, "application/json");
+
+                // Determine endpoint based on program type
+                var endpoint = newProgram is CustomProgram ? $"programs/{matchingProgram.Id}" : $"customblocks/{matchingProgram.Id}";
+                response = await Http.PostAsync(endpoint, content);
             }
             catch (Exception ex)
             {

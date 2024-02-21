@@ -211,7 +211,7 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
-        [HttpPut("update-user-article")]
+        [HttpPost("update-user-article")]
         public async Task<IActionResult> UpdateUserArticle([FromBody] UserArticle userArticle)
         {
             try
@@ -226,7 +226,7 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
-        [HttpPut("update-user-article2/{programId}")]
+        [HttpPost("update-user-article2/{programId}")]
         public async Task<IActionResult> UpdateUserArticle(string programId, [FromBody] UserArticle userArticle)
         {
             if (!ModelState.IsValid)
