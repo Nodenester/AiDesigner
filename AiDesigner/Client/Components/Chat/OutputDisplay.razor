@@ -1,8 +1,12 @@
 ﻿@using System.Text.RegularExpressions
 @using Newtonsoft.Json.Linq
+@inject IJSRuntime JSRuntime;
+
 @code {
     [Parameter]
     public object OutputItem { get; set; }
+
+    string oldwav { get; set; }
 
     private RenderFragment RenderOutput() => builder =>
     {
@@ -32,6 +36,7 @@
                 // Render as audio
                 builder.OpenElement(5, "audio");
                 builder.AddAttribute(6, "controls", true);
+                builder.AddAttribute(10, "style", "width: 100%;");
                 builder.OpenElement(7, "source");
                 builder.AddAttribute(8, "src", $"data:audio/wav;base64,{text}");
                 builder.AddAttribute(9, "type", "audio/wav");
@@ -86,9 +91,19 @@
     {
         // Implement based on known patterns for your audio format
         // Example pattern check (this is just an example and might not be accurate for your case)
-        if (base64.StartsWith("Zkxh")) return true;
+        if (base64.StartsWith("Zkxh") || base64.StartsWith("SUQz"))
+        {
+            ReloadAudio();
+            return true;
+        }
         return false;
     }
+
+    private async Task ReloadAudio()
+    {
+        await JSRuntime.InvokeVoidAsync("eval", "document.querySelector('audio').load()");
+    }
 }
+
 
 @RenderOutput()
