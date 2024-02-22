@@ -13,6 +13,9 @@ using Microsoft.AspNetCore.Authorization;
 using AiDesigner.Areas.Identity;
 using Microsoft.AspNetCore.Components.Authorization;
 using AiDesigner.Server.Data;
+using Microsoft.AspNetCore.Identity.UI.Services;
+using WebPWrecover.Services;
+using System.Configuration;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -42,6 +45,8 @@ builder.Services.AddRazorPages();
 builder.Services.AddSingleton<DBConnection>(new DBConnection(connectionString));
 builder.Services.AddSingleton<IAuthorizationMiddlewareResultHandler, AiDesigner.Server.Data.AuthorizationMiddlewareResultHandler>();
 
+builder.Services.AddTransient<IEmailSender, EmailSender>();
+builder.Services.Configure<SmtpSettings>(builder.Configuration.GetSection("SmtpSettings"));
 
 var app = builder.Build();
 
