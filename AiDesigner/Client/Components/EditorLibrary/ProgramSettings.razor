@@ -41,7 +41,7 @@
                     <label for="Suportchat" class="ml-2 text-sm text-gray-700 dark:text-white">Enabled</label>
                 </div>
                 <div class="mt-4">
-                    <label for="apiKey" class="block text-sm font-medium text-gray-700 dark:text-white">API Key</label>
+                    <label for="apiKey" class="block text-sm font-medium text-gray-700 dark:text-white">Program Key</label>
                     <input type="text" @bind="((CustomProgram)localProgram).ApiKey" id="apiKey" class="w-full p-2 border rounded dark:bg-gray-600 dark:text-gray-300 outline-none border-0" readonly />
                 </div>
                 <div class="mt-4 flex justify-center">
@@ -135,7 +135,7 @@
             switch (SelectedLanguage)
             {
                 case "curl":
-                    code = $"# cURL command for {(SelectedProgram?.Name ?? "Untitled")}\n";
+                    code = $"# Curl command for {(SelectedProgram?.Name ?? "Untitled")}\n";
                     string curlUrl = $"{baseUrl}/api/Program/execute?programKey={programKey}&apiKey={apiKey}";
 
                     if (SelectedProgram.SupportsSessions)
