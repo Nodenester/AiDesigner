@@ -5,13 +5,14 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <base href="/" />
-@*     <title>NodeNestor</title>
- *@ <meta name="description" content="NodeNestor is an online platform for building and sharing AI workflows.">
+    <title>NodeNestor</title>
+    <meta name="description" content="NodeNestor is an online platform for building and sharing AI workflows.">
+    <link rel="icon" type="image/png" href="favicon.png" />
+
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.0.0-alpha.1/dist/tailwind.min.css" rel="stylesheet">
     <script src="https://unpkg.com/jsplumb"></script>
     <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
     <link href="css/app.css" rel="stylesheet" />
-    <link rel="icon" type="image/png" href="favicon.png" />
     <link href="AiDesigner.Client.styles.css" rel="stylesheet" />
     <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/interactjs@1.10.11/dist/interact.min.js"></script>
@@ -25,7 +26,7 @@
     <link href="css/output.css" rel="stylesheet" />
     <link href="css/miniComponets.css" rel="stylesheet" />
     <script src="js/darkmode.js"></script>
-    <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)" />
+    <HeadOutlet @rendermode="new InteractiveWebAssemblyRenderMode(prerender: true)" />
 </head>
 
 <body class="body" style="font-family: Arial, Helvetica, sans-serif;">
@@ -60,12 +61,15 @@
             background: #2b2b2b;
         }
     </style>
+
     <Routes @rendermode="new InteractiveWebAssemblyRenderMode(prerender: false)"/>
-    <div id="blazor-error-ui">
+
+@*     <div id="blazor-error-ui">
         An unhandled error has occurred.
         <a href="" class="reload">Reload</a>
         <a class="dismiss">🗙</a>
-    </div>
+    </div> *@
+
     <script src="_content/Microsoft.AspNetCore.Components.WebAssembly.Authentication/AuthenticationService.js"></script>
     <script src="_framework/blazor.web.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
