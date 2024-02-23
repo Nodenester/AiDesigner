@@ -549,8 +549,11 @@
                             <textarea @bind="@variable.Description" class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" placeholder="@variable.Description"></textarea>
                         </div>
 
-                        <label class="w-100">Is Session Variable:</label>
-                        <input id="IsSession" type="checkbox" @bind="variable.IsSessionVariable" class="w-6 h-6 accent-green-600 rounded ml-1" />
+                        @if(localProgram.SupportsSessions)
+                        {
+                            <label class="w-100">Is Session Variable:</label>
+                            <input id="IsSession" type="checkbox" @bind="variable.IsSessionVariable" class="w-6 h-6 accent-green-600 rounded ml-1" />
+                        }
 
                         <label class="w-100">Variable Default Value:</label>
                         <!-- Styling the text input for dark mode using Tailwind -->
