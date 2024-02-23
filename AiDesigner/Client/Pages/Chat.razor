@@ -21,10 +21,10 @@
 <div class="flex bo" style="height: 100%;">
     <!-- Select Program box -->
     <div class="@($"flex-shrink-0 {(isSidebarActive ? "active" : "")}") flex flex-col bg-gray-100 dark:bg-gray-700 w-72">
-        @if (customPrograms != null && workshopPrograms != null)
-        {
-            <div class="p-2 overflow-y-auto" style="height: 50%;">
-                <p class="text-lg font-semibold mb-4 ml-4 dark:!text-white text-black">Your Programs</p>
+        <div class="p-2 overflow-y-auto" style="height: 50%;">
+            <p class="text-lg font-semibold mb-4 ml-4 dark:!text-white text-black">Your Programs</p>
+            @if (customPrograms != null)
+            {
                 @foreach (var program in customPrograms)
                 {
                     <div class="rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 hover:!bg-white @(selectedProgram == program ? "dark:!bg-gray-600 bg-white" : "dark:!g-gray-800")">
@@ -43,30 +43,48 @@
                         </button>
                     </div>
                 }
-            </div>
-            <div class="p-2 overflow-y-auto" style="height: 40%;">
-                <p class="text-lg font-semibold mb-4 ml-4 dark:!text-white text-black">Vaulted Programs</p>
-                @if (workshopArticles != null)
-                {
-                    @foreach (var program in workshopArticles.Where(article => article.Type == "Program"))
+            }
+            else
+            {
+                <div class="animate-pulse flex flex-col space-y-4">
+                    @for (int i = 0; i < 5; i++) // Assuming an average of 5 programs to mimic
                     {
-                        var isSelected = selectedProgram?.Id.ToString() == program.ProgramId;
-                        <div class="rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 @(isSelected ? "dark:!bg-gray-600" : "dark:!g-gray-800")">
-                            <button @ref='programButtonReferences[(Guid.Parse(program.ProgramId), "")]'
-                                    @onmouseenter='() => ShowTooltip(Guid.Parse(program.ProgramId), "")'
-                                    @onmouseleave="HideTooltip"
-                                    class="flex items-center text-white w-full h-full"
-                                    @onclick="() => SelectWorkshopArticle(program)">
-                                <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.ProgramImage)" class="program-image mx-2">
-                                <span class="ml-2 dark:!text-white text-black">
-                                    @program.Name
-                               </span>
-                            </button>
-                        </div>
+                        <div class="rounded-lg h-12 bg-gray-300 dark:bg-gray-600"></div>
                     }
+                </div>
+            }
+        </div>
+        <div class="p-2 overflow-y-auto" style="height: 40%;">
+            <p class="text-lg font-semibold mb-4 ml-4 dark:!text-white text-black">Vaulted Programs</p>
+            @if (workshopArticles != null)
+            {
+                @foreach (var program in workshopArticles.Where(article => article.Type == "Program"))
+                {
+                    var isSelected = selectedProgram?.Id.ToString() == program.ProgramId;
+                    <div class="rounded-lg mb-2 h-12 flex hover:dark:!bg-gray-600 @(isSelected ? "dark:!bg-gray-600" : "dark:!g-gray-800")">
+                        <button @ref='programButtonReferences[(Guid.Parse(program.ProgramId), "")]'
+                                @onmouseenter='() => ShowTooltip(Guid.Parse(program.ProgramId), "")'
+                                @onmouseleave="HideTooltip"
+                                class="flex items-center text-white w-full h-full"
+                                @onclick="() => SelectWorkshopArticle(program)">
+                            <img src="data:image/jpeg;base64,@Convert.ToBase64String(program.ProgramImage)" class="program-image mx-2">
+                            <span class="ml-2 dark:!text-white text-black">
+                                @program.Name
+                            </span>
+                        </button>
+                    </div>
                 }
-            </div>
-        }
+            }
+            else
+            {
+                <div class="animate-pulse flex flex-col space-y-4">
+                    @for (int i = 0; i < 4; i++) // Mimicking vaulted programs
+                    {
+                        <div class="rounded-lg h-12 bg-gray-300 dark:bg-gray-600"></div>
+                    }
+                </div>
+            }
+        </div>
         <button class="toggle-button text-white" @onclick="ToggleSidebar">☰</button>
     </div>
     <div class="w-full flex mleft">
