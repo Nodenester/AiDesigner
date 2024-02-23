@@ -37,9 +37,16 @@
                     @if (ShowTypeDropdown)
                     {
                         <div class="absolute left-0 mt-0 w-full py-1 bg-white dark:!bg-gray-700 border-0 rounded-md z-50">
-                            <button @onclick='() => SetOption("Home")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Home" ? "bg-gray-200 dark:bg-gray-500" : "")">Home</button>
-                            <button @onclick='() => SetOption("Type 1")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Type 1" ? "bg-gray-200 dark:bg-gray-500" : "")">Type 1</button>
-                            <button @onclick='() => SetOption("Type 2")' class="w-full text-left block px-4 py-2 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Type 2" ? "bg-gray-200 dark:bg-gray-500" : "")">Type 2</button>
+                            <button @onclick='() => SetOption("Home")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Home" ? "bg-gray-200 dark:bg-gray-500" : "")">Home</button>
+@*                             <button @onclick='() => SetOption("Type 1")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Type 1" ? "bg-gray-200 dark:bg-gray-500" : "")">Type 1</button>
+                            <button @onclick='() => SetOption("Type 2")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Type 2" ? "bg-gray-200 dark:bg-gray-500" : "")">Type 2</button> *@
+                            @*daaam*@
+                            <button @onclick='() => SetOption("Chatbots")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Chatbots" ? "bg-gray-200 dark:bg-gray-500" : "")">Chatbots</button>
+                            <button @onclick='() => SetOption("Image gen")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Image gen" ? "bg-gray-200 dark:bg-gray-500" : "")">Image gen</button>
+                            <button @onclick='() => SetOption("Text gen")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Text gen" ? "bg-gray-200 dark:bg-gray-500" : "")">Text gen</button>
+                            <button @onclick='() => SetOption("Content gen")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Content gen" ? "bg-gray-200 dark:bg-gray-500" : "")">Content gen</button>
+                            <button @onclick='() => SetOption("Automation")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Automation" ? "bg-gray-200 dark:bg-gray-500" : "")">Automation</button>
+                            <button @onclick='() => SetOption("Analytics")' class="w-full text-left block px-2 py-1 text-sm text-black dark:!text-white hover:bg-gray-100 dark:hover:bg-gray-600 @(SelectedOption == "Analytics" ? "bg-gray-200 dark:bg-gray-500" : "")">Analytics</button>
                         </div>
                     }
                 </div>
