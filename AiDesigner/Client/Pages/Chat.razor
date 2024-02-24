@@ -371,10 +371,9 @@
                     isExecutionFailed = false;
                     try
                     {
-                        var _httpClient = new HttpClient {};
-                        _httpClient.Timeout = TimeSpan.FromMinutes(10);
+                        Http.Timeout = TimeSpan.FromMinutes(10);
                         var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(nonNullInputValues), Encoding.UTF8, "application/json");
-                        var response = await _httpClient.PostAsync(url, requestContent);
+                        var response = await Http.PostAsync(url, requestContent);
                         var content = await response.Content.ReadAsStringAsync();
 
                         var responseContent = await response.Content.ReadAsStringAsync();
