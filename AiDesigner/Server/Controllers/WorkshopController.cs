@@ -296,7 +296,7 @@ namespace AiDesigner.Server.Controllers
                     "application/json"
                 );
 
-                var response = await client.PostAsync("https://api-inference.huggingface.co/models/openskyml/dalle-3-xl", content);
+                var response = await client.PostAsync("https://api-inference.huggingface.co/models/stabilityai/stable-diffusion-xl-base-1.0", content);
 
                 if (!response.IsSuccessStatusCode)
                 {

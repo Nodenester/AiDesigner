@@ -89,7 +89,7 @@
                 @if (SelectedArticle.ProgramImage != null && !generating)
                 {
                     <button @onclick="GenerateImage" class="bg-blue-600 hover:bg-blue-700 text-white font-bold ml-4 py-2 px-4 rounded mt-4 transition duration-200 ease-in-out">
-                        Remake image(160t)
+                        Remake image(40t)
                     </button>
                 }
                 else if (generating)
@@ -257,7 +257,7 @@
                 {
                     var url = $"Chat/Wallet/DeductTokens";
 
-                    var requestBody = new { userId, tokensToDeduct = 160 };
+                    var requestBody = new { userId, tokensToDeduct = 40 };
                     var content = JsonContent.Create(requestBody);
 
                     var response = await Http.PostAsync(url, content);
