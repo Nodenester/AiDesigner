@@ -115,15 +115,15 @@ else
     {
         case NodeBaseApi.Version2.Type.String:
             <div class="mb-2">
-                <p class="font-semibold">Type: Text</p>
-                <textarea @onchange="eventArgs => HandleInput(eventArgs)" value="@Value" placeholder="@Placeholdervalue"
+@*                 <p class="font-semibold">Type: Text</p>
+ *@                <textarea @onchange="eventArgs => HandleInput(eventArgs)" value="@Value" placeholder="@Placeholdervalue"
                 class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0" />
             </div>
             break;
         case NodeBaseApi.Version2.Type.Picture:
             <div class="mb-2">
-                <p class="font-semibold">Type: Picture</p>
-                <div>
+@*                 <p class="font-semibold">Type: Picture</p>
+ *@                <div>
                     <div class="flex items-center justify-center w-full">
                         <label for="dropzone-file" class="flex flex-col items-center justify-center w-full h-30 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-bray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:bg-gray-600">
                             <div class="flex flex-col items-center justify-center pt-2 pb-2">
@@ -141,15 +141,15 @@ else
             break;
         case NodeBaseApi.Version2.Type.Number:
             <div class="mb-2">
-                <p class="font-semibold">Type: Number</p>
-                <input type="number" @oninput="eventArgs => HandleInput(eventArgs)" value="@Value" placeholder="@Placeholdervalue"
+@*                 <p class="font-semibold">Type: Number</p>
+ *@                <input type="number" @oninput="eventArgs => HandleInput(eventArgs)" value="@Value" placeholder="@Placeholdervalue"
                 class="w-full p-2 border rounded dark:bg-gray-600 dark:text-white outline-none border-0"/>
             </div>
             break;
         case NodeBaseApi.Version2.Type.Boolean:
             <div class="mb-2">
-                <p class="font-semibold w-full">Type: Boolean</p>
-                <div class="mt-2 w-full flex justify-center">
+@*                 <p class="font-semibold w-full">Type: Boolean</p>
+ *@                <div class="mt-2 w-full flex justify-center">
                     <div class="w-72 cursor-pointer flex items-center justify-center">
                         <label for="@Id" class="flex items-center justify-center h-12 w-full">
                             <input type="checkbox" id="@Id" @onchange="eventArgs => HandleInput(eventArgs)" checked="@(Value ?? false)"
@@ -161,8 +161,8 @@ else
             break;
         case NodeBaseApi.Version2.Type.Audio:
             <div class="mb-2">
-                <p class="font-semibold">Type: Audio</p>
-                <div>
+@*                 <p class="font-semibold">Type: Audio</p>
+ *@                <div>
                     <div class="flex items-center justify-center w-full">
                         <label for="audio-dropzone-file" class="flex flex-col items-center justify-center w-full h-30 border-2 border-gray-300 border-dashed rounded-lg cursor-pointer bg-gray-50 dark:hover:bg-gray-800 dark:bg-gray-700 hover:bg-gray-100 dark:border-gray-600 dark:hover:border-gray-500 dark:hover:!bg-gray-600">
                             <div class="flex flex-col items-center justify-center pt-2 pb-2">
