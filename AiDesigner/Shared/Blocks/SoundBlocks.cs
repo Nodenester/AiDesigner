@@ -104,12 +104,33 @@ namespace NodeExacuteApi.Data.Blocks
             Description = "Amplifies the audio by a specified factor.";
             Inputs = new List<Input>
         {
-            new Input { Id = Guid.NewGuid(), Name = "Audio", Description = "The audio file.", Type = Type.Audio, IsRequired = true },
-            new Input { Id = Guid.NewGuid(), Name = "Amplification Factor", Description = "The amplification factor.", Type = Type.Number, IsRequired = true }
+            new Input { Id = Guid.NewGuid(), Name = "Audio", Description = "The audio file.", Type = Type.Audio },
+            new Input { Id = Guid.NewGuid(), Name = "Amplification Factor", Description = "The amplification factor.", Type = Type.Number }
         };
             Outputs = new List<Output>
         {
             new Output { Id = Guid.NewGuid(), Name = "Output Audio", Description = "The amplified audio file.", Type = Type.Audio }
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+    public class AudioOverlay : Block
+    {
+        public AudioOverlay()
+        {
+            Id = Guid.NewGuid();
+            Name = "Audio Overlay";
+            Description = "Overlays two audio files over each other.";
+            Inputs = new List<Input>
+        {
+            new Input { Id = Guid.NewGuid(), Name = "Audio 1", Description = "The audio file.", Type = Type.Audio },
+            new Input { Id = Guid.NewGuid(), Name = "Audio 2", Description = "The audio file 2.", Type = Type.Audio },
+        };
+            Outputs = new List<Output>
+        {
+            new Output { Id = Guid.NewGuid(), Name = "Output Audio", Description = "The combined audio file.", Type = Type.Audio }
         };
         }
 
