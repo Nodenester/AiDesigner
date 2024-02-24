@@ -371,13 +371,12 @@
                     isExecutionFailed = false;
                     try
                     {
-                        Http.Timeout = TimeSpan.FromMinutes(10);
                         var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(nonNullInputValues), Encoding.UTF8, "application/json");
                         var response = await Http.PostAsync(url, requestContent);
                         var content = await response.Content.ReadAsStringAsync();
 
                         var responseContent = await response.Content.ReadAsStringAsync();
-                        Console.WriteLine(responseContent);
+                        //Console.WriteLine(responseContent);
                         var outputValues = JsonConvert.DeserializeObject<List<object>>(responseContent);
 
                         if (response.IsSuccessStatusCode)

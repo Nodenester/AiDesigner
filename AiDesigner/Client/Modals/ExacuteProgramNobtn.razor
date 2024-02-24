@@ -249,7 +249,6 @@
                 StateHasChanged();
                 try
                 {
-                    Http.Timeout = TimeSpan.FromMinutes(10);
                     var requestContent = new StringContent(System.Text.Json.JsonSerializer.Serialize(nonNullInputValues), Encoding.UTF8, "application/json");
                     var response = await Http.PostAsync(url, requestContent);
                     var responseContent = await response.Content.ReadAsStringAsync();
