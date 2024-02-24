@@ -102,6 +102,31 @@ namespace AiDesigner.Shared.Blocks
         public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
     }
 
+    //OrTrigger
+    public class OrTrigger : Block
+    {
+        public OrTrigger()
+        {
+            Id = Guid.NewGuid();
+            Name = "Or Trigger";
+            Description = "A or block but for triggers.";
+
+            Inputs = new List<Input>
+        {
+            new Input { Name = "Trigger 1", Type = Type.Trigger, Description = "Trigger input 1" },
+            new Input { Name = "Trigger 2", Type = Type.Trigger, Description = "Trigger input 3" },
+        };
+
+            Outputs = new List<Output>
+        {
+            new Output { Name = "True", Type = Type.Trigger, Description = "The output trigger" },
+        };
+        }
+
+        public override List<object> Execute(List<object> inputs, ProgramStructure programStructure) { return null; }
+    }
+
+
     //Variable handeling
     public class SetVariable : Block
     {

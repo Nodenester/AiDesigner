@@ -427,6 +427,12 @@
                                                     Add input
                                                 </button>
                                             }
+                                            @if (node.Block.Name == "Or Trigger")
+                                            {
+                                                <button @onclick='() => AddSelectInput(node, "Trigger")' class="px-1 text-sm small-font text-white bg-gray-600 hover:bg-gray-700 rounded-md d-flex" type="button">
+                                                    Add input
+                                                </button>
+                                            }
                                             
                                         </div>
                                         <div class="right-part">
