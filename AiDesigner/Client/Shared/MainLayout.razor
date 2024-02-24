@@ -457,7 +457,7 @@
         //     AuthState = AuthenticationStateProvider.GetAuthenticationStateAsync().Result;
         // }
 
-        Http.Timeout = TimeSpan.FromMinutes(10);
+        //Http.Timeout = TimeSpan.FromMinutes(10);
         //NavigationManagers.LocationChanged += HandleLocationChanged;
         AuthenticationStateProvider.AuthenticationStateChanged += OnAuthenticationStateChanged;
         UpdatePrograms().ContinueWith(t =>
