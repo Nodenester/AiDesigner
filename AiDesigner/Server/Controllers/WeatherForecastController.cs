@@ -1,3 +1,4 @@
+using AiDesigner.Server.Data;
 using AiDesigner.Shared;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -5,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace AiDesigner.Server.Controllers
 {
     [Authorize]
+    [CustomAuthorize]
     [ApiController]
     [Route("[controller]")]
     public class WeatherForecastController : ControllerBase

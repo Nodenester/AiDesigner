@@ -7,10 +7,12 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AiDesigner.Server.Data;
 
 namespace AiDesigner.Server.Controllers
 {
     [Authorize]
+    [CustomAuthorize]
     [ApiController]
     [Route("[controller]")]
     public class ExecuteController : ControllerBase
@@ -20,7 +22,7 @@ namespace AiDesigner.Server.Controllers
         public ExecuteController()
         {
             _httpClient = new HttpClient { BaseAddress = new Uri("https://api.nodenestor.com/") };
-            //_httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:44313/") };
+            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:44313/") };
             _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 

@@ -17,6 +17,7 @@ using OtpNet;
 namespace AiDesigner.Server.Controllers
 {
     [Authorize]
+    [CustomAuthorize]
     [ApiController]
     [Route("[controller]")]
     public class WorkshopController : ControllerBase

@@ -17,6 +17,7 @@ using NodeBaseApi.Version2;
 namespace NodeBaseApi.Controllers
 {
     [Authorize]
+    [CustomAuthorize]
     [ApiController]
     [Route("[controller]")]
     public class ChatController : ControllerBase
@@ -225,6 +226,7 @@ namespace NodeBaseApi.Controllers
         [HttpGet("ApiKey/GetByUserId/{userId}")]
         public async Task<ActionResult<IEnumerable<ApiKey>>> GetByUserId(Guid userId)
         {
+            var hej = User.Identity.Name;
             try
             {
                 var apiKeys = await _dbConnection.GetApiKeysByUserIdAsync(userId);

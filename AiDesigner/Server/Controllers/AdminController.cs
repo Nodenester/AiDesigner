@@ -16,6 +16,7 @@ using NodeBaseApi.Version2;
 namespace AiDesigner.Server.Controllers
 {
     [Authorize(Roles = "Administrator")]
+    [CustomAuthorize(Role = "Administrator")]
     [ApiController]
     [Route("[controller]")]
     public class AdminController : ControllerBase

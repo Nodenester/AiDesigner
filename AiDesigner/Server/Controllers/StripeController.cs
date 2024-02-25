@@ -12,6 +12,7 @@ using NodeBaseApi.Version2;
 namespace NodeBaseApi.StripeController
 {
     [Authorize]
+    [CustomAuthorize]
     [ApiController]
     [Route("[controller]")]
     public class StripeController : ControllerBase

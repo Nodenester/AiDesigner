@@ -14,6 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient
 });
 
 builder.Services.AddAuthorizationCore();
+builder.Services.AddApiAuthorization();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, PersistentAuthenticationStateProvider>();
 
