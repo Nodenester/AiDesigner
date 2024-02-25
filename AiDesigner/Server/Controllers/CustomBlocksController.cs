@@ -15,6 +15,7 @@ using NodeBaseApi.Version2;
 namespace NodeBaseApi.Controllers
 {
     [Authorize]
+    [CustomAuthorize]
     [ApiController]
     [Route("[controller]")]
     public class CustomBlocksController : ControllerBase

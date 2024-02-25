@@ -15,6 +15,7 @@ using NodeBaseApi.Version2;
 
 namespace AiDesigner.Server.Controllers
 {
+    [CustomAuthorize]
     [Route("Tutorial")]
     [ApiController]
     public class TutorialController : ControllerBase

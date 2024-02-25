@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AiDesigner.Server.Data;
+using Microsoft.AspNetCore.Mvc;
 using System;
 using System.IO;
 using System.Linq;
@@ -6,6 +7,7 @@ using System.Security.Cryptography;
 
 namespace AiDesigner.Server.Controllers
 {
+    [CustomAuthorize]
     [ApiController]
     [Route("api/[controller]")]
     public class ImagesController : ControllerBase
