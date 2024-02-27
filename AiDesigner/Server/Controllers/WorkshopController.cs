@@ -348,12 +348,17 @@ namespace AiDesigner.Server.Controllers
 
                 // Program Outputs
                 promptBuilder.AppendLine("Program Outputs:");
-                foreach (var output in program.ProgramStructure.ProgramEnd) // Assuming ProgramEnd contains outputs
+                int index = 0; 
+                foreach (var output in program.ProgramStructure.ProgramEnd) 
                 {
-                    promptBuilder.AppendLine($"- {output.Name}: {output.Description}");
+                    // Skip the second item only if program does not support chats
+                    if (!(index == 1 && !program.SupportsChat))
+                    {
+                        promptBuilder.AppendLine($"- {output.Name}: {output.Description}");
+                    }
+                    index++; 
                 }
 
-                // Adding a tag to indicate where the generated description should start
                 promptBuilder.AppendLine();
                 promptBuilder.AppendLine("<!-- Generated Description Start -->");
 
