@@ -422,7 +422,7 @@ namespace AiDesigner.Server.Controllers
         [HttpGet("author")]
         public async Task<IActionResult> Get4ArticlesByAuthor()
         {
-            var articles = await _dbConnection.Get5ArticlesByAuthorAsync("14fa5960-cfeb-4cb5-8718-0df2fe41b071");
+            var articles = await _dbConnection.Get5ArticlesByAuthorAsync("7cc3fb45-553b-414e-9413-b7a289f4d968");
             return Ok(articles);
         }
     }

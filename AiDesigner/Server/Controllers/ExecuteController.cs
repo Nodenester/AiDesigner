@@ -22,7 +22,7 @@ namespace AiDesigner.Server.Controllers
         public ExecuteController()
         {
             _httpClient = new HttpClient { BaseAddress = new Uri("https://api.nodenestor.com/") };
-            _httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:44313/") };
+            //_httpClient = new HttpClient { BaseAddress = new Uri("https://localhost:44313/") };
             _httpClient.Timeout = TimeSpan.FromMinutes(10);
         }
 
