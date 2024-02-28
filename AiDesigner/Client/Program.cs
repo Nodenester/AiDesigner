@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Components.WebAssembly.Authentication;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using Radzen;
 using AiDesigner.Client.Services;
-using AiDesigner.Client.Services.AiDesigner.Client.Services;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 
