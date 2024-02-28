@@ -950,6 +950,7 @@ namespace AiDesigner.Server.Data
         }
 
         //Token handeling
+        //Token handling
         public async Task<Wallet> EnsureWalletAndRetrieveTokensAsync(Guid userId)
         {
             using (var connection = new SqlConnection(_connectionString))
@@ -957,6 +958,7 @@ namespace AiDesigner.Server.Data
                 var query = @"
                     DECLARE @Today DATE = CAST(GETDATE() AS DATE);
                     DECLARE @TokensToAdd INT = 500;
+                    DECLARE @BoughtTokens INT = 2000;
 
                     SELECT @TokensToAdd = CASE SubscriptionTier
                         WHEN 0 THEN 500
@@ -969,7 +971,7 @@ namespace AiDesigner.Server.Data
                     BEGIN
                         INSERT INTO Ludde.TokenWallet (Id, UserId, Tokens, LastRefill, BoughtTokens, SubscriptionTier)
                         OUTPUT inserted.Tokens, inserted.BoughtTokens
-                        VALUES (NEWID(), @UserId, @TokensToAdd, @Today, 0, 0);
+                        VALUES (NEWID(), @UserId, @TokensToAdd, @Today, @BoughtTokens, 0); -- Use @BoughtTokens here
                     END
                     ELSE
                     BEGIN
@@ -986,6 +988,7 @@ namespace AiDesigner.Server.Data
                 return walletData ?? new Wallet();
             }
         }
+
 
         public async Task<bool> AddBoughtTokensAsync(Guid userId, int tokensToAdd)
         {
