@@ -190,6 +190,12 @@ namespace AiDesigner.Server.Controllers
             }
         }
 
+        [HttpGet("Ping")]
+        public IActionResult Get()
+        {
+            return Ok("Pong");
+        }
+
     }
 
 }

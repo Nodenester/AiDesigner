@@ -162,7 +162,7 @@ namespace NodeBaseApi.Controllers
         {
             try
             {
-                IEnumerable<ProgramObject> userPrograms = await _dbConnection.GetAllUserProgramsAsync(userId);
+                IEnumerable<ProgramObject> userPrograms = await _dbConnection.GetAllUserProgramsAsync(userId, User.Identity.Name);
 
                 var settings = new JsonSerializerSettings
                 {

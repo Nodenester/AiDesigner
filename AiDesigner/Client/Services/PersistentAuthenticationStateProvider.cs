@@ -1,8 +1,9 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components;
 using System.Security.Claims;
+using AiDesigner.Client.Services.Data;
 
-namespace AiDesigner.Client
+namespace AiDesigner.Client.Services
 {
     // This is a client-side AuthenticationStateProvider that determines the user's authentication state by
     // looking for data persisted in the page when it was rendered on the server. This authentication state will
@@ -44,7 +45,7 @@ namespace AiDesigner.Client
 
         public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            if (_navigationManager != null && (_navigationManager.Uri.Contains("/Identity")))
+            if (_navigationManager != null && _navigationManager.Uri.Contains("/Identity"))
             {
                 return defaultUnauthenticatedTask;
             }

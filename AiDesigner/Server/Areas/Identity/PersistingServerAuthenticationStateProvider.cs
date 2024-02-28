@@ -1,4 +1,4 @@
-using AiDesigner.Client;
+using AiDesigner.Client.Services.Data;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.AspNetCore.Components.Server;

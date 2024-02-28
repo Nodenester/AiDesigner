@@ -141,7 +141,7 @@ namespace AiDesigner.Server.Data
             }
         }
 
-        public async Task<IEnumerable<ProgramObject>> GetAllUserProgramsAsync(Guid userId)
+        public async Task<IEnumerable<ProgramObject>> GetAllUserProgramsAsync(Guid userId, string Name)
         {
             using (var connection = new SqlConnection(_connectionString))
             {
@@ -169,7 +169,13 @@ namespace AiDesigner.Server.Data
                     var starterPrograms = await GetStarterProgramsAsync();
                     foreach (var starterProgram in starterPrograms)
                     {
-                        var newProgramId = await SaveProgramAsync(starterProgram); 
+                        // Generate a new ID for the copied program
+                        starterProgram.Id = Guid.NewGuid();
+
+                        starterProgram.Author = userId.ToString();
+                        starterProgram.AuthorName = Name;
+
+                        var newProgramId = await SaveProgramAsync(starterProgram);
                         await ConnectUserToProgramAsync(userId, newProgramId);
                     }
 
