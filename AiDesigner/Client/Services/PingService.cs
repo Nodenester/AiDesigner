@@ -30,7 +30,7 @@
             try
             {
                 // Assuming "/api/ping" is the endpoint in your controller
-                var response = await _http.GetAsync("api/ping");
+                var response = await _http.GetAsync("Tutorial/Ping");
                 if (response.IsSuccessStatusCode)
                 {
                     Console.WriteLine("Server pinged successfully.");
