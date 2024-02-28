@@ -20,7 +20,7 @@
             }
 
             // Set the timer to ping every 10 minutes
-            _timer = new Timer(async _ => await PingServer(), null, TimeSpan.Zero, TimeSpan.FromMinutes(10));
+            _timer = new Timer(async _ => await PingServer(), null, TimeSpan.Zero, TimeSpan.FromMinutes(5));
             _isStarted = true; // Set the flag to true after starting
             Console.WriteLine("PingService started successfully.");
         }
