@@ -20,7 +20,7 @@
                     <img src="data:image/jpeg;base64,@Convert.ToBase64String(tutorial.Image)" alt="@tutorial.Name" class="w-full h-48 object-cover mb-4 rounded" />
                 }
 
-                <p class="text-gray-600 mb-4 dark:text-gray-400">@tutorial.Text</p>
+                <p class="text-gray-600 mb-4 dark:!text-white text-black">@tutorial.Text</p>
 
                 @if(tutorial.IsCompleted)
                 {
