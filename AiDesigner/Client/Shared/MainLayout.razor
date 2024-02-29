@@ -170,10 +170,6 @@
             <article class="flex-1 overflow-y-auto p-4 bg-white-100 dark:bg-gray-600 text-gray-800 dark:text-white">
                 <AuthorizeView>
                     <Authorized>
-                    @{
-                    var user = AuthState?.User;
-                        if (user.IsInRole("Administrator") || user.IsInRole("BetaTester"))
-                        {
                         <CascadingValue Value="@EAPs" Name="EAPs">
                             <CascadingValue Value="@APs" Name="APs">
                                 <CascadingValue Value="@AP" Name="AP">
@@ -205,17 +201,10 @@
                                 </CascadingValue>
                             </CascadingValue>
                         </CascadingValue>
-                        }
-                        else
-                        {
-                            <AiDesigner.Client.Modals.BetaModal />
-                            @Body
-                        }
-                    }
                     </Authorized>
                     <NotAuthorized>
-                        <AiDesigner.Client.Modals.BetaModal />
-                        @Body
+@*                         <AiDesigner.Client.Modals.BetaModal />
+ *@                        @Body
                     </NotAuthorized>
                 </AuthorizeView>
                 @if (Title != "home" && Title != "library" && Title != "editor" && Title != "documentation" && Title != "admin-page" && Title != "statistics" && Title != "chat")
