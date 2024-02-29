@@ -46,13 +46,13 @@
                         <button @onclick="ToggleMenu" class="p-4 flex items-center text-gray-800 dark:text-white">
                             NodeNestor
                         </button>
-                        <div class="@menuClass absolute left-0 w-full rounded-md shadow-lg" style="top: 100%; z-index:1002;">
+                        <div class="@{(isMenuVisible ? "block" : "hidden")} absolute left-0 w-full rounded-md shadow-lg" style="top: 100%; z-index:1002;">
                             <div class="py-1 bg-white dark:!bg-gray-800 ring-1 ring-black ring-opacity-5">
-                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="">Home</NavLink>
-                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="chat">Chat</NavLink>
-                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="pricing">Pricing</NavLink>
-                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="documentation/introduction/overview">Docs</NavLink>
-                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="aboutus">About</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="" @onclick="HideMenu">Home</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="chat" @onclick="HideMenu">Chat</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="pricing" @onclick="HideMenu">Pricing</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="documentation/introduction/overview" @onclick="HideMenu">Docs</NavLink>
+                                <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="aboutus" @onclick="HideMenu">About</NavLink>
                             </div>
                         </div>
                     </div>
@@ -370,6 +370,10 @@
     private void ToggleMenu()
     {
         isMenuVisible = !isMenuVisible;
+    }
+    private void HideMenu()
+    {
+        isMenuVisible = false;
     }
 
     public void SetAnalytic(ChacheAnalytics Analytics)
