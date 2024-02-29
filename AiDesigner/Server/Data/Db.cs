@@ -174,6 +174,10 @@ namespace AiDesigner.Server.Data
 
                         starterProgram.Author = userId.ToString();
                         starterProgram.AuthorName = Name;
+                        if(starterProgram is CustomProgram customProgram)
+                        {
+                            customProgram.ApiKey = Guid.NewGuid();
+                        }
 
                         var newProgramId = await SaveProgramAsync(starterProgram);
                         await ConnectUserToProgramAsync(userId, newProgramId);
