@@ -255,7 +255,7 @@
                             </div>
                             @foreach (var node in localProgram.ProgramStructure.ProgramBlocks)
                             {
-                                <div id="@node.Id" class="node" style="left: @(node.X.ToString() + "px"); top: @(node.Y.ToString() + "px");" @onclick="(() => SelectNode(node))">
+                                <div id="@node.Id" class="node" style="left: @(node.X.ToString().Replace("−", "-") + "px"); top: @(node.Y.ToString().Replace("−", "-") + "px");" @onclick="(() => SelectNode(node))">
                                     <div class="top-part dark:bg-gray-600">
                                         <div style="display: inline-block; margin-left: 10px;" class="w-full">
                                             <span>@node.Block.Name</span>
@@ -587,12 +587,13 @@
     .button-hover:hover .close-button {
         display: block;
     }
+
     .whiteboard {
         position: relative;
         width: 100%;
         height: 100%;
         background-image: linear-gradient(90deg, rgba(0,0,0,0.1) 2px, transparent 2px), linear-gradient(rgba(0,0,0,0.1) 2px, transparent 2px), linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px), linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
-        background-size: calc(100px * @zoomvalue) calc(100px * @zoomvalue), calc(100px * @zoomvalue) calc(100px * @zoomvalue), calc(25px * @zoomvalue) calc(25px * @zoomvalue), calc(25px * @zoomvalue) calc(25px * @zoomvalue);
+        background-size: @GenerateBackgroundSizeStyle();
         overflow: hidden;
         cursor: move;
     }
@@ -913,6 +914,43 @@
     }
 
     //System Logic
+    string GenerateWhiteboardStyle()
+    {
+        // Convert to integer values, eliminating decimals
+        var bigSquareSize = (int)Math.Round(100 * zoomvalue);
+        var smallSquareSize = (int)Math.Round(25 * zoomvalue);
+
+        // Generate CSS string with integer pixel values
+        string style = $@"
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-image:
+                linear-gradient(90deg, rgba(0,0,0,0.1) 2px, transparent 2px),
+                linear-gradient(rgba(0,0,0,0.1) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px),
+                linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
+            background-size:
+            {bigSquareSize}px {bigSquareSize}px,
+            {bigSquareSize}px {bigSquareSize}px,
+            {smallSquareSize}px {smallSquareSize}px,
+            {smallSquareSize}px {smallSquareSize}px;
+            overflow: hidden;
+            cursor: move;";
+
+        return style;
+    }
+
+    public string GenerateBackgroundSizeStyle()
+    {
+        var bigSquareSize = (int)Math.Round(100 * zoomvalue);
+        var smallSquareSize = (int)Math.Round(25 * zoomvalue);
+
+        return $"{bigSquareSize}px {bigSquareSize}px, " +
+               $"{bigSquareSize}px {bigSquareSize}px, " +
+               $"{smallSquareSize}px {smallSquareSize}px, " +
+               $"{smallSquareSize}px {smallSquareSize}px";
+    }
 
     private TaskCompletionSource<bool> screenshotCompletionSource;
     public async Task Take()

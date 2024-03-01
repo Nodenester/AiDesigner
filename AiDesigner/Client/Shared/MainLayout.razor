@@ -46,7 +46,7 @@
                         <button @onclick="ToggleMenu" class="p-4 flex items-center text-gray-800 dark:text-white">
                             NodeNestor
                         </button>
-                        <div class="@{(isMenuVisible ? "block" : "hidden")} absolute left-0 w-full rounded-md shadow-lg" style="top: 100%; z-index:1002;">
+                        <div class="@(isMenuVisible ? "block" : "hidden") absolute left-0 w-full rounded-md shadow-lg" style="top: 100%; z-index:1002;">
                             <div class="py-1 bg-white dark:!bg-gray-800 ring-1 ring-black ring-opacity-5">
                                 <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="" @onclick="HideMenu">Home</NavLink>
                                 <NavLink class="block px-4 py-2 text-sm text-gray-700 dark:text-gray-300" href="chat" @onclick="HideMenu">Chat</NavLink>
