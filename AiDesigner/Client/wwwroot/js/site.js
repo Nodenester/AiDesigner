@@ -565,6 +565,53 @@ window.jsPlumbInterop = {
             console.error('Node does not exist with id:' + nodeId);
         }
     },
+
+    createTemporaryLine: function (sourceId, color) {
+        var source = document.querySelector('[id="' + sourceId + '"].Connection');
+        if (!source) {
+            console.error('Source does not exist with id:', sourceId);
+            return;
+        }
+
+        // Create a visual line (if it doesn't already exist)
+        var visualLine = document.getElementById('visual-line');
+        if (!visualLine) {
+            visualLine = document.createElement('div');
+            visualLine.id = 'visual-line';
+            visualLine.style.position = 'absolute';
+            visualLine.style.height = '2px'; // Line thickness
+            visualLine.style.background = color;
+            document.body.appendChild(visualLine);
+        }
+
+        // Function to update line position
+        var updateLinePosition = function (e) {
+            var sourceRect = source.getBoundingClientRect();
+            var startX = sourceRect.left + (sourceRect.width / 2);
+            var startY = sourceRect.top + (sourceRect.height / 2);
+            var endX = e.clientX;
+            var endY = e.clientY;
+            var length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            var angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+
+            visualLine.style.width = length + 'px';
+            visualLine.style.left = startX + 'px';
+            visualLine.style.top = startY + 'px';
+            visualLine.style.transform = 'rotate(' + angle + 'deg)';
+            visualLine.style.transformOrigin = '0 0';
+        };
+
+        // Attach event listener to update line position with mouse movement
+        document.addEventListener('mousemove', updateLinePosition);
+
+        // Cleanup function
+        window.removeTemporaryLine = function () {
+            document.removeEventListener('mousemove', updateLinePosition);
+            if (visualLine) {
+                visualLine.remove();
+            }
+        };
+    },
 };
 
 // Variable to store the current hovered connection

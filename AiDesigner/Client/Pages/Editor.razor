@@ -931,10 +931,10 @@
                 linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px),
                 linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
             background-size:
-            {bigSquareSize}px {bigSquareSize}px,
-            {bigSquareSize}px {bigSquareSize}px,
-            {smallSquareSize}px {smallSquareSize}px,
-            {smallSquareSize}px {smallSquareSize}px;
+        {bigSquareSize}px {bigSquareSize}px,
+        {bigSquareSize}px {bigSquareSize}px,
+        {smallSquareSize}px {smallSquareSize}px,
+        {smallSquareSize}px {smallSquareSize}px;
             overflow: hidden;
             cursor: move;";
 
@@ -970,10 +970,13 @@
 
 
     [JSInvokable]
-    public async void DeselectBlock()
+    public async Task DeselectBlock() // Consider using Task instead of void for async methods
     {
         SelectedBlock = null;
+        SelectedOutput = null;
+        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.removeTemporaryLine");
     }
+
 
     [JSInvokable]
     public async void OnRemoveConnection(string connectionId)
@@ -1123,23 +1126,35 @@
     public async void SelectOutput(Output output)
     {
         SelectedOutput = output;
-        //Console.WriteLine("Selected ouput is: " + output.Id);
+        var lineColor = GetLineColor(output.Type.ToString());
+        //await JSRuntime.InvokeVoidAsync("jsPlumbInterop.removeTemporaryLine");
+        await JSRuntime.InvokeVoidAsync("jsPlumbInterop.createTemporaryLine", output.Id, lineColor);
+
+        //Console.WriteLine("Selected output is: " + output.Id);
     }
+
 
     public async void TryConnect(Input input)
     {
         if (SelectedOutput != null)
         {
-            //Console.WriteLine("input id: " + input.Id);
+            // Attempt to connect
             if (localProgram.ProgramStructure.TryConnectProgramBlock(SelectedOutput.Id, input.Id))
             {
+                // If connection is successful, invoke jsPlumbInterop.connectInputs
                 await JSRuntime.InvokeVoidAsync("jsPlumbInterop.connectInputs", SelectedOutput.Id, input.Id, GetLineColor(input.Type.ToString()));
+                Console.WriteLine("Connection Succeeded");
+
+                // Now, remove the temporary line regardless of connection success
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.removeTemporaryLine");
                 SelectedOutput = null;
-                Console.WriteLine("Connection Succeded");
             }
             else
             {
-                Console.WriteLine("connection failed");
+                Console.WriteLine("Connection failed");
+
+                // If connection fails, still remove the temporary line
+                await JSRuntime.InvokeVoidAsync("jsPlumbInterop.removeTemporaryLine");
             }
         }
     }
