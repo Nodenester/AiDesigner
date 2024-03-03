@@ -567,6 +567,7 @@ window.jsPlumbInterop = {
     },
 
     createTemporaryLine: function (sourceId, color) {
+        var zoom = currentZoom;
         var source = document.querySelector('[id="' + sourceId + '"].Connection');
         if (!source) {
             console.error('Source does not exist with id:', sourceId);
@@ -579,7 +580,7 @@ window.jsPlumbInterop = {
             visualLine = document.createElement('div');
             visualLine.id = 'visual-line';
             visualLine.style.position = 'absolute';
-            visualLine.style.height = '2px'; // Line thickness
+            visualLine.style.height = (5 * zoom) + 'px'; 
             visualLine.style.background = color;
             document.body.appendChild(visualLine);
         }
@@ -591,14 +592,16 @@ window.jsPlumbInterop = {
             var startY = sourceRect.top + (sourceRect.height / 2);
             var endX = e.clientX;
             var endY = e.clientY;
-            var length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2));
+            var length = Math.sqrt(Math.pow(endX - startX, 2) + Math.pow(endY - startY, 2)) - 5;
             var angle = Math.atan2(endY - startY, endX - startX) * (180 / Math.PI);
+
+            var verticalOffset = 3 * zoom; // Amount to move the line up by, adjust as needed
 
             visualLine.style.width = length + 'px';
             visualLine.style.left = startX + 'px';
-            visualLine.style.top = startY + 'px';
+            visualLine.style.top = (startY - verticalOffset) + 'px'; // Move the line up by subtracting verticalOffset
             visualLine.style.transform = 'rotate(' + angle + 'deg)';
-            visualLine.style.transformOrigin = '0 0';
+            visualLine.style.transformOrigin = '0 50%';
         };
 
         // Attach event listener to update line position with mouse movement
@@ -606,11 +609,18 @@ window.jsPlumbInterop = {
 
         // Cleanup function
         window.removeTemporaryLine = function () {
-            document.removeEventListener('mousemove', updateLinePosition);
-            if (visualLine) {
-                visualLine.remove();
+            try {
+                document.removeEventListener('mousemove', updateLinePosition);
+                var visualLine = document.getElementById('visual-line');
+                if (visualLine) {
+                    visualLine.remove();
+                }
+            } catch (error) {
+                console.error("Failed to remove temporary line:", error);
+                // Handle any cleanup or recovery actions here
             }
         };
+
     },
 };
 
@@ -961,7 +971,6 @@ function getCsrfToken() {
     return csrfCookie ? csrfCookie.split('=')[1] : null;
 }
 
-
 function submitLogoutForm(logoutUrl, csrfToken) {
     const form = document.createElement('form');
     form.action = logoutUrl;
@@ -976,6 +985,7 @@ function submitLogoutForm(logoutUrl, csrfToken) {
     document.body.appendChild(form);
     form.submit();
 }
+
 function scrollToBottomIfNeeded(elementId) {
     var element = document.getElementById(elementId);
     // Check if the user is near the bottom
