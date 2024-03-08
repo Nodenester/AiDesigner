@@ -41,42 +41,76 @@ namespace NodeBaseApi.Controllers
                 ObjectCreationHandling = ObjectCreationHandling.Replace
             };
 
-            // Deserialize the JsonElement body into a CustomProgram object
-            CustomProgram? program = new CustomProgram();
-            try
+            if(body.GetRawText().Contains("ApiKey"))
             {
-                program = JsonConvert.DeserializeObject<CustomProgram>(body.GetRawText(), settings);
-            }
-            catch(Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+                try
+                {
+                    var program = JsonConvert.DeserializeObject<CustomProgram>(body.GetRawText(), settings);
+                    if (program == null)
+                    {
+                        return BadRequest();
+                    }
 
-            if (program == null)
-            {
-                return BadRequest();
-            }
+                    // Allow null ProgramStructure
+                    if (program.ProgramStructure == null)
+                    {
+                        program.ProgramStructure = new ProgramStructure();
+                    }
 
-            // Allow null ProgramStructure
-            if (program.ProgramStructure == null)
-            {
-                program.ProgramStructure = new ProgramStructure();
+                    try
+                    {
+                        var programId = await _dbConnection.SaveProgramAsync(program);
+                        return programId;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the exception
+                        Console.WriteLine(ex);
+                        // Return a 500 status code
+                        return StatusCode(500, "Internal server error");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
+            else
+            {
+                try
+                {
+                    var program = JsonConvert.DeserializeObject<CustomBlockProgram>(body.GetRawText(), settings);
+                    if (program == null)
+                    {
+                        return BadRequest();
+                    }
 
-            try
-            {
-                var programId = await _dbConnection.SaveProgramAsync(program);
-                return programId;
+                    // Allow null ProgramStructure
+                    if (program.ProgramStructure == null)
+                    {
+                        program.ProgramStructure = new ProgramStructure();
+                    }
+
+                    try
+                    {
+                        var programId = await _dbConnection.SaveProgramAsync(program);
+                        return programId;
+                    }
+                    catch (Exception ex)
+                    {
+                        // Log the exception
+                        Console.WriteLine(ex);
+                        // Return a 500 status code
+                        return StatusCode(500, "Internal server error");
+                    }
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine(e.Message);
+                }
             }
-            catch (Exception ex)
-            {
-                // Log the exception
-                Console.WriteLine(ex);
-                // Return a 500 status code
-                return StatusCode(500, "Internal server error");
-            }
+            return BadRequest();
         }
-
 
         // PUT api/programs/{id}
         [HttpPost("{id}")]
