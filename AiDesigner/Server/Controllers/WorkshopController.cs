@@ -340,23 +340,22 @@ namespace AiDesigner.Server.Controllers
 
                 // Program Inputs
                 promptBuilder.AppendLine("Program Inputs:");
+                int index = 0;
                 foreach (var input in program.ProgramStructure.ProgramStart)
                 {
-                    promptBuilder.AppendLine($"- {input.Name}: {input.Description}");
+                    if (!(index == 1 && !program.SupportsChat))
+                    {
+                        promptBuilder.AppendLine($"- {input.Name}: {input.Description}");
+                    }
+                    index++;
                 }
                 promptBuilder.AppendLine();
 
                 // Program Outputs
                 promptBuilder.AppendLine("Program Outputs:");
-                int index = 0; 
                 foreach (var output in program.ProgramStructure.ProgramEnd) 
                 {
-                    // Skip the second item only if program does not support chats
-                    if (!(index == 1 && !program.SupportsChat))
-                    {
-                        promptBuilder.AppendLine($"- {output.Name}: {output.Description}");
-                    }
-                    index++; 
+                    promptBuilder.AppendLine($"- {output.Name}: {output.Description}");
                 }
 
                 promptBuilder.AppendLine();

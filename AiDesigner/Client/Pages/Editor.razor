@@ -913,43 +913,51 @@
         }
     }
 
-    //System Logic
-    string GenerateWhiteboardStyle()
-    {
-        // Convert to integer values, eliminating decimals
-        var bigSquareSize = (int)Math.Round(100 * zoomvalue);
-        var smallSquareSize = (int)Math.Round(25 * zoomvalue);
-
-        // Generate CSS string with integer pixel values
-        string style = $@"
-            position: relative;
-            width: 100%;
-            height: 100%;
-            background-image:
-                linear-gradient(90deg, rgba(0,0,0,0.1) 2px, transparent 2px),
-                linear-gradient(rgba(0,0,0,0.1) 2px, transparent 2px),
-                linear-gradient(90deg, rgba(0,0,0,0.05) 1px, transparent 1px),
-                linear-gradient(rgba(0,0,0,0.05) 1px, transparent 1px);
-            background-size:
-    {bigSquareSize}px {bigSquareSize}px,
-    {bigSquareSize}px {bigSquareSize}px,
-    {smallSquareSize}px {smallSquareSize}px,
-    {smallSquareSize}px {smallSquareSize}px;
-            overflow: hidden;
-            cursor: move;";
-
-        return style;
-    }
-
     public string GenerateBackgroundSizeStyle()
     {
-        var bigSquareSize = (int)Math.Round(100 * zoomvalue);
-        var smallSquareSize = (int)Math.Round(25 * zoomvalue);
+        var bigSquareSize = (int)Math.Floor(100 * zoomvalue);
+        var smallSquareSize = (int)Math.Floor(25 * zoomvalue);
+
+        int firstDecimal = (int)((zoomvalue * 10) % 10);
+        int secondDecimal = (int)((zoomvalue * 100) % 10);
+
+        bool shouldReverse = secondDecimal == 9;
+        if (shouldReverse)
+        {
+            firstDecimal = (firstDecimal % 2 == 0) ? 1 : 0; 
+        }
+
+        bool isOddDecimal = firstDecimal % 2 != 0;
+
+        // Determine the adjustment based on zoomvalue being below 0
+        Console.WriteLine(zoomvalue);
+        string adjustment = "";
+        if (zoomvalue < 0.89)
+        {
+            if (isOddDecimal)
+            {
+                adjustment = ".25";
+            }
+            else
+            {
+                adjustment = ".75";
+            }
+        }
+        else
+        {
+            if (isOddDecimal)
+            {
+                adjustment = ".5";
+            }
+        }
+        Console.WriteLine(adjustment);
+
+        string smallSquareSizeStr = smallSquareSize + adjustment;
 
         return $"{bigSquareSize}px {bigSquareSize}px, " +
                $"{bigSquareSize}px {bigSquareSize}px, " +
-               $"{smallSquareSize}px {smallSquareSize}px, " +
-               $"{smallSquareSize}px {smallSquareSize}px";
+               $"{smallSquareSizeStr}px {smallSquareSizeStr}px, " +
+               $"{smallSquareSizeStr}px {smallSquareSizeStr}px";
     }
 
     private TaskCompletionSource<bool> screenshotCompletionSource;
