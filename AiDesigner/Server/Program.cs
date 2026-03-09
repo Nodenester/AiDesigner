@@ -20,7 +20,7 @@ using System.Configuration;
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not found.");
-StripeConfiguration.ApiKey = "REDACTED_STRIPE_LIVE_KEY";
+StripeConfiguration.ApiKey = "sk_live_YOUR_KEY_HERE";
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseSqlServer(connectionString));

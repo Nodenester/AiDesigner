@@ -23,7 +23,7 @@ namespace AiDesigner.Server.Controllers
             try
             {
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_FhbDyhoqpkHsWvBZHvjEtym20CY0yPv4");
+                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_YOUR_SECRET_HERE");
 
                 if (stripeEvent.Type == Events.CheckoutSessionCompleted)
                 {
@@ -92,7 +92,7 @@ namespace AiDesigner.Server.Controllers
             try
             {
                 var json = await new StreamReader(HttpContext.Request.Body).ReadToEndAsync();
-                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_WGGx9bGo1N5diXNbAQZkgSLvrZaJrCaw");
+                var stripeEvent = EventUtility.ConstructEvent(json, Request.Headers["Stripe-Signature"], "whsec_YOUR_SECRET_HERE");
 
                 if (stripeEvent.Type == Events.CustomerSubscriptionCreated)
                 {
